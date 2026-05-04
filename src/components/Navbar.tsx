@@ -1,0 +1,73 @@
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { useState } from 'react';
+
+export default function Navbar() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  return (
+    <nav className="sticky top-0 z-40 glass border-b border-slate-800/50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          <Link to="/" className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center">
+              <i className="fas fa-trophy text-white text-sm"></i>
+            </div>
+            <span className="font-bold text-xl tracking-tight">
+              Torneo<span className="gradient-text">Pro</span>
+            </span>
+          </Link>
+
+          <div className="hidden md:flex items-center gap-6">
+            <Link to="/" className="text-slate-400 hover:text-white transition-colors font-medium">Inicio</Link>
+            {user ? (
+              <>
+                <Link to="/dashboard" className="text-slate-400 hover:text-white transition-colors font-medium">Mis Torneos</Link>
+                <Link to="/tournaments/create" className="btn-primary text-sm">
+                  <i className="fas fa-plus"></i> Nuevo Torneo
+                </Link>
+                <div className="flex items-center gap-3 ml-4 pl-4 border-l border-slate-700">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-600 to-accent-600 flex items-center justify-center text-sm font-bold">
+                    {user.name.charAt(0).toUpperCase()}
+                  </div>
+                  <button onClick={() => { logout(); navigate('/'); }} className="text-slate-400 hover:text-red-400 transition-colors text-sm">
+                    <i className="fas fa-sign-out-alt"></i>
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <Link to="/login" className="text-slate-400 hover:text-white transition-colors font-medium">Iniciar sesión</Link>
+                <Link to="/register" className="btn-primary text-sm">Registrarse</Link>
+              </>
+            )}
+          </div>
+
+          <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden text-slate-400 hover:text-white">
+            <i className={`fas ${mobileOpen ? 'fa-times' : 'fa-bars'} text-xl`}></i>
+          </button>
+        </div>
+      </div>
+
+      {mobileOpen && (
+        <div className="md:hidden glass border-t border-slate-800/50 px-4 py-4 space-y-3 animate-fade-in">
+          <Link to="/" onClick={() => setMobileOpen(false)} className="block text-slate-400 hover:text-white py-2">Inicio</Link>
+          {user ? (
+            <>
+              <Link to="/dashboard" onClick={() => setMobileOpen(false)} className="block text-slate-400 hover:text-white py-2">Mis Torneos</Link>
+              <Link to="/tournaments/create" onClick={() => setMobileOpen(false)} className="block text-slate-400 hover:text-white py-2">Nuevo Torneo</Link>
+              <button onClick={() => { logout(); navigate('/'); setMobileOpen(false); }} className="block text-red-400 py-2">Cerrar sesión</button>
+            </>
+          ) : (
+            <>
+              <Link to="/login" onClick={() => setMobileOpen(false)} className="block text-slate-400 hover:text-white py-2">Iniciar sesión</Link>
+              <Link to="/register" onClick={() => setMobileOpen(false)} className="block text-slate-400 hover:text-white py-2">Registrarse</Link>
+            </>
+          )}
+        </div>
+      )}
+    </nav>
+  );
+}

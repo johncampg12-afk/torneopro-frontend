@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #3b82f6 #0f172a;
+  }
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #0f172a;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #3b82f6;
+    border-radius: 4px;
+  }
+}
+
+@layer components {
+  .glass {
+    @apply bg-slate-800/70 backdrop-blur-xl border border-white/10 rounded-2xl;
+  }
+  .glass-light {
+    @apply bg-white/80 backdrop-blur-xl border border-black/5 rounded-2xl;
+  }
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary-400 to-accent-400 bg-clip-text text-transparent;
+  }
+  .hover-lift {
+    @apply transition-all duration-300;
+  }
+  .hover-lift:hover {
+    @apply -translate-y-1 shadow-2xl shadow-primary-500/10;
+  }
+  .btn-primary {
+    @apply px-5 py-2.5 rounded-xl font-semibold bg-gradient-to-r from-primary-600 to-primary-500 
+           hover:from-primary-500 hover:to-primary-400 text-white shadow-lg shadow-primary-500/25 
+           transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-secondary {
+    @apply px-5 py-2.5 rounded-xl font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 
+           border border-slate-700 transition-all flex items-center gap-2;
+  }
+  .btn-accent {
+    @apply px-5 py-2.5 rounded-xl font-semibold bg-gradient-to-r from-accent-600 to-accent-500 
+           hover:from-accent-500 hover:to-accent-400 text-white shadow-lg shadow-accent-500/25 
+           transition-all flex items-center gap-2;
+  }
+  .input-dark {
+    @apply w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white 
+           placeholder-slate-500 focus:outline-none focus:border-primary-500 
+           focus:ring-2 focus:ring-primary-500/20 transition-all;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out;
+}
+.animate-slide-up {
+  animation: slideUp 0.5s ease-out;
+}
