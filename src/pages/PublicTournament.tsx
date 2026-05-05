@@ -8,6 +8,7 @@ export default function PublicTournament() {
   const [tab, setTab] = useState('fixture');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [topScorers, setTopScorers] = useState<any[]>([]);
 
   // Hook colocado antes de cualquier return
   const standings = useMemo(() => {
@@ -55,6 +56,14 @@ export default function PublicTournament() {
       .catch((err) => setError(err.response?.data?.message || 'Torneo no encontrado'))
       .finally(() => setLoading(false));
   }, [shareCode]);
+
+  useEffect(() => {
+    if (tournament) {
+      api.get(`/tournaments/${tournament.id}/top-scorers`)
+        .then(res => setTopScorers(res.data))
+        .catch(() => {});
+    }
+  }, [tournament]);
 
   if (loading) return (
     <div className="min-h-screen bg-dark-950 flex items-center justify-center">
@@ -282,38 +291,78 @@ export default function PublicTournament() {
 
         {/* Stats */}
         {tab === 'stats' && (
-          <div className="grid md:grid-cols-2 gap-6 animate-fade-in">
-            <div className="glass p-4 md:p-6">
-              <h3 className="text-lg font-bold mb-4">Goles por Equipo</h3>
-              <div className="space-y-3">
-                {standings.sort((a: any, b: any) => b.gf - a.gf).slice(0, 8).map((team: any) => (
-                  <div key={team.id} className="flex items-center gap-3">
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: team.color }}></div>
-                    <span className="flex-1 text-sm truncate">{team.name}</span>
-                    <div className="w-24 md:w-32 bg-slate-800 rounded-full h-2">
-                      <div className="bg-primary-500 h-2 rounded-full transition-all" style={{ width: `${Math.min(100, (team.gf / Math.max(1, standings[0]?.gf)) * 100)}%` }}></div>
+          <>
+            <div className="grid md:grid-cols-2 gap-6 animate-fade-in">
+              <div className="glass p-4 md:p-6">
+                <h3 className="text-lg font-bold mb-4">Goles por Equipo</h3>
+                <div className="space-y-3">
+                  {standings.sort((a: any, b: any) => b.gf - a.gf).slice(0, 8).map((team: any) => (
+                    <div key={team.id} className="flex items-center gap-3">
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: team.color }}></div>
+                      <span className="flex-1 text-sm truncate">{team.name}</span>
+                      <div className="w-24 md:w-32 bg-slate-800 rounded-full h-2">
+                        <div className="bg-primary-500 h-2 rounded-full transition-all" style={{ width: `${Math.min(100, (team.gf / Math.max(1, standings[0]?.gf)) * 100)}%` }}></div>
+                      </div>
+                      <span className="text-sm font-bold w-8 text-right">{team.gf}</span>
                     </div>
-                    <span className="text-sm font-bold w-8 text-right">{team.gf}</span>
-                  </div>
-                ))}
+                  ))}
+                </div>
+              </div>
+              <div className="glass p-4 md:p-6">
+                <h3 className="text-lg font-bold mb-4">Rendimiento (% victorias)</h3>
+                <div className="space-y-3">
+                  {standings.filter((s: any) => s.played > 0).sort((a: any, b: any) => (b.wins / b.played) - (a.wins / a.played)).slice(0, 8).map((team: any) => (
+                    <div key={team.id} className="flex items-center gap-3">
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: team.color }}></div>
+                      <span className="flex-1 text-sm truncate">{team.name}</span>
+                      <div className="w-24 md:w-32 bg-slate-800 rounded-full h-2">
+                        <div className="bg-accent-500 h-2 rounded-full transition-all" style={{ width: `${(team.wins / team.played) * 100}%` }}></div>
+                      </div>
+                      <span className="text-sm font-bold w-12 text-right">{Math.round((team.wins / team.played) * 100)}%</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
-            <div className="glass p-4 md:p-6">
-              <h3 className="text-lg font-bold mb-4">Rendimiento (% victorias)</h3>
-              <div className="space-y-3">
-                {standings.filter((s: any) => s.played > 0).sort((a: any, b: any) => (b.wins / b.played) - (a.wins / a.played)).slice(0, 8).map((team: any) => (
-                  <div key={team.id} className="flex items-center gap-3">
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: team.color }}></div>
-                    <span className="flex-1 text-sm truncate">{team.name}</span>
-                    <div className="w-24 md:w-32 bg-slate-800 rounded-full h-2">
-                      <div className="bg-accent-500 h-2 rounded-full transition-all" style={{ width: `${(team.wins / team.played) * 100}%` }}></div>
-                    </div>
-                    <span className="text-sm font-bold w-12 text-right">{Math.round((team.wins / team.played) * 100)}%</span>
-                  </div>
-                ))}
-              </div>
+
+            {/* Top Scorers Table */}
+            <div className="mt-6 glass p-4 md:p-6">
+              <h3 className="text-lg font-bold mb-4">Máximos Goleadores</h3>
+              {topScorers.length === 0 ? (
+                <p className="text-sm text-slate-400">Sin datos</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="text-slate-400 border-b border-slate-800">
+                        <th className="text-left py-2">Jugador</th>
+                        <th className="text-center py-2">Equipo</th>
+                        <th className="text-center py-2">Goles</th>
+                        <th className="text-center py-2">Asist.</th>
+                        <th className="text-center py-2">Amar.</th>
+                        <th className="text-center py-2">Rojas</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {topScorers.map((p: any) => (
+                        <tr key={p.id} className="border-b border-slate-800/50">
+                          <td className="py-2">{p.name}</td>
+                          <td className="text-center py-2 flex justify-center items-center gap-2">
+                            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: p.teamColor }}></span>
+                            {p.team}
+                          </td>
+                          <td className="text-center py-2 font-bold">{p.goals}</td>
+                          <td className="text-center py-2">{p.assists}</td>
+                          <td className="text-center py-2">{p.yellowCards}</td>
+                          <td className="text-center py-2">{p.redCards}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
-          </div>
+          </>
         )}
       </main>
 

@@ -14,6 +14,19 @@ export default function TournamentDetail() {
   const [editMatch, setEditMatch] = useState<any>(null);
   const [editRound, setEditRound] = useState<any>(null);
 
+  // Jugadores por equipo
+  const [playersByTeam, setPlayersByTeam] = useState<Record<string, any[]>>({});
+  const [addPlayerForTeam, setAddPlayerForTeam] = useState<string | null>(null);
+  const [newPlayerName, setNewPlayerName] = useState('');
+  const [newPlayerNumber, setNewPlayerNumber] = useState('');
+
+  // Eventos del partido
+  const [matchEvents, setMatchEvents] = useState<any[]>([]);
+  const [newEvent, setNewEvent] = useState({ playerId: '', type: 'GOAL', minute: '' });
+
+  // Máximos goleadores
+  const [topScorers, setTopScorers] = useState<any[]>([]);
+
   // Hook useMemo siempre antes de cualquier return
   const standings = useMemo(() => {
     if (!tournament) return [];
@@ -60,10 +73,60 @@ export default function TournamentDetail() {
       return;
     }
     api.get(`/tournaments/${id}`)
-      .then(res => setTournament(res.data))
+      .then(res => {
+        setTournament(res.data);
+      })
       .catch(() => navigate('/dashboard'))
       .finally(() => setLoading(false));
   }, [id, user, navigate]);
+
+  // Cargar jugadores de todos los equipos al obtener el torneo
+  useEffect(() => {
+    if (!tournament) return;
+    const fetchPlayers = async () => {
+      const map: Record<string, any[]> = {};
+      for (const team of tournament.teams) {
+        try {
+          const res = await api.get(`/players/team/${team.id}`);
+          map[team.id] = res.data;
+        } catch {}
+      }
+      setPlayersByTeam(map);
+    };
+    fetchPlayers();
+  }, [tournament]);
+
+  // Cargar top scorers
+  useEffect(() => {
+    if (tournament) {
+      api.get(`/tournaments/${tournament.id}/top-scorers`)
+        .then(res => setTopScorers(res.data))
+        .catch(() => {});
+    }
+  }, [tournament]);
+
+  // Cargar eventos al abrir modal de partido
+  useEffect(() => {
+    if (editMatch) {
+      api.get(`/matches/${editMatch.id}/events`)
+        .then(res => setMatchEvents(res.data))
+        .catch(() => setMatchEvents([]));
+      // Cargar jugadores de ambos equipos si no existen
+      (async () => {
+        const teamsToLoad = [editMatch.homeTeamId, editMatch.awayTeamId].filter(Boolean);
+        for (const teamId of teamsToLoad) {
+          if (!playersByTeam[teamId]) {
+            try {
+              const res = await api.get(`/players/team/${teamId}`);
+              setPlayersByTeam(prev => ({ ...prev, [teamId]: res.data }));
+            } catch {}
+          }
+        }
+      })();
+    } else {
+      setMatchEvents([]);
+    }
+  }, [editMatch]);
 
   if (loading) {
     return (
@@ -114,6 +177,35 @@ export default function TournamentDetail() {
     try {
       await api.patch(`/tournaments/${id}`, { isPublic: !tournament.isPublic });
       setTournament({ ...tournament, isPublic: !tournament.isPublic });
+    } catch {}
+  };
+
+  const handleAddPlayer = async () => {
+    if (!addPlayerForTeam || !newPlayerName.trim()) return;
+    try {
+      await api.post(`/players/team/${addPlayerForTeam}`, {
+        name: newPlayerName,
+        number: newPlayerNumber ? parseInt(newPlayerNumber) : undefined,
+      });
+      const res = await api.get(`/players/team/${addPlayerForTeam}`);
+      setPlayersByTeam(prev => ({ ...prev, [addPlayerForTeam]: res.data }));
+      setAddPlayerForTeam(null);
+      setNewPlayerName('');
+      setNewPlayerNumber('');
+    } catch {}
+  };
+
+  const handleAddEvent = async () => {
+    if (!editMatch || !newEvent.playerId) return;
+    try {
+      await api.post(`/matches/${editMatch.id}/events`, {
+        playerId: newEvent.playerId,
+        type: newEvent.type,
+        minute: newEvent.minute ? parseInt(newEvent.minute) : undefined,
+      });
+      const res = await api.get(`/matches/${editMatch.id}/events`);
+      setMatchEvents(res.data);
+      setNewEvent({ playerId: '', type: 'GOAL', minute: '' });
     } catch {}
   };
 
@@ -287,6 +379,7 @@ export default function TournamentDetail() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-fade-in">
           {tournament.teams.map((team: any) => {
             const teamStats = standings.find((s: any) => s.id === team.id);
+            const players = playersByTeam[team.id] || [];
             return (
               <div key={team.id} className="glass p-4 md:p-6 hover-lift">
                 <div className="flex items-center gap-4 mb-4">
@@ -311,6 +404,30 @@ export default function TournamentDetail() {
                     <div className="text-lg font-bold text-red-400">{teamStats?.losses || 0}</div>
                     <div className="text-xs text-slate-500">Derrotas</div>
                   </div>
+                </div>
+
+                {/* Lista de jugadores */}
+                <div className="mt-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-slate-400 font-medium">Jugadores ({players.length})</span>
+                    <button
+                      onClick={() => setAddPlayerForTeam(team.id)}
+                      className="text-xs text-primary-400 hover:text-primary-300"
+                    >
+                      + Añadir
+                    </button>
+                  </div>
+                  {players.length === 0 && (
+                    <p className="text-xs text-slate-600">Sin jugadores</p>
+                  )}
+                  {players.map((player: any) => (
+                    <div key={player.id} className="flex items-center justify-between text-sm py-1">
+                      <span>
+                        {player.number ? <span className="text-slate-500 mr-1">#{player.number}</span> : null}
+                        {player.name}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               </div>
             );
@@ -376,6 +493,72 @@ export default function TournamentDetail() {
               </div>
             </div>
           </div>
+
+          {/* Máximos goleadores */}
+          <div className="glass p-4 md:p-6 md:col-span-2">
+            <h3 className="text-lg font-bold mb-4">Máximos Goleadores</h3>
+            {topScorers.length === 0 ? (
+              <p className="text-sm text-slate-400">Sin datos</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="text-slate-400 border-b border-slate-800">
+                      <th className="text-left py-2">Jugador</th>
+                      <th className="text-center py-2">Equipo</th>
+                      <th className="text-center py-2">Goles</th>
+                      <th className="text-center py-2">Asist.</th>
+                      <th className="text-center py-2">Amar.</th>
+                      <th className="text-center py-2">Rojas</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {topScorers.map((p: any) => (
+                      <tr key={p.id} className="border-b border-slate-800/50">
+                        <td className="py-2">{p.name}</td>
+                        <td className="text-center py-2 flex justify-center items-center gap-2">
+                          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: p.teamColor }}></span>
+                          {p.team}
+                        </td>
+                        <td className="text-center py-2 font-bold">{p.goals}</td>
+                        <td className="text-center py-2">{p.assists}</td>
+                        <td className="text-center py-2">{p.yellowCards}</td>
+                        <td className="text-center py-2">{p.redCards}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Modal para añadir jugador */}
+      {addPlayerForTeam && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setAddPlayerForTeam(null)}>
+          <div className="bg-dark-900 p-6 rounded-2xl w-full max-w-sm mx-4" onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-bold mb-4">Añadir Jugador</h3>
+            <input
+              value={newPlayerName}
+              onChange={e => setNewPlayerName(e.target.value)}
+              placeholder="Nombre"
+              className="input-dark mb-3"
+              autoFocus
+            />
+            <input
+              value={newPlayerNumber}
+              onChange={e => setNewPlayerNumber(e.target.value)}
+              placeholder="Número (opcional)"
+              className="input-dark mb-4"
+            />
+            <div className="flex gap-3">
+              <button onClick={() => setAddPlayerForTeam(null)} className="flex-1 btn-secondary justify-center">Cancelar</button>
+              <button onClick={handleAddPlayer} className="flex-1 btn-primary justify-center">
+                Añadir
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -431,6 +614,79 @@ export default function TournamentDetail() {
               <label className="block text-sm font-medium text-slate-400 mb-1.5">Ubicación</label>
               <input type="text" defaultValue={editMatch.location || ''} id="matchLocation" placeholder="Cancha, estadio, etc." className="input-dark" />
             </div>
+
+            {/* Eventos del partido */}
+            <div className="mb-6">
+              <h4 className="text-sm font-medium text-slate-400 mb-2">Eventos del Partido</h4>
+              {matchEvents.length === 0 && <p className="text-xs text-slate-500">Sin eventos registrados</p>}
+              {matchEvents.map(ev => (
+                <div key={ev.id} className="flex items-center gap-2 text-sm py-1">
+                  <span className="text-xs text-slate-500 w-8">{ev.minute !== null ? `${ev.minute}'` : ''}</span>
+                  <span className="text-xs font-medium flex-1">{ev.player?.name || 'Desconocido'}</span>
+                  <span className={`text-xs px-1.5 py-0.5 rounded ${
+                    ev.type === 'GOAL' ? 'bg-yellow-500/20 text-yellow-400' :
+                    ev.type === 'ASSIST' ? 'bg-blue-500/20 text-blue-400' :
+                    ev.type === 'YELLOW_CARD' ? 'bg-yellow-300/20 text-yellow-300' :
+                    'bg-red-500/20 text-red-400'
+                  }`}>
+                    {ev.type === 'GOAL' ? '⚽ Gol' :
+                     ev.type === 'ASSIST' ? '🅰️ Asist.' :
+                     ev.type === 'YELLOW_CARD' ? '🟨 Amarilla' :
+                     '🟥 Roja'}
+                  </span>
+                </div>
+              ))}
+
+              <div className="mt-4 pt-4 border-t border-slate-800">
+                <div className="grid grid-cols-12 gap-2">
+                  <div className="col-span-5">
+                    <select
+                      value={newEvent.playerId}
+                      onChange={e => setNewEvent({...newEvent, playerId: e.target.value})}
+                      className="input-dark text-xs w-full"
+                    >
+                      <option value="">Jugador</option>
+                      {[
+                        ...(playersByTeam[editMatch?.homeTeamId] || []).map((p: any) => ({ ...p, teamName: getTeam(editMatch?.homeTeamId).name })),
+                        ...(playersByTeam[editMatch?.awayTeamId] || []).map((p: any) => ({ ...p, teamName: getTeam(editMatch?.awayTeamId).name }))
+                      ].map(p => (
+                        <option key={p.id} value={p.id}>{p.name} ({p.teamName})</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="col-span-4">
+                    <select
+                      value={newEvent.type}
+                      onChange={e => setNewEvent({...newEvent, type: e.target.value})}
+                      className="input-dark text-xs w-full"
+                    >
+                      <option value="GOAL">⚽ Gol</option>
+                      <option value="ASSIST">🅰️ Asistencia</option>
+                      <option value="YELLOW_CARD">🟨 Amarilla</option>
+                      <option value="RED_CARD">🟥 Roja</option>
+                    </select>
+                  </div>
+                  <div className="col-span-2">
+                    <input
+                      type="number"
+                      placeholder="Min."
+                      value={newEvent.minute}
+                      onChange={e => setNewEvent({...newEvent, minute: e.target.value})}
+                      className="input-dark text-xs w-full"
+                    />
+                  </div>
+                  <div className="col-span-1">
+                    <button
+                      onClick={handleAddEvent}
+                      className="w-full h-full bg-primary-600 hover:bg-primary-500 rounded-lg text-white text-xs font-bold transition-colors"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="flex gap-3">
               <button onClick={() => setEditMatch(null)} className="flex-1 btn-secondary justify-center">Cancelar</button>
               <button onClick={saveMatch} className="flex-1 btn-primary justify-center">
