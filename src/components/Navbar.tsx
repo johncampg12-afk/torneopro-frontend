@@ -52,18 +52,18 @@ export default function Navbar() {
       </div>
 
       {mobileOpen && (
-        <div className="md:hidden glass border-t border-slate-800/50 px-4 py-4 space-y-3 animate-fade-in">
-          <Link to="/" onClick={() => setMobileOpen(false)} className="block text-slate-400 hover:text-white py-2">Inicio</Link>
+        <div className="md:hidden glass border-t border-slate-800/50 px-4 py-4 space-y-1 animate-fade-in">
+          <Link to="/" onClick={() => setMobileOpen(false)} className="block text-slate-400 hover:text-white py-3 px-2 rounded-lg">Inicio</Link>
           {user ? (
             <>
-              <Link to="/dashboard" onClick={() => setMobileOpen(false)} className="block text-slate-400 hover:text-white py-2">Mis Torneos</Link>
-              <Link to="/tournaments/create" onClick={() => setMobileOpen(false)} className="block text-slate-400 hover:text-white py-2">Nuevo Torneo</Link>
-              <button onClick={() => { logout(); navigate('/'); setMobileOpen(false); }} className="block text-red-400 py-2">Cerrar sesión</button>
+              <Link to="/dashboard" onClick={() => setMobileOpen(false)} className="block text-slate-400 hover:text-white py-3 px-2 rounded-lg">Mis Torneos</Link>
+              <Link to="/tournaments/create" onClick={() => setMobileOpen(false)} className="block text-white bg-primary-600 py-3 px-2 rounded-lg text-center font-medium">Nuevo Torneo</Link>
+              <button onClick={() => { logout(); navigate('/'); setMobileOpen(false); }} className="block w-full text-left text-red-400 py-3 px-2 rounded-lg">Cerrar sesión</button>
             </>
           ) : (
             <>
-              <Link to="/login" onClick={() => setMobileOpen(false)} className="block text-slate-400 hover:text-white py-2">Iniciar sesión</Link>
-              <Link to="/register" onClick={() => setMobileOpen(false)} className="block text-slate-400 hover:text-white py-2">Registrarse</Link>
+              <Link to="/login" onClick={() => setMobileOpen(false)} className="block text-slate-400 hover:text-white py-3 px-2 rounded-lg">Iniciar sesión</Link>
+              <Link to="/register" onClick={() => setMobileOpen(false)} className="block text-white bg-primary-600 py-3 px-2 rounded-lg text-center font-medium">Registrarse</Link>
             </>
           )}
         </div>

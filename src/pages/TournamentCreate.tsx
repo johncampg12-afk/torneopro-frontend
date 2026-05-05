@@ -78,7 +78,7 @@ export default function TournamentCreate() {
       </div>
 
       {step === 1 && (
-        <div className="glass p-8 animate-fade-in">
+        <div className="glass p-6 md:p-8 animate-fade-in">
           <h3 className="text-xl font-bold mb-6">Información del Torneo</h3>
           <div className="mb-4">
             <label className="block text-sm font-medium text-slate-400 mb-1.5">Nombre del Torneo *</label>
@@ -88,12 +88,12 @@ export default function TournamentCreate() {
 
           <div className="mb-4">
             <label className="block text-sm font-medium text-slate-400 mb-2">Deporte</label>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {sports.map(s => (
                 <button key={s.id} onClick={() => setData({...data, sport: s.id})}
-                  className={`p-4 rounded-xl border transition-all flex flex-col items-center gap-2 ${data.sport === s.id ? 'border-primary-500 bg-primary-500/10' : 'border-slate-700 bg-slate-800/50 hover:border-slate-600'}`}>
-                  <i className={`fas ${s.icon} text-xl ${data.sport === s.id ? 'text-primary-400' : 'text-slate-500'}`}></i>
-                  <span className={`text-sm font-medium ${data.sport === s.id ? 'text-white' : 'text-slate-400'}`}>{s.name}</span>
+                  className={`p-3 md:p-4 rounded-xl border transition-all flex flex-col items-center gap-1 md:gap-2 ${data.sport === s.id ? 'border-primary-500 bg-primary-500/10' : 'border-slate-700 bg-slate-800/50 hover:border-slate-600'}`}>
+                  <i className={`fas ${s.icon} text-lg md:text-xl ${data.sport === s.id ? 'text-primary-400' : 'text-slate-500'}`}></i>
+                  <span className={`text-xs md:text-sm font-medium ${data.sport === s.id ? 'text-white' : 'text-slate-400'}`}>{s.name}</span>
                 </button>
               ))}
             </div>
@@ -153,7 +153,7 @@ export default function TournamentCreate() {
       )}
 
       {step === 2 && (
-        <div className="glass p-8 animate-fade-in">
+        <div className="glass p-6 md:p-8 animate-fade-in">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-xl font-bold">Equipos ({teams.filter(t => t.name.trim()).length})</h3>
             <button onClick={addTeam} className="btn-secondary text-sm">
@@ -166,7 +166,7 @@ export default function TournamentCreate() {
                 <div className="w-10 h-10 rounded-lg flex-shrink-0" style={{ backgroundColor: team.color }}></div>
                 <input value={team.name} onChange={e => updateTeam(idx, 'name', e.target.value)}
                   placeholder={`Equipo ${idx + 1}`}
-                  className="flex-1 bg-transparent border-none focus:outline-none text-white placeholder-slate-600" />
+                  className="flex-1 bg-transparent border-none focus:outline-none text-white placeholder-slate-600 text-sm md:text-base" />
                 <div className="flex gap-1">
                   {colors.slice(0, 5).map(c => (
                     <button key={c} onClick={() => updateTeam(idx, 'color', c)}
@@ -194,7 +194,7 @@ export default function TournamentCreate() {
       )}
 
       {step === 3 && (
-        <div className="glass p-8 animate-fade-in">
+        <div className="glass p-6 md:p-8 animate-fade-in">
           <h3 className="text-xl font-bold mb-6">Resumen</h3>
           <div className="space-y-4 mb-8">
             <div className="flex justify-between py-3 border-b border-slate-800">
