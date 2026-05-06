@@ -9,18 +9,18 @@ const ads = [
     id: 1,
     title: 'Clínica Dental',
     subtitle: 'Dental Fresh Plus',
-    description: '10% de descuento para participantes del torneo',
+    description: 'Reserva tu Sonrisa. Primera consulta gratis',
     image: '/sponsors/dental-fresh-plus-hrz.jpeg',
-    color: '#f97316',
+    color: '#16f99a',
     link: '#',
   },
   {
     id: 2,
-    title: 'Bar Restaurante «La Goleta»',
-    subtitle: 'Comida y bebida para equipos',
-    description: 'Reserva tu mesa para después del partido',
-    image: '/sponsors/sponsor2.png',
-    color: '#10b981',
+    title: 'Tienda de ropa TrenSport',
+    subtitle: 'Trend Sport',
+    description: 'La ropa del momento, para lucir al momento',
+    image: '/sponsors/trend-sport-hrz.png',
+    color: '#e87400',
     link: '#',
   },
   {
@@ -44,7 +44,7 @@ export default function Home() {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentAd((prev) => (prev + 1) % ads.length);
-    }, 3000);
+    }, 4000);
     return () => clearInterval(interval);
   }, []);
 
@@ -82,7 +82,7 @@ export default function Home() {
               className="absolute inset-0 w-full h-full object-cover rounded-3xl"
             />
             {/* Capa oscura semitransparente para que el texto sea legible */}
-            <div className="absolute inset-0 bg-black/50 rounded-3xl"></div>
+            <div className="absolute inset-0 bg-black/30 rounded-3xl"></div>
 
             {/* Texto superpuesto */}
             <div className="relative z-10 h-full flex flex-col justify-end p-6 md:p-8 lg:p-12">
