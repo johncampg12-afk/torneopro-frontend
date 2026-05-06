@@ -28,7 +28,7 @@ const ads = [
     title: 'Clínica Deportiva «FisioSport»',
     subtitle: 'Recuperación y masajes',
     description: 'Primera sesión gratuita mostrando este anuncio',
-    image: '/sponsors/sponsor3.png',
+    image: '/sponsors/EMPRENDE-CONMIGO-TREND-SPORT.png',
     color: '#3b82f6',
     link: '#',
   },
