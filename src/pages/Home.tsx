@@ -7,10 +7,10 @@ import { useAuth } from '../contexts/AuthContext';
 const ads = [
   {
     id: 1,
-    title: 'Patrocinador Oficial',
-    subtitle: 'Tienda Deportiva «El Crack»',
+    title: 'Clínica Dental',
+    subtitle: 'Dental Fresh Plus',
     description: '10% de descuento para participantes del torneo',
-    image: '/sponsors/sponsor1.png',  // ← Cambia por la ruta real de tu imagen
+    image: '/sponsors/dental-fresh-plus-hrz.jpeg',  // ← Cambia por la ruta real de tu imagen
     color: '#f97316',
     link: '#',
   },
