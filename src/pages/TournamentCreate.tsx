@@ -29,14 +29,15 @@ export default function TournamentCreate() {
     name: '', sport: 'futbol', format: 'liga', doubleRound: false,
     description: '', startDate: '', location: '', isPublic: true,
   });
-  const [teams, setTeams] = useState([{ name: '', color: colors[0] }]);
+  // Cada equipo ahora incluye logo base64 (inicialmente null)
+  const [teams, setTeams] = useState([{ name: '', color: colors[0], logo: null as string | null }]);
 
   if (!user) {
     navigate('/login');
     return null;
   }
 
-  const addTeam = () => setTeams([...teams, { name: '', color: colors[teams.length % colors.length] }]);
+  const addTeam = () => setTeams([...teams, { name: '', color: colors[teams.length % colors.length], logo: null }]);
   const updateTeam = (idx: number, field: string, value: string) => {
     const updated = [...teams];
     updated[idx] = { ...updated[idx], [field]: value };
@@ -46,8 +47,30 @@ export default function TournamentCreate() {
     if (teams.length > 2) setTeams(teams.filter((_, i) => i !== idx));
   };
 
+  // Convierte una imagen a base64 y la guarda en la propiedad logo del equipo
+  const handleLogoChange = (idx: number, file: File) => {
+    if (!file) return;
+    if (file.size > 200000) {
+      alert('La imagen no debe superar los 200 KB.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      updateTeam(idx, 'logo', reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleCreate = async () => {
-    const validTeams = teams.filter(t => t.name.trim());
+    // Filtramos equipos con nombre y nos aseguramos de que logo sea string o null (no undefined)
+    const validTeams = teams
+      .filter(t => t.name.trim())
+      .map(t => ({
+        name: t.name.trim(),
+        color: t.color,
+        logo: t.logo || null,
+      }));
+
     if (validTeams.length < 2) return alert('Mínimo 2 equipos');
     if (!data.name.trim()) return alert('Nombre del torneo requerido');
 
@@ -163,7 +186,12 @@ export default function TournamentCreate() {
           <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
             {teams.map((team, idx) => (
               <div key={idx} className="flex items-center gap-3 bg-slate-800/50 rounded-xl p-3 border border-slate-800">
-                <div className="w-10 h-10 rounded-lg flex-shrink-0" style={{ backgroundColor: team.color }}></div>
+                {/* Previsualización del color o del logo */}
+                {team.logo ? (
+                  <img src={team.logo} alt="escudo" className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
+                ) : (
+                  <div className="w-10 h-10 rounded-lg flex-shrink-0" style={{ backgroundColor: team.color }}></div>
+                )}
                 <input value={team.name} onChange={e => updateTeam(idx, 'name', e.target.value)}
                   placeholder={`Equipo ${idx + 1}`}
                   className="flex-1 bg-transparent border-none focus:outline-none text-white placeholder-slate-600 text-sm md:text-base" />
@@ -173,6 +201,27 @@ export default function TournamentCreate() {
                       className={`w-6 h-6 rounded-full border-2 transition-all ${team.color === c ? 'border-white scale-110' : 'border-transparent'}`}
                       style={{ backgroundColor: c }}></button>
                   ))}
+                </div>
+                {/* Botón para subir logo */}
+                <div className="flex items-center">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    id={`logo-upload-${idx}`}
+                    onChange={(e) => {
+                      if (e.target.files?.[0]) handleLogoChange(idx, e.target.files[0]);
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => document.getElementById(`logo-upload-${idx}`)?.click()}
+                    className="text-xs text-slate-400 hover:text-white flex items-center gap-1"
+                    title={team.logo ? 'Cambiar escudo' : 'Subir escudo'}
+                  >
+                    <i className="fas fa-image"></i>
+                    {team.logo ? <span className="hidden sm:inline">Cambiar</span> : <span className="hidden sm:inline">Escudo</span>}
+                  </button>
                 </div>
                 {teams.length > 2 && (
                   <button onClick={() => removeTeam(idx)} className="w-8 h-8 rounded-lg hover:bg-red-500/20 text-slate-500 hover:text-red-400 flex items-center justify-center transition-colors">

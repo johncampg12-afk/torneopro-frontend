@@ -3,14 +3,14 @@ import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
 
-// Datos de ejemplo para el carrusel de publicidad
+// Datos del carrusel de publicidad
 const ads = [
   {
     id: 1,
     title: 'Patrocinador Oficial',
     subtitle: 'Tienda Deportiva «El Crack»',
     description: '10% de descuento para participantes del torneo',
-    icon: 'fa-shirt',
+    image: '/sponsors/sponsor1.png',  // ← Cambia por la ruta real de tu imagen
     color: '#f97316',
     link: '#',
   },
@@ -19,7 +19,7 @@ const ads = [
     title: 'Bar Restaurante «La Goleta»',
     subtitle: 'Comida y bebida para equipos',
     description: 'Reserva tu mesa para después del partido',
-    icon: 'fa-utensils',
+    image: '/sponsors/sponsor2.png',
     color: '#10b981',
     link: '#',
   },
@@ -28,7 +28,7 @@ const ads = [
     title: 'Clínica Deportiva «FisioSport»',
     subtitle: 'Recuperación y masajes',
     description: 'Primera sesión gratuita mostrando este anuncio',
-    icon: 'fa-heart-pulse',
+    image: '/sponsors/sponsor3.png',
     color: '#3b82f6',
     link: '#',
   },
@@ -40,7 +40,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [currentAd, setCurrentAd] = useState(0);
 
-  // Rotación automática de anuncios
+  // Rotación automática cada 3 segundos
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentAd((prev) => (prev + 1) % ads.length);
@@ -63,9 +63,8 @@ export default function Home() {
 
   return (
     <div className="animate-fade-in">
-      {/* Carrusel de publicidad – ocupa el mismo lugar del hero */}
+      {/* Carrusel de publicidad */}
       <div className="relative overflow-hidden rounded-3xl mb-8 h-64 md:h-72 lg:h-80">
-        {/* Slides */}
         {ads.map((ad, index) => (
           <a
             key={ad.id}
@@ -76,7 +75,8 @@ export default function Home() {
               index === currentAd ? 'opacity-100 z-10' : 'opacity-0 z-0'
             }`}
           >
-            <div className="w-full h-full rounded-3xl p-6 md:p-8 lg:p-12 flex flex-col justify-center"
+            <div
+              className="w-full h-full rounded-3xl p-6 md:p-8 lg:p-12 flex flex-col justify-center"
               style={{
                 background: `linear-gradient(135deg, ${ad.color}22 0%, #0f172a 80%)`,
                 border: `1px solid ${ad.color}44`,
@@ -84,30 +84,35 @@ export default function Home() {
               }}
             >
               <div className="flex items-start gap-4 md:gap-6">
-                {/* Ícono del anuncio */}
-                <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl flex items-center justify-center text-3xl md:text-4xl"
-                  style={{
-                    background: `linear-gradient(135deg, ${ad.color}, ${ad.color}cc)`,
-                    boxShadow: `0 0 20px ${ad.color}66`,
-                  }}
+                {/* Imagen del anuncio */}
+                <div
+                  className="w-16 h-16 md:w-20 md:h-20 rounded-2xl overflow-hidden flex-shrink-0"
+                  style={{ boxShadow: `0 0 20px ${ad.color}66` }}
                 >
-                  <i className={`fas ${ad.icon} text-white`}></i>
+                  <img
+                    src={ad.image}
+                    alt={ad.subtitle}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
-                <div className="flex-1">
-                  <p className="text-xs md:text-sm font-bold tracking-wider uppercase mb-1"
+
+                <div className="flex-1 min-w-0">
+                  <p
+                    className="text-xs md:text-sm font-bold tracking-wider uppercase mb-1"
                     style={{ color: ad.color }}
                   >
                     {ad.title}
                   </p>
-                  <h2 className="text-2xl md:text-3xl lg:text-4xl font-black text-white mb-2">
+                  <h2 className="text-2xl md:text-3xl lg:text-4xl font-black text-white mb-2 truncate">
                     {ad.subtitle}
                   </h2>
                   <p className="text-slate-400 text-sm md:text-base max-w-lg">
                     {ad.description}
                   </p>
                 </div>
+
                 {/* Flecha discreta para indicar que es clicable */}
-                <div className="hidden sm:flex items-center">
+                <div className="hidden sm:flex items-center flex-shrink-0">
                   <i className="fas fa-arrow-right text-slate-600 text-2xl"></i>
                 </div>
               </div>
@@ -115,7 +120,7 @@ export default function Home() {
           </a>
         ))}
 
-        {/* Indicadores de slide (puntos) */}
+        {/* Indicadores de slide */}
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex gap-2">
           {ads.map((_, idx) => (
             <button

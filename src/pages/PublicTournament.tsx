@@ -261,9 +261,21 @@ export default function PublicTournament() {
               return (
                 <div key={team.id} className="glass p-4 md:p-6">
                   <div className="flex items-center gap-4 mb-4">
-                    <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl flex items-center justify-center text-xl md:text-2xl" style={{ backgroundColor: team.color + '30', color: team.color }}>
-                      <i className="fas fa-shield-alt"></i>
-                    </div>
+                    {/* Mostrar escudo si existe, de lo contrario mostrar icono */}
+                    {team.logo ? (
+                      <img
+                        src={team.logo}
+                        alt={team.name}
+                        className="w-12 h-12 md:w-14 md:h-14 rounded-xl object-cover"
+                      />
+                    ) : (
+                      <div
+                        className="w-12 h-12 md:w-14 md:h-14 rounded-xl flex items-center justify-center text-xl md:text-2xl"
+                        style={{ backgroundColor: team.color + '30', color: team.color }}
+                      >
+                        <i className="fas fa-shield-alt"></i>
+                      </div>
+                    )}
                     <div>
                       <h4 className="font-bold text-base md:text-lg">{team.name}</h4>
                       <p className="text-sm text-slate-500">{teamStats?.points || 0} pts · {teamStats?.played || 0} PJ</p>

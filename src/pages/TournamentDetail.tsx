@@ -19,7 +19,7 @@ export default function TournamentDetail() {
   const [addPlayerForTeam, setAddPlayerForTeam] = useState<string | null>(null);
   const [newPlayerName, setNewPlayerName] = useState('');
   const [newPlayerNumber, setNewPlayerNumber] = useState('');
-  const [editingPlayer, setEditingPlayer] = useState<any>(null); // NUEVO: jugador a editar
+  const [editingPlayer, setEditingPlayer] = useState<any>(null);
   const [editingPlayerName, setEditingPlayerName] = useState('');
   const [editingPlayerNumber, setEditingPlayerNumber] = useState('');
 
@@ -104,7 +104,6 @@ export default function TournamentDetail() {
       api.get(`/matches/${editMatch.id}/events`)
         .then(res => setMatchEvents(res.data))
         .catch(() => setMatchEvents([]));
-      // Cargar jugadores de ambos equipos si no están
       [editMatch.homeTeamId, editMatch.awayTeamId].forEach(async teamId => {
         if (!playersByTeam[teamId]) {
           const res = await api.get(`/players/team/${teamId}`);
@@ -199,7 +198,6 @@ export default function TournamentDetail() {
         name: editingPlayerName,
         number: editingPlayerNumber ? parseInt(editingPlayerNumber) : null,
       });
-      // Recargar jugadores del equipo
       const teamId = editingPlayer.teamId;
       const res = await api.get(`/players/team/${teamId}`);
       setPlayersByTeam(prev => ({ ...prev, [teamId]: res.data }));
@@ -216,7 +214,7 @@ export default function TournamentDetail() {
     } catch {}
   };
 
-  // ─── Equipos ──────────────────────────────────────────
+  // ─── Equipos (nombre + escudo) ────────────────────────
   const startEditTeam = (team: any) => {
     setEditingTeamId(team.id);
     setEditingTeamName(team.name);
@@ -226,11 +224,32 @@ export default function TournamentDetail() {
     if (!editingTeamId || !editingTeamName.trim()) return;
     try {
       await api.patch(`/teams/${editingTeamId}`, { name: editingTeamName });
-      // Recargar el torneo para reflejar el nuevo nombre
       const res = await api.get(`/tournaments/${id}`);
       setTournament(res.data);
       setEditingTeamId(null);
     } catch {}
+  };
+
+  // Actualizar escudo del equipo mientras se edita
+  const handleTeamLogoChange = async (teamId: string, file: File) => {
+    if (!file) return;
+    if (file.size > 200000) {
+      alert('La imagen no debe superar 200 KB');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const base64 = reader.result as string;
+      try {
+        await api.patch(`/teams/${teamId}`, { logo: base64 });
+        // Recargar el torneo para reflejar el nuevo logo
+        const res = await api.get(`/tournaments/${id}`);
+        setTournament(res.data);
+      } catch {
+        alert('Error al subir el escudo');
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   // ─── Eventos de partido ───────────────────────────────
@@ -250,7 +269,7 @@ export default function TournamentDetail() {
 
   return (
     <div className="animate-fade-in">
-      {/* Header (sin cambios) */}
+      {/* Header */}
       <div className="glass rounded-2xl p-4 md:p-6 mb-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
@@ -297,7 +316,7 @@ export default function TournamentDetail() {
         </div>
       </div>
 
-      {/* Tabs (sin cambios) */}
+      {/* Tabs */}
       <div className="flex gap-1 mb-6 bg-slate-800/50 p-1 rounded-xl overflow-x-auto">
         {[
           { id: 'fixture', label: 'Fixture', icon: 'fa-calendar-alt' },
@@ -313,7 +332,7 @@ export default function TournamentDetail() {
         ))}
       </div>
 
-      {/* ==================== Fixture (sin cambios) ==================== */}
+      {/* ==================== Fixture ==================== */}
       {tab === 'fixture' && (
         <div className="space-y-6 animate-fade-in">
           {tournament.rounds.map((round: any) => (
@@ -369,7 +388,7 @@ export default function TournamentDetail() {
         </div>
       )}
 
-      {/* ==================== Standings (sin cambios) ==================== */}
+      {/* ==================== Standings ==================== */}
       {tab === 'standings' && (
         <div className="glass rounded-2xl overflow-hidden animate-fade-in">
           <div className="overflow-x-auto">
@@ -411,7 +430,7 @@ export default function TournamentDetail() {
         </div>
       )}
 
-      {/* ==================== Teams (con edición de equipo y jugadores) ==================== */}
+      {/* ==================== Teams (con edición de equipo, escudo y jugadores) ==================== */}
       {tab === 'teams' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-fade-in">
           {tournament.teams.map((team: any) => {
@@ -421,26 +440,61 @@ export default function TournamentDetail() {
 
             return (
               <div key={team.id} className="glass p-4 md:p-6 hover-lift">
-                {/* Nombre del equipo editable */}
+                {/* Nombre del equipo editable + subida de escudo */}
                 <div className="flex items-center gap-2 mb-4">
                   {isEditingThisTeam ? (
-                    <div className="flex-1 flex gap-2">
-                      <input
-                        value={editingTeamName}
-                        onChange={e => setEditingTeamName(e.target.value)}
-                        className="input-dark flex-1 text-sm py-1"
-                        autoFocus
-                        onKeyDown={e => e.key === 'Enter' && saveEditTeam()}
-                      />
-                      <button onClick={saveEditTeam} className="btn-primary text-xs px-2 py-1"><i className="fas fa-check"></i></button>
-                      <button onClick={() => setEditingTeamId(null)} className="btn-secondary text-xs px-2 py-1"><i className="fas fa-times"></i></button>
+                    <div className="flex-1 space-y-3">
+                      {/* Inputs de nombre */}
+                      <div className="flex gap-2">
+                        <input
+                          value={editingTeamName}
+                          onChange={e => setEditingTeamName(e.target.value)}
+                          className="input-dark flex-1 text-sm py-1"
+                          autoFocus
+                          onKeyDown={e => e.key === 'Enter' && saveEditTeam()}
+                        />
+                        <button onClick={saveEditTeam} className="btn-primary text-xs px-2 py-1"><i className="fas fa-check"></i></button>
+                        <button onClick={() => setEditingTeamId(null)} className="btn-secondary text-xs px-2 py-1"><i className="fas fa-times"></i></button>
+                      </div>
+                      {/* Subir escudo */}
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          id={`edit-logo-${team.id}`}
+                          className="hidden"
+                          onChange={(e) => {
+                            if (e.target.files?.[0]) handleTeamLogoChange(team.id, e.target.files[0]);
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => document.getElementById(`edit-logo-${team.id}`)?.click()}
+                          className="text-xs text-primary-400 hover:text-primary-300 flex items-center gap-1"
+                        >
+                          <i className="fas fa-image"></i> {team.logo ? 'Cambiar escudo' : 'Añadir escudo'}
+                        </button>
+                        {team.logo && (
+                          <img src={team.logo} alt="Vista previa" className="w-6 h-6 rounded object-cover border border-slate-700" />
+                        )}
+                      </div>
                     </div>
                   ) : (
                     <>
-                      <h4 className="font-bold text-base md:text-lg flex-1">{team.name}</h4>
-                      <button onClick={() => startEditTeam(team)} className="text-slate-500 hover:text-slate-300" title="Editar nombre">
-                        <i className="fas fa-pen text-xs"></i>
-                      </button>
+                      {/* Icono o escudo */}
+                      {team.logo ? (
+                        <img src={team.logo} alt={team.name} className="w-10 h-10 md:w-12 md:h-12 rounded-xl object-cover" />
+                      ) : (
+                        <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center text-xl" style={{ backgroundColor: team.color + '30', color: team.color }}>
+                          <i className="fas fa-shield-alt"></i>
+                        </div>
+                      )}
+                      <div className="flex-1 flex items-center justify-between">
+                        <h4 className="font-bold text-base md:text-lg">{team.name}</h4>
+                        <button onClick={() => startEditTeam(team)} className="text-slate-500 hover:text-slate-300" title="Editar nombre">
+                          <i className="fas fa-pen text-xs"></i>
+                        </button>
+                      </div>
                     </>
                   )}
                 </div>
@@ -597,7 +651,7 @@ export default function TournamentDetail() {
         </>
       )}
 
-      {/* ==================== Modal Editar Partido + Eventos (sin cambios) ==================== */}
+      {/* ==================== Modal Editar Partido + Eventos ==================== */}
       {editMatch && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-2 md:p-4 animate-fade-in">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setEditMatch(null)}></div>
@@ -650,7 +704,7 @@ export default function TournamentDetail() {
               <input type="text" defaultValue={editMatch.location || ''} id="matchLocation" placeholder="Cancha, estadio, etc." className="input-dark" />
             </div>
 
-            {/* Eventos del partido (sin cambios) */}
+            {/* Eventos del partido */}
             <div className="mb-6">
               <h4 className="text-sm font-medium text-slate-400 mb-2">Eventos</h4>
               {matchEvents.length === 0 && <p className="text-xs text-slate-500">Sin eventos registrados</p>}

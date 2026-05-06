@@ -7,6 +7,8 @@ export const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  maxContentLength: 10 * 1024 * 1024, // 10 MB
+  maxBodyLength: 10 * 1024 * 1024,
 });
 
 api.interceptors.request.use((config) => {
