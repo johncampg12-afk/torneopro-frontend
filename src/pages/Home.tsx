@@ -3,10 +3,50 @@ import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
 
+// Datos de ejemplo para el carrusel de publicidad
+const ads = [
+  {
+    id: 1,
+    title: 'Patrocinador Oficial',
+    subtitle: 'Tienda Deportiva «El Crack»',
+    description: '10% de descuento para participantes del torneo',
+    icon: 'fa-shirt',
+    color: '#f97316',
+    link: '#',
+  },
+  {
+    id: 2,
+    title: 'Bar Restaurante «La Goleta»',
+    subtitle: 'Comida y bebida para equipos',
+    description: 'Reserva tu mesa para después del partido',
+    icon: 'fa-utensils',
+    color: '#10b981',
+    link: '#',
+  },
+  {
+    id: 3,
+    title: 'Clínica Deportiva «FisioSport»',
+    subtitle: 'Recuperación y masajes',
+    description: 'Primera sesión gratuita mostrando este anuncio',
+    icon: 'fa-heart-pulse',
+    color: '#3b82f6',
+    link: '#',
+  },
+];
+
 export default function Home() {
   const { user } = useAuth();
   const [publicTournaments, setPublicTournaments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentAd, setCurrentAd] = useState(0);
+
+  // Rotación automática de anuncios
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentAd((prev) => (prev + 1) % ads.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     api.get('/tournaments/public')
@@ -23,42 +63,75 @@ export default function Home() {
 
   return (
     <div className="animate-fade-in">
-      {/* Hero */}
-      <div className="relative overflow-hidden rounded-3xl mb-8 p-6 md:p-8 lg:p-12">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary-900/50 via-dark-900 to-accent-900/30"></div>
-        <div className="absolute inset-0" style={{backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(59,130,246,0.15) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(34,197,94,0.1) 0%, transparent 50%)'}}></div>
-        <div className="relative z-10">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-            <div>
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-black mb-3">
-                <span className="gradient-text">TorneoPro</span>
-              </h1>
-              <p className="text-slate-400 text-base md:text-lg max-w-xl">
-                El gestor de torneos deportivos más completo, moderno y <span className="text-accent-400 font-semibold">100% gratuito</span>. 
-                Crea, gestiona y comparte tus campeonatos en segundos.
-              </p>
+      {/* Carrusel de publicidad – ocupa el mismo lugar del hero */}
+      <div className="relative overflow-hidden rounded-3xl mb-8 h-64 md:h-72 lg:h-80">
+        {/* Slides */}
+        {ads.map((ad, index) => (
+          <a
+            key={ad.id}
+            href={ad.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`absolute inset-0 transition-opacity duration-700 ${
+              index === currentAd ? 'opacity-100 z-10' : 'opacity-0 z-0'
+            }`}
+          >
+            <div className="w-full h-full rounded-3xl p-6 md:p-8 lg:p-12 flex flex-col justify-center"
+              style={{
+                background: `linear-gradient(135deg, ${ad.color}22 0%, #0f172a 80%)`,
+                border: `1px solid ${ad.color}44`,
+                boxShadow: `0 0 30px ${ad.color}22`,
+              }}
+            >
+              <div className="flex items-start gap-4 md:gap-6">
+                {/* Ícono del anuncio */}
+                <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl flex items-center justify-center text-3xl md:text-4xl"
+                  style={{
+                    background: `linear-gradient(135deg, ${ad.color}, ${ad.color}cc)`,
+                    boxShadow: `0 0 20px ${ad.color}66`,
+                  }}
+                >
+                  <i className={`fas ${ad.icon} text-white`}></i>
+                </div>
+                <div className="flex-1">
+                  <p className="text-xs md:text-sm font-bold tracking-wider uppercase mb-1"
+                    style={{ color: ad.color }}
+                  >
+                    {ad.title}
+                  </p>
+                  <h2 className="text-2xl md:text-3xl lg:text-4xl font-black text-white mb-2">
+                    {ad.subtitle}
+                  </h2>
+                  <p className="text-slate-400 text-sm md:text-base max-w-lg">
+                    {ad.description}
+                  </p>
+                </div>
+                {/* Flecha discreta para indicar que es clicable */}
+                <div className="hidden sm:flex items-center">
+                  <i className="fas fa-arrow-right text-slate-600 text-2xl"></i>
+                </div>
+              </div>
             </div>
-            <div className="flex gap-3">
-              {user ? (
-                <Link to="/tournaments/create" className="btn-primary text-sm md:text-lg px-6 md:px-8 py-3 md:py-4">
-                  <i className="fas fa-plus"></i> Crear Torneo
-                </Link>
-              ) : (
-                <>
-                  <Link to="/register" className="btn-primary text-sm md:text-lg px-6 md:px-8 py-3 md:py-4">
-                    <i className="fas fa-rocket"></i> Empezar Gratis
-                  </Link>
-                  <Link to="/login" className="btn-secondary text-sm md:text-lg px-4 md:px-6 py-3 md:py-4">
-                    Iniciar sesión
-                  </Link>
-                </>
-              )}
-            </div>
-          </div>
+          </a>
+        ))}
+
+        {/* Indicadores de slide (puntos) */}
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+          {ads.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => setCurrentAd(idx)}
+              className={`w-2 h-2 md:w-3 md:h-3 rounded-full transition-all ${
+                idx === currentAd
+                  ? 'bg-white shadow-[0_0_8px_rgba(255,255,255,0.6)] scale-125'
+                  : 'bg-slate-600 hover:bg-slate-400'
+              }`}
+            />
+          ))}
         </div>
       </div>
 
-      {/* Stats */}
+      {/* Stats (sin cambios) */}
       <div className="grid grid-cols-3 gap-3 md:gap-4 mb-8">
         {stats.map(s => (
           <div key={s.label} className="glass p-3 md:p-5 text-center">
@@ -69,7 +142,7 @@ export default function Home() {
         ))}
       </div>
 
-      {/* Public Tournaments */}
+      {/* Torneos Públicos (sin cambios) */}
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-xl md:text-2xl font-bold">Torneos Públicos</h2>
         <span className="text-sm text-slate-500">{publicTournaments.length} torneos</span>
