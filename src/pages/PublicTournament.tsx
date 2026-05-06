@@ -2,6 +2,18 @@ import { useEffect, useState, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { api } from '../lib/api';
 
+// Componente local reutilizable para mostrar el nombre del equipo con su logo o círculo de color
+const TeamDisplay = ({ team }: { team: any }) => (
+  <div className="flex items-center gap-2">
+    {team.logo ? (
+      <img src={team.logo} alt={team.name} className="w-5 h-5 md:w-6 md:h-6 rounded-full object-cover" />
+    ) : (
+      <div className="w-3 h-3 md:w-4 md:h-4 rounded-full" style={{ backgroundColor: team.color || '#666' }}></div>
+    )}
+    <span className="font-semibold text-sm md:text-base truncate">{team.name}</span>
+  </div>
+);
+
 export default function PublicTournament() {
   const { shareCode } = useParams();
   const [tournament, setTournament] = useState<any>(null);
@@ -85,7 +97,9 @@ export default function PublicTournament() {
 
   if (!tournament) return null;
 
-  const getTeam = (teamId: string) => tournament.teams.find((t: any) => t.id === teamId) || { name: 'Por definir', color: '#666' };
+  // Añadir logo: null a la respuesta por defecto
+  const getTeam = (teamId: string) =>
+    tournament.teams.find((t: any) => t.id === teamId) || { name: 'Por definir', color: '#666', logo: null };
 
   const playedMatches = tournament.rounds.reduce((a: number, r: any) => a + r.matches.filter((m: any) => m.played).length, 0);
   const totalMatches = tournament.rounds.reduce((a: number, r: any) => a + r.matches.length, 0);
@@ -176,8 +190,7 @@ export default function PublicTournament() {
                       <div key={match.id} className={`bg-slate-800/50 rounded-xl p-3 md:p-4 border ${match.played ? 'border-primary-500/30' : 'border-slate-800'}`}>
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
-                            <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: home.color }}></div>
-                            <span className="font-semibold text-sm md:text-base truncate">{home.name}</span>
+                            <TeamDisplay team={home} />
                           </div>
                           <div className="flex items-center gap-2 md:gap-3 px-2 md:px-4">
                             <span className={`text-xl md:text-2xl font-black ${match.played ? 'text-white' : 'text-slate-600'}`}>
@@ -189,8 +202,7 @@ export default function PublicTournament() {
                             </span>
                           </div>
                           <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0 justify-end">
-                            <span className="font-semibold text-sm md:text-base truncate">{away.name}</span>
-                            <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: away.color }}></div>
+                            <TeamDisplay team={away} />
                           </div>
                         </div>
                         {(match.date || match.time || match.location) && (
@@ -230,10 +242,7 @@ export default function PublicTournament() {
                         </span>
                       </td>
                       <td className="px-3 md:px-6 py-3 md:py-4">
-                        <div className="flex items-center gap-2">
-                          <div className="w-3 h-3 md:w-4 md:h-4 rounded" style={{ backgroundColor: team.color }}></div>
-                          <span className="font-semibold truncate">{team.name}</span>
-                        </div>
+                        <TeamDisplay team={team} />
                       </td>
                       {['played','wins','draws','losses','gf','ga','gd'].map(field => (
                         <td key={field} className="px-3 md:px-6 py-3 md:py-4 text-center">
@@ -261,7 +270,6 @@ export default function PublicTournament() {
               return (
                 <div key={team.id} className="glass p-4 md:p-6">
                   <div className="flex items-center gap-4 mb-4">
-                    {/* Mostrar escudo si existe, de lo contrario mostrar icono */}
                     {team.logo ? (
                       <img
                         src={team.logo}
@@ -310,10 +318,11 @@ export default function PublicTournament() {
                 <div className="space-y-3">
                   {standings.sort((a: any, b: any) => b.gf - a.gf).slice(0, 8).map((team: any) => (
                     <div key={team.id} className="flex items-center gap-3">
-                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: team.color }}></div>
-                      <span className="flex-1 text-sm truncate">{team.name}</span>
-                      <div className="w-24 md:w-32 bg-slate-800 rounded-full h-2">
-                        <div className="bg-primary-500 h-2 rounded-full transition-all" style={{ width: `${Math.min(100, (team.gf / Math.max(1, standings[0]?.gf)) * 100)}%` }}></div>
+                      <TeamDisplay team={team} />
+                      <div className="flex-1 min-w-0">
+                        <div className="w-full bg-slate-800 rounded-full h-2">
+                          <div className="bg-primary-500 h-2 rounded-full transition-all" style={{ width: `${Math.min(100, (team.gf / Math.max(1, standings[0]?.gf)) * 100)}%` }}></div>
+                        </div>
                       </div>
                       <span className="text-sm font-bold w-8 text-right">{team.gf}</span>
                     </div>
@@ -325,10 +334,11 @@ export default function PublicTournament() {
                 <div className="space-y-3">
                   {standings.filter((s: any) => s.played > 0).sort((a: any, b: any) => (b.wins / b.played) - (a.wins / a.played)).slice(0, 8).map((team: any) => (
                     <div key={team.id} className="flex items-center gap-3">
-                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: team.color }}></div>
-                      <span className="flex-1 text-sm truncate">{team.name}</span>
-                      <div className="w-24 md:w-32 bg-slate-800 rounded-full h-2">
-                        <div className="bg-accent-500 h-2 rounded-full transition-all" style={{ width: `${(team.wins / team.played) * 100}%` }}></div>
+                      <TeamDisplay team={team} />
+                      <div className="flex-1 min-w-0">
+                        <div className="w-full bg-slate-800 rounded-full h-2">
+                          <div className="bg-accent-500 h-2 rounded-full transition-all" style={{ width: `${(team.wins / team.played) * 100}%` }}></div>
+                        </div>
                       </div>
                       <span className="text-sm font-bold w-12 text-right">{Math.round((team.wins / team.played) * 100)}%</span>
                     </div>

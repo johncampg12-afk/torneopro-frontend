@@ -3,6 +3,26 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
 
+// Componente auxiliar: muestra logo si existe, si no, círculo de color
+const TeamBadge = ({ team, size = 'md' }: { team: any; size?: 'sm' | 'md' | 'lg' }) => {
+  const sizes = {
+    sm: { img: 'w-5 h-5', dot: 'w-3 h-3' },
+    md: { img: 'w-8 h-8', dot: 'w-4 h-4' },
+    lg: { img: 'w-12 h-12 md:w-14 md:h-14', dot: 'w-6 h-6 md:w-8 md:h-8' },
+  };
+  const { img, dot } = sizes[size];
+  return (
+    <div className="flex items-center gap-2">
+      {team.logo ? (
+        <img src={team.logo} alt={team.name} className={`${img} rounded-full object-cover flex-shrink-0`} />
+      ) : (
+        <div className={`${dot} rounded-full flex-shrink-0`} style={{ backgroundColor: team.color || '#666' }}></div>
+      )}
+      <span className="font-semibold truncate">{team.name}</span>
+    </div>
+  );
+};
+
 export default function TournamentDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -131,7 +151,7 @@ export default function TournamentDetail() {
   if (!tournament) return null;
 
   const getTeam = (teamId: string) =>
-    tournament.teams.find((t: any) => t.id === teamId) || { name: 'Por definir', color: '#666' };
+    tournament.teams.find((t: any) => t.id === teamId) || { name: 'Por definir', color: '#666', logo: null };
 
   const playedMatches = tournament.rounds.reduce(
     (a: number, r: any) => a + r.matches.filter((m: any) => m.played).length, 0
@@ -230,7 +250,6 @@ export default function TournamentDetail() {
     } catch {}
   };
 
-  // Actualizar escudo del equipo mientras se edita
   const handleTeamLogoChange = async (teamId: string, file: File) => {
     if (!file) return;
     if (file.size > 200000) {
@@ -242,7 +261,6 @@ export default function TournamentDetail() {
       const base64 = reader.result as string;
       try {
         await api.patch(`/teams/${teamId}`, { logo: base64 });
-        // Recargar el torneo para reflejar el nuevo logo
         const res = await api.get(`/tournaments/${id}`);
         setTournament(res.data);
       } catch {
@@ -269,7 +287,7 @@ export default function TournamentDetail() {
 
   return (
     <div className="animate-fade-in">
-      {/* Header */}
+      {/* Header sin cambios */}
       <div className="glass rounded-2xl p-4 md:p-6 mb-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
@@ -332,7 +350,7 @@ export default function TournamentDetail() {
         ))}
       </div>
 
-      {/* ==================== Fixture ==================== */}
+      {/* ==================== Fixture (con escudos) ==================== */}
       {tab === 'fixture' && (
         <div className="space-y-6 animate-fade-in">
           {tournament.rounds.map((round: any) => (
@@ -354,9 +372,8 @@ export default function TournamentDetail() {
                     <div key={match.id} onClick={() => { setEditMatch(match); setEditRound(round); }}
                       className={`bg-slate-800/50 rounded-xl p-3 md:p-4 border cursor-pointer transition-all hover:border-primary-500/50 ${match.played ? 'border-primary-500/30' : 'border-slate-800'}`}>
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
-                          <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: home.color }}></div>
-                          <span className="font-semibold text-sm md:text-base truncate">{home.name}</span>
+                        <div className="flex-1 min-w-0">
+                          <TeamBadge team={home} size="sm" />
                         </div>
                         <div className="flex items-center gap-2 md:gap-3 px-2 md:px-4">
                           <span className={`text-xl md:text-2xl font-black ${match.played ? 'text-white' : 'text-slate-600'}`}>
@@ -367,9 +384,8 @@ export default function TournamentDetail() {
                             {match.played ? match.awayScore : '-'}
                           </span>
                         </div>
-                        <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0 justify-end">
-                          <span className="font-semibold text-sm md:text-base truncate">{away.name}</span>
-                          <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: away.color }}></div>
+                        <div className="flex-1 min-w-0 flex justify-end">
+                          <TeamBadge team={away} size="sm" />
                         </div>
                       </div>
                       {(match.date || match.time || match.location) && (
@@ -388,7 +404,7 @@ export default function TournamentDetail() {
         </div>
       )}
 
-      {/* ==================== Standings ==================== */}
+      {/* ==================== Standings (con escudos) ==================== */}
       {tab === 'standings' && (
         <div className="glass rounded-2xl overflow-hidden animate-fade-in">
           <div className="overflow-x-auto">
@@ -407,10 +423,7 @@ export default function TournamentDetail() {
                       <span className={`w-7 h-7 md:w-8 md:h-8 rounded-lg flex items-center justify-center font-bold text-xs md:text-sm ${idx === 0 ? 'bg-yellow-500/20 text-yellow-400' : idx === 1 ? 'bg-slate-400/20 text-slate-300' : idx === 2 ? 'bg-orange-600/20 text-orange-400' : 'text-slate-500'}`}>{idx + 1}</span>
                     </td>
                     <td className="px-3 md:px-6 py-3 md:py-4">
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 md:w-4 md:h-4 rounded" style={{ backgroundColor: team.color }}></div>
-                        <span className="font-semibold truncate">{team.name}</span>
-                      </div>
+                      <TeamBadge team={team} size="md" />
                     </td>
                     {['played','wins','draws','losses','gf','ga','gd'].map(field => (
                       <td key={field} className="px-3 md:px-6 py-3 md:py-4 text-center">
@@ -430,7 +443,7 @@ export default function TournamentDetail() {
         </div>
       )}
 
-      {/* ==================== Teams (con edición de equipo, escudo y jugadores) ==================== */}
+      {/* ==================== Teams (editar equipos, escudo y jugadores) – sin cambios ==================== */}
       {tab === 'teams' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-fade-in">
           {tournament.teams.map((team: any) => {
@@ -444,57 +457,29 @@ export default function TournamentDetail() {
                 <div className="flex items-center gap-2 mb-4">
                   {isEditingThisTeam ? (
                     <div className="flex-1 space-y-3">
-                      {/* Inputs de nombre */}
                       <div className="flex gap-2">
-                        <input
-                          value={editingTeamName}
-                          onChange={e => setEditingTeamName(e.target.value)}
-                          className="input-dark flex-1 text-sm py-1"
-                          autoFocus
-                          onKeyDown={e => e.key === 'Enter' && saveEditTeam()}
-                        />
+                        <input value={editingTeamName} onChange={e => setEditingTeamName(e.target.value)}
+                          className="input-dark flex-1 text-sm py-1" autoFocus
+                          onKeyDown={e => e.key === 'Enter' && saveEditTeam()} />
                         <button onClick={saveEditTeam} className="btn-primary text-xs px-2 py-1"><i className="fas fa-check"></i></button>
                         <button onClick={() => setEditingTeamId(null)} className="btn-secondary text-xs px-2 py-1"><i className="fas fa-times"></i></button>
                       </div>
-                      {/* Subir escudo */}
                       <div className="flex items-center gap-2">
-                        <input
-                          type="file"
-                          accept="image/*"
-                          id={`edit-logo-${team.id}`}
-                          className="hidden"
-                          onChange={(e) => {
-                            if (e.target.files?.[0]) handleTeamLogoChange(team.id, e.target.files[0]);
-                          }}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => document.getElementById(`edit-logo-${team.id}`)?.click()}
-                          className="text-xs text-primary-400 hover:text-primary-300 flex items-center gap-1"
-                        >
+                        <input type="file" accept="image/*" id={`edit-logo-${team.id}`} className="hidden"
+                          onChange={(e) => { if (e.target.files?.[0]) handleTeamLogoChange(team.id, e.target.files[0]); }} />
+                        <button type="button" onClick={() => document.getElementById(`edit-logo-${team.id}`)?.click()}
+                          className="text-xs text-primary-400 hover:text-primary-300 flex items-center gap-1">
                           <i className="fas fa-image"></i> {team.logo ? 'Cambiar escudo' : 'Añadir escudo'}
                         </button>
-                        {team.logo && (
-                          <img src={team.logo} alt="Vista previa" className="w-6 h-6 rounded object-cover border border-slate-700" />
-                        )}
+                        {team.logo && <img src={team.logo} alt="Vista previa" className="w-6 h-6 rounded object-cover border border-slate-700" />}
                       </div>
                     </div>
                   ) : (
                     <>
-                      {/* Icono o escudo */}
-                      {team.logo ? (
-                        <img src={team.logo} alt={team.name} className="w-10 h-10 md:w-12 md:h-12 rounded-xl object-cover" />
-                      ) : (
-                        <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center text-xl" style={{ backgroundColor: team.color + '30', color: team.color }}>
-                          <i className="fas fa-shield-alt"></i>
-                        </div>
-                      )}
-                      <div className="flex-1 flex items-center justify-between">
-                        <h4 className="font-bold text-base md:text-lg">{team.name}</h4>
-                        <button onClick={() => startEditTeam(team)} className="text-slate-500 hover:text-slate-300" title="Editar nombre">
-                          <i className="fas fa-pen text-xs"></i>
-                        </button>
-                      </div>
+                      <TeamBadge team={team} size="lg" />
+                      <button onClick={() => startEditTeam(team)} className="text-slate-500 hover:text-slate-300 ml-auto" title="Editar nombre">
+                        <i className="fas fa-pen text-xs"></i>
+                      </button>
                     </>
                   )}
                 </div>
@@ -523,9 +508,7 @@ export default function TournamentDetail() {
                       + Añadir
                     </button>
                   </div>
-                  {players.length === 0 && (
-                    <p className="text-xs text-slate-500">Sin jugadores</p>
-                  )}
+                  {players.length === 0 && <p className="text-xs text-slate-500">Sin jugadores</p>}
                   {players.map((player: any) => (
                     <div key={player.id} className="flex items-center justify-between text-sm py-1 group">
                       <span className="truncate">
@@ -549,19 +532,20 @@ export default function TournamentDetail() {
         </div>
       )}
 
-      {/* ==================== Stats (con goleadores) ==================== */}
+      {/* ==================== Stats (con escudos en gráficos) ==================== */}
       {tab === 'stats' && (
         <>
           <div className="grid md:grid-cols-2 gap-6 animate-fade-in">
             <div className="glass p-4 md:p-6">
               <h3 className="text-lg font-bold mb-4">Goles por Equipo</h3>
               <div className="space-y-3">
-                {standings.sort((a: any, b: any) => b.gf - a.gf).slice(0, 8).map((team: any) => (
+                {standings.sort((a, b) => b.gf - a.gf).slice(0, 8).map(team => (
                   <div key={team.id} className="flex items-center gap-3">
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: team.color }}></div>
-                    <span className="flex-1 text-sm truncate">{team.name}</span>
-                    <div className="w-24 md:w-32 bg-slate-800 rounded-full h-2">
-                      <div className="bg-primary-500 h-2 rounded-full transition-all" style={{ width: `${Math.min(100, (team.gf / Math.max(1, standings[0]?.gf)) * 100)}%` }}></div>
+                    <TeamBadge team={team} size="sm" />
+                    <div className="flex-1 min-w-0">
+                      <div className="w-full bg-slate-800 rounded-full h-2">
+                        <div className="bg-primary-500 h-2 rounded-full" style={{ width: `${Math.min(100, (team.gf / Math.max(1, standings[0]?.gf)) * 100)}%` }}></div>
+                      </div>
                     </div>
                     <span className="text-sm font-bold w-8 text-right">{team.gf}</span>
                   </div>
@@ -571,12 +555,13 @@ export default function TournamentDetail() {
             <div className="glass p-4 md:p-6">
               <h3 className="text-lg font-bold mb-4">Rendimiento (% victorias)</h3>
               <div className="space-y-3">
-                {standings.filter((s: any) => s.played > 0).sort((a: any, b: any) => (b.wins / b.played) - (a.wins / a.played)).slice(0, 8).map((team: any) => (
+                {standings.filter(s => s.played > 0).sort((a, b) => (b.wins / b.played) - (a.wins / a.played)).slice(0, 8).map(team => (
                   <div key={team.id} className="flex items-center gap-3">
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: team.color }}></div>
-                    <span className="flex-1 text-sm truncate">{team.name}</span>
-                    <div className="w-24 md:w-32 bg-slate-800 rounded-full h-2">
-                      <div className="bg-accent-500 h-2 rounded-full transition-all" style={{ width: `${(team.wins / team.played) * 100}%` }}></div>
+                    <TeamBadge team={team} size="sm" />
+                    <div className="flex-1 min-w-0">
+                      <div className="w-full bg-slate-800 rounded-full h-2">
+                        <div className="bg-accent-500 h-2 rounded-full" style={{ width: `${(team.wins / team.played) * 100}%` }}></div>
+                      </div>
                     </div>
                     <span className="text-sm font-bold w-12 text-right">{Math.round((team.wins / team.played) * 100)}%</span>
                   </div>
@@ -590,7 +575,7 @@ export default function TournamentDetail() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="bg-slate-800/50 rounded-xl p-4 text-center">
                 <div className="text-2xl md:text-3xl font-bold text-primary-400">
-                  {tournament.rounds.reduce((a: number, r: any) => a + r.matches.reduce((b: number, m: any) => b + (m.homeScore || 0) + (m.awayScore || 0), 0), 0)}
+                  {tournament.rounds.reduce((a, r) => a + r.matches.reduce((b, m) => b + (m.homeScore || 0) + (m.awayScore || 0), 0), 0)}
                 </div>
                 <div className="text-sm text-slate-500 mt-1">Total goles/puntos</div>
               </div>
@@ -600,7 +585,7 @@ export default function TournamentDetail() {
               </div>
               <div className="bg-slate-800/50 rounded-xl p-4 text-center">
                 <div className="text-2xl md:text-3xl font-bold text-yellow-400">
-                  {tournament.rounds.reduce((a: number, r: any) => a + r.matches.filter((m: any) => m.played && m.homeScore === m.awayScore).length, 0)}
+                  {tournament.rounds.reduce((a, r) => a + r.matches.filter(m => m.played && m.homeScore === m.awayScore).length, 0)}
                 </div>
                 <div className="text-sm text-slate-500 mt-1">Empates</div>
               </div>
@@ -651,7 +636,7 @@ export default function TournamentDetail() {
         </>
       )}
 
-      {/* ==================== Modal Editar Partido + Eventos ==================== */}
+      {/* ==================== Modal Editar Partido (con escudos) ==================== */}
       {editMatch && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-2 md:p-4 animate-fade-in">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setEditMatch(null)}></div>
@@ -664,19 +649,28 @@ export default function TournamentDetail() {
             </div>
             <div className="flex items-center justify-between mb-6 md:mb-8">
               <div className="text-center flex-1">
-                <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl mx-auto mb-2 flex items-center justify-center text-xl md:text-2xl" style={{ backgroundColor: getTeam(editMatch.homeTeamId).color + '30' }}>
-                  <i className="fas fa-shield-alt" style={{ color: getTeam(editMatch.homeTeamId).color }}></i>
-                </div>
+                {getTeam(editMatch.homeTeamId).logo ? (
+                  <img src={getTeam(editMatch.homeTeamId).logo} alt="" className="w-12 h-12 md:w-16 md:h-16 rounded-xl object-cover mx-auto mb-2" />
+                ) : (
+                  <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl mx-auto mb-2 flex items-center justify-center text-xl md:text-2xl" style={{ backgroundColor: getTeam(editMatch.homeTeamId).color + '30', color: getTeam(editMatch.homeTeamId).color }}>
+                    <i className="fas fa-shield-alt"></i>
+                  </div>
+                )}
                 <div className="font-bold text-sm md:text-base">{getTeam(editMatch.homeTeamId).name}</div>
               </div>
               <div className="px-3 md:px-4 text-xl md:text-2xl font-black text-slate-500">VS</div>
               <div className="text-center flex-1">
-                <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl mx-auto mb-2 flex items-center justify-center text-xl md:text-2xl" style={{ backgroundColor: getTeam(editMatch.awayTeamId).color + '30' }}>
-                  <i className="fas fa-shield-alt" style={{ color: getTeam(editMatch.awayTeamId).color }}></i>
-                </div>
+                {getTeam(editMatch.awayTeamId).logo ? (
+                  <img src={getTeam(editMatch.awayTeamId).logo} alt="" className="w-12 h-12 md:w-16 md:h-16 rounded-xl object-cover mx-auto mb-2" />
+                ) : (
+                  <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl mx-auto mb-2 flex items-center justify-center text-xl md:text-2xl" style={{ backgroundColor: getTeam(editMatch.awayTeamId).color + '30', color: getTeam(editMatch.awayTeamId).color }}>
+                    <i className="fas fa-shield-alt"></i>
+                  </div>
+                )}
                 <div className="font-bold text-sm md:text-base">{getTeam(editMatch.awayTeamId).name}</div>
               </div>
             </div>
+            {/* Resto del modal (marcador, fecha, eventos) */}
             <div className="grid grid-cols-2 gap-4 mb-6">
               <div>
                 <label className="block text-sm text-slate-400 mb-2 text-center">Local</label>
