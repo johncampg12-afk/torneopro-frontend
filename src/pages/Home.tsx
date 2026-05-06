@@ -16,9 +16,9 @@ const ads = [
   },
   {
     id: 2,
-    title: 'Tienda de ropa TrenSport',
+    title: 'Tienda de ropa TrendSport',
     subtitle: 'Trend Sport',
-    description: 'La ropa del momento, para lucir al momento',
+    description: 'Atrévete a vestir diferente',
     image: '/sponsors/trend-sport-hrz.png',
     color: '#e87400',
     link: '#',
