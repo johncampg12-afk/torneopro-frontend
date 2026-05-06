@@ -10,7 +10,7 @@ const ads = [
     title: 'Clínica Dental',
     subtitle: 'Dental Fresh Plus',
     description: '10% de descuento para participantes del torneo',
-    image: '/sponsors/dental-fresh-plus-hrz.jpeg',  // ← Cambia por la ruta real de tu imagen
+    image: '/sponsors/dental-fresh-plus-hrz.jpeg',
     color: '#f97316',
     link: '#',
   },
@@ -63,7 +63,7 @@ export default function Home() {
 
   return (
     <div className="animate-fade-in">
-      {/* Carrusel de publicidad */}
+      {/* Carrusel de publicidad con imagen a pantalla completa */}
       <div className="relative overflow-hidden rounded-3xl mb-8 h-64 md:h-72 lg:h-80">
         {ads.map((ad, index) => (
           <a
@@ -75,52 +75,36 @@ export default function Home() {
               index === currentAd ? 'opacity-100 z-10' : 'opacity-0 z-0'
             }`}
           >
-            <div
-              className="w-full h-full rounded-3xl p-6 md:p-8 lg:p-12 flex flex-col justify-center"
-              style={{
-                background: `linear-gradient(135deg, ${ad.color}22 0%, #0f172a 80%)`,
-                border: `1px solid ${ad.color}44`,
-                boxShadow: `0 0 30px ${ad.color}22`,
-              }}
-            >
-              <div className="flex items-start gap-4 md:gap-6">
-                {/* Imagen del anuncio */}
-                <div
-                  className="w-16 h-16 md:w-20 md:h-20 rounded-2xl overflow-hidden flex-shrink-0"
-                  style={{ boxShadow: `0 0 20px ${ad.color}66` }}
+            {/* Imagen de fondo ocupando todo el contenedor */}
+            <img
+              src={ad.image}
+              alt={ad.subtitle}
+              className="absolute inset-0 w-full h-full object-cover rounded-3xl"
+            />
+            {/* Capa oscura semitransparente para que el texto sea legible */}
+            <div className="absolute inset-0 bg-black/50 rounded-3xl"></div>
+
+            {/* Texto superpuesto */}
+            <div className="relative z-10 h-full flex flex-col justify-end p-6 md:p-8 lg:p-12">
+              <div className="max-w-xl">
+                <p
+                  className="text-xs md:text-sm font-bold tracking-wider uppercase mb-2"
+                  style={{ color: ad.color }}
                 >
-                  <img
-                    src={ad.image}
-                    alt={ad.subtitle}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <p
-                    className="text-xs md:text-sm font-bold tracking-wider uppercase mb-1"
-                    style={{ color: ad.color }}
-                  >
-                    {ad.title}
-                  </p>
-                  <h2 className="text-2xl md:text-3xl lg:text-4xl font-black text-white mb-2 truncate">
-                    {ad.subtitle}
-                  </h2>
-                  <p className="text-slate-400 text-sm md:text-base max-w-lg">
-                    {ad.description}
-                  </p>
-                </div>
-
-                {/* Flecha discreta para indicar que es clicable */}
-                <div className="hidden sm:flex items-center flex-shrink-0">
-                  <i className="fas fa-arrow-right text-slate-600 text-2xl"></i>
-                </div>
+                  {ad.title}
+                </p>
+                <h2 className="text-2xl md:text-3xl lg:text-4xl font-black text-white mb-2">
+                  {ad.subtitle}
+                </h2>
+                <p className="text-slate-300 text-sm md:text-base">
+                  {ad.description}
+                </p>
               </div>
             </div>
           </a>
         ))}
 
-        {/* Indicadores de slide */}
+        {/* Indicadores de slide (puntos) */}
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex gap-2">
           {ads.map((_, idx) => (
             <button
