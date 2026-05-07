@@ -79,7 +79,7 @@ export default function Home() {
             <img
               src={ad.image}
               alt={ad.subtitle}
-              className="absolute inset-0 w-full h-full object-contain md:object-cover rounded-3xl"
+              className="absolute inset-0 w-full h-full object-contain md:object-cover"
             />
             {/* Capa oscura semitransparente para que el texto sea legible */}
             <div className="absolute inset-0 bg-black/20 rounded-3xl"></div>
