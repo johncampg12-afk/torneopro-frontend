@@ -114,7 +114,7 @@ export default function PublicTournament() {
               <img
                 src="/torneo-trend-sport.png"
                 alt="Torneos TrendSport"
-                className="w-9 h-9 rounded-lg object-contain"
+                className="w-14 h-14 rounded-lg object-contain"
               />
               <span className="font-bold text-lg md:text-xl tracking-tight">
                 Torneos<span className="gradient-text">TrendSport</span>
