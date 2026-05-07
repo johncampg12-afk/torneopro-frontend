@@ -16,7 +16,7 @@ export default function Navbar() {
               <i className="fas fa-trophy text-white text-sm"></i>
             </div>
             <span className="font-bold text-xl tracking-tight">
-              Torneo<span className="gradient-text">Pro</span>
+              Torneos<span className="gradient-text">TrendSport</span>
             </span>
           </Link>
 

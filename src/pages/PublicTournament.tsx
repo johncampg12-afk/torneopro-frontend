@@ -390,8 +390,8 @@ export default function PublicTournament() {
 
       <footer className="border-t border-slate-800/50 mt-12 md:mt-20 py-6 md:py-8">
         <div className="max-w-7xl mx-auto px-4 text-center text-slate-600 text-sm">
-          <p>TorneoPro · Gestor de Torneos 100% Gratuito</p>
-          <Link to="/" className="text-primary-400 hover:text-primary-300 mt-2 inline-block">Crea tu propio torneo gratis</Link>
+          <p>Torneos TrendSport · Gestor de Torneos</p>
+          <Link to="/" className="text-primary-400 hover:text-primary-300 mt-2 inline-block">Crea tu propio torneo con nosotros</Link>
         </div>
       </footer>
     </div>

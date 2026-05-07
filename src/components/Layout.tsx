@@ -16,7 +16,7 @@ export default function Layout() {
       {!isPublicView && (
         <footer className="border-t border-slate-800/50 mt-12 md:mt-20 py-6 md:py-8">
           <div className="max-w-7xl mx-auto px-4 text-center text-slate-600 text-sm">
-            <p className="mb-1">TorneoPro · Gestor de Torneos 100% Gratuito</p>
+            <p className="mb-1">Torneos TrendSport · Gestor de Torneos</p>
             <p>Crea, gestiona y comparte tus campeonatos deportivos</p>
           </div>
         </footer>
