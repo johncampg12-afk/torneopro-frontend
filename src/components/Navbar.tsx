@@ -12,9 +12,11 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center">
-              <i className="fas fa-trophy text-white text-sm"></i>
-            </div>
+            <img
+              src="/torneo-trend-sport.png"
+              alt="Torneos TrendSport"
+              className="w-9 h-9 rounded-lg object-contain"
+            />
             <span className="font-bold text-xl tracking-tight">
               Torneos<span className="gradient-text">TrendSport</span>
             </span>
