@@ -15,7 +15,7 @@ export default function Navbar() {
             <img
               src="/torneo-trend-sport.png"
               alt="Torneos TrendSport"
-              className="w-9 h-9 rounded-lg object-contain"
+              className="w-12 h-12 rounded-lg object-contain"
             />
             <span className="font-bold text-xl tracking-tight">
               Torneos<span className="gradient-text">TrendSport</span>
