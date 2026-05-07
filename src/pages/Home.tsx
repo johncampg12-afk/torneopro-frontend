@@ -40,7 +40,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [currentAd, setCurrentAd] = useState(0);
 
-  // Rotación automática cada 3 segundos
+  // Rotación automática cada 4 segundos
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentAd((prev) => (prev + 1) % ads.length);
@@ -63,7 +63,7 @@ export default function Home() {
 
   return (
     <div className="animate-fade-in">
-      {/* Carrusel de publicidad con imagen a pantalla completa */}
+      {/* Carrusel de publicidad con imagen a pantalla completa y bordes redondeados */}
       <div className="relative overflow-hidden rounded-3xl mb-8 h-64 md:h-72 lg:h-80">
         {ads.map((ad, index) => (
           <a
@@ -71,20 +71,20 @@ export default function Home() {
             href={ad.link}
             target="_blank"
             rel="noopener noreferrer"
-            className={`absolute inset-0 transition-opacity duration-700 overflow-hidden rounded-3xl ${
+            className={`absolute inset-0 transition-opacity duration-700 overflow-hidden rounded-3xl bg-gray-900 ${
               index === currentAd ? 'opacity-100 z-10' : 'opacity-0 z-0'
             }`}
           >
-            {/* Imagen de fondo ocupando todo el contenedor */}
+            {/* Imagen de fondo que ocupa todo el contenedor */}
             <img
               src={ad.image}
               alt={ad.subtitle}
               className="absolute inset-0 w-full h-full object-contain md:object-cover"
             />
-            {/* Capa oscura semitransparente para que el texto sea legible */}
-            <div className="absolute inset-0 bg-black/20 rounded-3xl"></div>
+            {/* Capa oscura semitransparente para mejorar la legibilidad del texto */}
+            <div className="absolute inset-0 bg-black/20"></div>
 
-            {/* Texto superpuesto */}
+            {/* Texto superpuesto en la parte inferior */}
             <div className="relative z-10 h-full flex flex-col justify-end p-6 md:p-8 lg:p-12">
               <div className="max-w-xl">
                 <p
@@ -120,7 +120,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Stats (sin cambios) */}
+      {/* Estadísticas */}
       <div className="grid grid-cols-3 gap-3 md:gap-4 mb-8">
         {stats.map(s => (
           <div key={s.label} className="glass p-3 md:p-5 text-center">
@@ -131,7 +131,7 @@ export default function Home() {
         ))}
       </div>
 
-      {/* Torneos Públicos (sin cambios) */}
+      {/* Torneos Públicos */}
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-xl md:text-2xl font-bold">Torneos Públicos</h2>
         <span className="text-sm text-slate-500">{publicTournaments.length} torneos</span>
