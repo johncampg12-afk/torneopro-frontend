@@ -51,7 +51,7 @@ export default function Home() {
 
   return (
     <div className="animate-fade-in">
-      {/* Carrusel de publicidad solo imágenes */}
+      {/* Carrusel de publicidad con solo imágenes (sin puntos) */}
       <div className="relative overflow-hidden rounded-3xl mb-8 h-64 md:h-72 lg:h-80">
         {ads.map((ad, index) => (
           <a
@@ -70,21 +70,7 @@ export default function Home() {
             />
           </a>
         ))}
-
-        {/* Indicadores de slide (puntos) */}
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex gap-2">
-          {ads.map((_, idx) => (
-            <button
-              key={idx}
-              onClick={() => setCurrentAd(idx)}
-              className={`w-2 h-2 md:w-3 md:h-3 rounded-full transition-all ${
-                idx === currentAd
-                  ? 'bg-white shadow-[0_0_8px_rgba(255,255,255,0.6)] scale-125'
-                  : 'bg-slate-600 hover:bg-slate-400'
-              }`}
-            />
-          ))}
-        </div>
+        {/* Los puntos indicadores han sido eliminados */}
       </div>
 
       {/* Estadísticas */}
@@ -116,7 +102,12 @@ export default function Home() {
         </div>
       ) : publicTournaments.length === 0 ? (
         <div className="text-center py-20 glass rounded-2xl">
-          <i className="fas fa-trophy text-4xl text-slate-700 mb-4"></i>
+          {/* Imagen de escudo en lugar del icono de copa */}
+          <img
+            src="/torneo-trend-sport.png"
+            alt="Escudo"
+            className="w-16 h-16 mx-auto mb-4 object-contain"
+          />
           <h3 className="text-xl font-bold text-slate-400 mb-2">No hay torneos públicos aún</h3>
           <p className="text-slate-600 mb-6">Sé el primero en crear uno</p>
           <Link to={user ? "/tournaments/create" : "/register"} className="btn-primary">
