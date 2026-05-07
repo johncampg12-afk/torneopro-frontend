@@ -79,10 +79,10 @@ export default function Home() {
             <img
               src={ad.image}
               alt={ad.subtitle}
-              className="absolute inset-0 w-full h-full object-cover rounded-3xl"
+              className="absolute inset-0 w-full h-full object-contain md:object-cover rounded-3xl"
             />
             {/* Capa oscura semitransparente para que el texto sea legible */}
-            <div className="absolute inset-0 bg-black/30 rounded-3xl"></div>
+            <div className="absolute inset-0 bg-black/10 rounded-3xl"></div>
 
             {/* Texto superpuesto */}
             <div className="relative z-10 h-full flex flex-col justify-end p-6 md:p-8 lg:p-12">
