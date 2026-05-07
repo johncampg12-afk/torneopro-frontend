@@ -3,33 +3,21 @@ import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
 
-// Datos del carrusel de publicidad
+// Datos del carrusel de publicidad (solo imágenes)
 const ads = [
   {
     id: 1,
-    title: 'Clínica Dental',
-    subtitle: 'Dental Fresh Plus',
-    description: 'Reserva tu Sonrisa. Primera consulta gratis',
     image: '/sponsors/dental-fresh-plus-hrz.jpeg',
-    color: '#16f99a',
     link: '#',
   },
   {
     id: 2,
-    title: 'Tienda de ropa TrendSport',
-    subtitle: 'Trend Sport',
-    description: 'Atrévete a vestir diferente',
     image: '/sponsors/trend-sport-hrz.png',
-    color: '#e87400',
     link: '#',
   },
   {
     id: 3,
-    title: 'Clínica Deportiva «FisioSport»',
-    subtitle: 'Recuperación y masajes',
-    description: 'Primera sesión gratuita mostrando este anuncio',
     image: '/sponsors/EMPRENDE-CONMIGO-TREND-SPORT.png',
-    color: '#3b82f6',
     link: '#',
   },
 ];
@@ -63,7 +51,7 @@ export default function Home() {
 
   return (
     <div className="animate-fade-in">
-      {/* Carrusel de publicidad con imagen a pantalla completa y bordes redondeados */}
+      {/* Carrusel de publicidad solo imágenes */}
       <div className="relative overflow-hidden rounded-3xl mb-8 h-64 md:h-72 lg:h-80">
         {ads.map((ad, index) => (
           <a
@@ -75,32 +63,11 @@ export default function Home() {
               index === currentAd ? 'opacity-100 z-10' : 'opacity-0 z-0'
             }`}
           >
-            {/* Imagen de fondo que ocupa todo el contenedor */}
             <img
               src={ad.image}
-              alt={ad.subtitle}
+              alt="Anuncio patrocinador"
               className="absolute inset-0 w-full h-full object-contain md:object-cover"
             />
-            {/* Capa oscura semitransparente para mejorar la legibilidad del texto */}
-            <div className="absolute inset-0 bg-black/20"></div>
-
-            {/* Texto superpuesto en la parte inferior */}
-            <div className="relative z-10 h-full flex flex-col justify-end p-6 md:p-8 lg:p-12">
-              <div className="max-w-xl">
-                <p
-                  className="text-xs md:text-sm font-bold tracking-wider uppercase mb-2"
-                  style={{ color: ad.color }}
-                >
-                  {ad.title}
-                </p>
-                <h2 className="text-2xl md:text-3xl lg:text-4xl font-black text-white mb-2">
-                  {ad.subtitle}
-                </h2>
-                <p className="text-slate-300 text-sm md:text-base">
-                  {ad.description}
-                </p>
-              </div>
-            </div>
           </a>
         ))}
 
