@@ -120,7 +120,7 @@ export default function PublicTournament() {
                 Torneos<span className="gradient-text">TrendSport</span>
               </span>
             </Link>
-            <span className="text-xs text-slate-500">Vista pública · Solo lectura</span>
+            <span className="text-xs text-slate-500">Vista pública</span>
           </div>
         </div>
       </div>
