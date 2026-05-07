@@ -50,6 +50,10 @@ export default function TournamentDetail() {
   // Eventos de partido
   const [matchEvents, setMatchEvents] = useState<any[]>([]);
   const [newEvent, setNewEvent] = useState({ playerId: '', type: 'GOAL', minute: '' });
+  // Edición de eventos
+  const [editingEventId, setEditingEventId] = useState<string | null>(null);
+  const [editEventType, setEditEventType] = useState('');
+  const [editEventMinute, setEditEventMinute] = useState('');
 
   // Máximos goleadores
   const [topScorers, setTopScorers] = useState<any[]>([]);
@@ -285,9 +289,31 @@ export default function TournamentDetail() {
     } catch {}
   };
 
+  const handleSaveEditEvent = async (eventId: string) => {
+    if (!editEventType) return;
+    try {
+      await api.patch(`/matches/events/${eventId}`, {
+        type: editEventType,
+        minute: editEventMinute ? parseInt(editEventMinute) : null,
+      });
+      const res = await api.get(`/matches/${editMatch.id}/events`);
+      setMatchEvents(res.data);
+      setEditingEventId(null);
+    } catch {}
+  };
+
+  const handleDeleteEvent = async (eventId: string) => {
+    if (!confirm('¿Eliminar este evento?')) return;
+    try {
+      await api.delete(`/matches/events/${eventId}`);
+      const res = await api.get(`/matches/${editMatch.id}/events`);
+      setMatchEvents(res.data);
+    } catch {}
+  };
+
   return (
     <div className="animate-fade-in">
-      {/* Header sin cambios */}
+      {/* Header */}
       <div className="glass rounded-2xl p-4 md:p-6 mb-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
@@ -350,7 +376,7 @@ export default function TournamentDetail() {
         ))}
       </div>
 
-      {/* ==================== Fixture (con escudos) ==================== */}
+      {/* Fixture */}
       {tab === 'fixture' && (
         <div className="space-y-6 animate-fade-in">
           {tournament.rounds.map((round: any) => (
@@ -404,7 +430,7 @@ export default function TournamentDetail() {
         </div>
       )}
 
-      {/* ==================== Standings (con escudos) ==================== */}
+      {/* Standings */}
       {tab === 'standings' && (
         <div className="glass rounded-2xl overflow-hidden animate-fade-in">
           <div className="overflow-x-auto">
@@ -443,7 +469,7 @@ export default function TournamentDetail() {
         </div>
       )}
 
-      {/* ==================== Teams (editar equipos, escudo y jugadores) – sin cambios ==================== */}
+      {/* Teams (editar equipos, escudo y jugadores) */}
       {tab === 'teams' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-fade-in">
           {tournament.teams.map((team: any) => {
@@ -532,7 +558,7 @@ export default function TournamentDetail() {
         </div>
       )}
 
-      {/* ==================== Stats (con escudos en gráficos) ==================== */}
+      {/* Stats */}
       {tab === 'stats' && (
         <>
           <div className="grid md:grid-cols-2 gap-6 animate-fade-in">
@@ -636,7 +662,7 @@ export default function TournamentDetail() {
         </>
       )}
 
-      {/* ==================== Modal Editar Partido (con escudos) ==================== */}
+      {/* Modal Editar Partido con edición/eliminación de eventos */}
       {editMatch && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-2 md:p-4 animate-fade-in">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setEditMatch(null)}></div>
@@ -670,7 +696,7 @@ export default function TournamentDetail() {
                 <div className="font-bold text-sm md:text-base">{getTeam(editMatch.awayTeamId).name}</div>
               </div>
             </div>
-            {/* Resto del modal (marcador, fecha, eventos) */}
+            {/* Marcador y datos */}
             <div className="grid grid-cols-2 gap-4 mb-6">
               <div>
                 <label className="block text-sm text-slate-400 mb-2 text-center">Local</label>
@@ -698,16 +724,56 @@ export default function TournamentDetail() {
               <input type="text" defaultValue={editMatch.location || ''} id="matchLocation" placeholder="Cancha, estadio, etc." className="input-dark" />
             </div>
 
-            {/* Eventos del partido */}
+            {/* Eventos del partido con editar/eliminar */}
             <div className="mb-6">
               <h4 className="text-sm font-medium text-slate-400 mb-2">Eventos</h4>
               {matchEvents.length === 0 && <p className="text-xs text-slate-500">Sin eventos registrados</p>}
               {matchEvents.map(ev => (
-                <div key={ev.id} className="flex items-center gap-2 text-sm py-1">
-                  <span className="text-xs text-slate-500">{ev.minute ? `${ev.minute}'` : ''}</span>
-                  <span className="text-xs font-medium">{ev.player.name}</span>
-                  <span className="text-xs px-1.5 py-0.5 rounded bg-slate-800">{ev.type}</span>
-                </div>
+                editingEventId === ev.id ? (
+                  <div key={ev.id} className="flex items-center gap-2 text-xs py-1">
+                    <input
+                      type="number"
+                      value={editEventMinute}
+                      onChange={e => setEditEventMinute(e.target.value)}
+                      placeholder="Min."
+                      className="w-12 bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-white"
+                    />
+                    <select
+                      value={editEventType}
+                      onChange={e => setEditEventType(e.target.value)}
+                      className="bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-white"
+                    >
+                      <option value="GOAL">⚽ Gol</option>
+                      <option value="ASSIST">🅰️ Asist.</option>
+                      <option value="YELLOW_CARD">🟨 Amar.</option>
+                      <option value="RED_CARD">🟥 Roja</option>
+                    </select>
+                    <button onClick={() => handleSaveEditEvent(ev.id)} className="text-green-400 hover:text-green-300">
+                      <i className="fas fa-check"></i>
+                    </button>
+                    <button onClick={() => setEditingEventId(null)} className="text-slate-400 hover:text-white">
+                      <i className="fas fa-times"></i>
+                    </button>
+                  </div>
+                ) : (
+                  <div key={ev.id} className="flex items-center gap-2 text-sm py-1 group">
+                    <span className="text-xs text-slate-500">{ev.minute ? `${ev.minute}'` : ''}</span>
+                    <span className="text-xs font-medium">{ev.player.name}</span>
+                    <span className="text-xs px-1.5 py-0.5 rounded bg-slate-800">{ev.type}</span>
+                    <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                      <button onClick={() => {
+                        setEditingEventId(ev.id);
+                        setEditEventType(ev.type);
+                        setEditEventMinute(ev.minute ?? '');
+                      }} className="text-slate-500 hover:text-primary-400" title="Editar">
+                        <i className="fas fa-pen text-xs"></i>
+                      </button>
+                      <button onClick={() => handleDeleteEvent(ev.id)} className="text-slate-500 hover:text-red-400" title="Eliminar">
+                        <i className="fas fa-trash text-xs"></i>
+                      </button>
+                    </div>
+                  </div>
+                )
               ))}
               <div className="mt-3 grid grid-cols-3 gap-2">
                 <select value={newEvent.playerId} onChange={e => setNewEvent({...newEvent, playerId: e.target.value})}
