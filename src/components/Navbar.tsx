@@ -9,7 +9,7 @@ export default function Navbar() {
 
   return (
     <nav className="sticky top-0 z-40 glass border-b border-slate-800/50 mt-3">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center gap-3">
             <img
@@ -54,7 +54,7 @@ export default function Navbar() {
       </div>
 
       {mobileOpen && (
-        <div className="md:hidden glass border-t border-slate-800/50 px-4 py-4 space-y-1 animate-fade-in">
+        <div className="md:hidden glass border-t border-slate-800/50 px-3 py-4 space-y-1 animate-fade-in">
           <Link to="/" onClick={() => setMobileOpen(false)} className="block text-slate-400 hover:text-white py-3 px-2 rounded-lg">Inicio</Link>
           {user ? (
             <>
