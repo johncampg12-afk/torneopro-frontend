@@ -9,15 +9,15 @@ export default function Navbar() {
 
   return (
     <nav className="sticky top-0 z-40 glass border-b border-slate-800/50 mt-3">
-      <div className="max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 relative">
-        <div className="flex items-center justify-center md:justify-between h-16">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center gap-3">
             <img
               src="/torneo-trend-sport.png"
               alt="Torneos TrendSport"
-              className="w-16 h-16 rounded-lg object-contain"
+              className="w-14 h-14 rounded-lg object-contain"
             />
-            <span className="font-bold text-xl tracking-tight">
+            <span className="font-bold text-xl tracking-tight leading-none">
               Torneos<span className="gradient-text">TrendSport</span>
             </span>
           </Link>
@@ -47,10 +47,7 @@ export default function Navbar() {
             )}
           </div>
 
-          <button
-            onClick={() => setMobileOpen(!mobileOpen)}
-            className="md:hidden absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
-          >
+          <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden text-slate-400 hover:text-white">
             <i className={`fas ${mobileOpen ? 'fa-times' : 'fa-bars'} text-xl`}></i>
           </button>
         </div>
