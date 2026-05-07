@@ -10,7 +10,7 @@ const ads = [
     title: 'Clínica Dental',
     subtitle: 'Dental Fresh Plus',
     description: 'Reserva tu Sonrisa. Primera consulta gratis',
-    image: '/sponsors/dental-fresh-plus-hrz1.jpeg',
+    image: '/sponsors/dental-fresh-plus-hrz.jpeg',
     color: '#16f99a',
     link: '#',
   },
@@ -71,7 +71,7 @@ export default function Home() {
             href={ad.link}
             target="_blank"
             rel="noopener noreferrer"
-            className={`absolute inset-0 transition-opacity duration-700 ${
+            className={`absolute inset-0 transition-opacity duration-700 overflow-hidden rounded-3xl ${
               index === currentAd ? 'opacity-100 z-10' : 'opacity-0 z-0'
             }`}
           >
