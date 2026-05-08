@@ -10,7 +10,7 @@ const ads = [
   { id: 3, image: '/sponsors/igana.png', link: 'https://www.igpro-analyzer.com/' },
   { id: 4, image: '/sponsors/dental.jpeg', link: '#' },
   { id: 5, image: '/sponsors/EMPRENDE-CONMIGO-TREND-SPORT.png', link: '#' },
-  { id: 6, image: '/sponsors/trend-sport-logo.png', link: '#' },
+  { id: 6, image: '/sponsors/trend-sport-logo.jpeg', link: '#' },
   { id: 7, image: '/sponsors/ig.png', link: 'https://www.igpro-analyzer.com/' },
 ];
 
