@@ -10,6 +10,8 @@ const ads = [
   { id: 3, image: '/sponsors/EMPRENDE-CONMIGO-TREND-SPORT.png', link: '#' },
   { id: 4, image: '/sponsors/trend-sport-logo.jpeg', link: '#' },
   { id: 5, image: '/sponsors/dental.jpeg', link: '#' },
+  { id: 6, image: '/sponsors/igana.jpeg', link: '#' },
+  { id: 7, image: '/sponsors/ig.jpeg', link: '#' },
 ];
 
 export default function Home() {
