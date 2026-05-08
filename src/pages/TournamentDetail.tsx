@@ -23,6 +23,15 @@ const TeamBadge = ({ team, size = 'md' }: { team: any; size?: 'sm' | 'md' | 'lg'
   );
 };
 
+// Animación de confeti
+const confettiPieces = Array.from({ length: 60 }).map((_, i) => ({
+  id: i,
+  color: ['#f97316', '#10b981', '#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6'][i % 6],
+  left: Math.random() * 100,
+  delay: Math.random() * 2,
+  duration: 2 + Math.random() * 3,
+}));
+
 export default function TournamentDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -57,6 +66,10 @@ export default function TournamentDetail() {
 
   // Máximos goleadores
   const [topScorers, setTopScorers] = useState<any[]>([]);
+
+  // Animación del campeón
+  const [showChampion, setShowChampion] = useState(false);
+  const [championTeam, setChampionTeam] = useState<any>(null);
 
   const standings = useMemo(() => {
     if (!tournament) return [];
@@ -176,6 +189,25 @@ export default function TournamentDetail() {
       await api.patch(`/matches/${editMatch.id}`, { homeScore, awayScore, date, time, location });
       const res = await api.get(`/tournaments/${id}`);
       setTournament(res.data);
+
+      // Detectar si es la final y hay un ganador para mostrar animación
+      const updatedMatch = res.data.rounds
+        .flatMap((r: any) => r.matches)
+        .find((m: any) => m.id === editMatch.id);
+      if (
+        updatedMatch &&
+        updatedMatch.played &&
+        updatedMatch.round?.name === 'Final' &&
+        updatedMatch.winnerId
+      ) {
+        const winner = res.data.teams.find((t: any) => t.id === updatedMatch.winnerId);
+        if (winner) {
+          setChampionTeam(winner);
+          setShowChampion(true);
+          setTimeout(() => setShowChampion(false), 7000);
+        }
+      }
+
       setEditMatch(null);
     } catch {}
   };
@@ -313,6 +345,41 @@ export default function TournamentDetail() {
 
   return (
     <div className="animate-fade-in">
+      {/* Overlay de campeón */}
+      {showChampion && championTeam && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-end pb-16 animate-fade-in">
+          {/* Confeti */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            {confettiPieces.map(p => (
+              <div
+                key={p.id}
+                className="absolute w-3 h-3 rounded-full"
+                style={{
+                  backgroundColor: p.color,
+                  left: `${p.left}%`,
+                  top: '-10px',
+                  animation: `confetti-fall ${p.duration}s ${p.delay}s ease-in infinite`,
+                }}
+              />
+            ))}
+          </div>
+          {/* Contenedor del campeón */}
+          <div className="relative z-10 glass p-8 md:p-12 rounded-3xl text-center max-w-sm mx-4">
+            <div className="text-5xl md:text-7xl mb-4">🏆</div>
+            {championTeam.logo ? (
+              <img src={championTeam.logo} alt={championTeam.name} className="w-32 h-32 md:w-40 md:h-40 rounded-2xl object-cover mx-auto mb-4 border-4 border-yellow-500 shadow-lg shadow-yellow-500/30" />
+            ) : (
+              <div className="w-32 h-32 md:w-40 md:h-40 rounded-2xl mx-auto mb-4 flex items-center justify-center text-5xl font-black text-white" style={{ backgroundColor: championTeam.color }}>
+                {championTeam.name.substring(0, 2).toUpperCase()}
+              </div>
+            )}
+            <h2 className="text-3xl md:text-4xl font-black text-white mb-1">{championTeam.name}</h2>
+            <p className="text-slate-400 text-lg">¡Campeón!</p>
+          </div>
+          <button onClick={() => setShowChampion(false)} className="mt-6 text-white/60 hover:text-white text-sm">Cerrar</button>
+        </div>
+      )}
+
       {/* Header */}
       <div className="glass rounded-2xl p-4 md:p-6 mb-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
