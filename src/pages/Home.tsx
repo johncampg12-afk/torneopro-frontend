@@ -5,21 +5,9 @@ import { useAuth } from '../contexts/AuthContext';
 
 // Datos del carrusel de publicidad (solo imágenes)
 const ads = [
-  {
-    id: 1,
-    image: '/sponsors/dental-fresh-plus-hrz.jpeg',
-    link: '#',
-  },
-  {
-    id: 2,
-    image: '/sponsors/trend-sport-hrz.png',
-    link: '#',
-  },
-  {
-    id: 3,
-    image: '/sponsors/EMPRENDE-CONMIGO-TREND-SPORT.png',
-    link: '#',
-  },
+  { id: 1, image: '/sponsors/dental-fresh-plus-hrz.jpeg', link: '#' },
+  { id: 2, image: '/sponsors/trend-sport-hrz.png', link: '#' },
+  { id: 3, image: '/sponsors/EMPRENDE-CONMIGO-TREND-SPORT.png', link: '#' },
 ];
 
 export default function Home() {
@@ -27,8 +15,9 @@ export default function Home() {
   const [publicTournaments, setPublicTournaments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentAd, setCurrentAd] = useState(0);
+  const [allTeams, setAllTeams] = useState<any[]>([]);
 
-  // Rotación automática cada 4 segundos
+  // Rotación de publicidad
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentAd((prev) => (prev + 1) % ads.length);
@@ -38,7 +27,21 @@ export default function Home() {
 
   useEffect(() => {
     api.get('/tournaments/public')
-      .then(res => setPublicTournaments(res.data))
+      .then(res => {
+        setPublicTournaments(res.data);
+        // Extraer todos los equipos de torneos públicos
+        const teams = res.data.flatMap((t: any) =>
+          (t.teams || []).map((team: any) => ({
+            ...team,
+            tournamentName: t.name,
+          }))
+        );
+        // Eliminar duplicados por id (si un mismo equipo está en varios torneos)
+        const unique = teams.filter((v: any, i: number, a: any[]) =>
+          a.findIndex((t: any) => t.id === v.id) === i
+        );
+        setAllTeams(unique);
+      })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
@@ -51,7 +54,7 @@ export default function Home() {
 
   return (
     <div className="animate-fade-in">
-      {/* Carrusel de publicidad con solo imágenes (sin puntos) */}
+      {/* Carrusel de publicidad */}
       <div className="relative overflow-hidden rounded-3xl mb-8 h-64 md:h-72 lg:h-80">
         {ads.map((ad, index) => (
           <a
@@ -70,8 +73,42 @@ export default function Home() {
             />
           </a>
         ))}
-        {/* Los puntos indicadores han sido eliminados */}
       </div>
+
+      {/* Carrusel de equipos estilo pasarela */}
+      {allTeams.length > 0 && (
+        <div className="mb-8">
+          <h3 className="text-sm font-medium text-slate-400 mb-3 uppercase tracking-wider text-center">
+            Equipos participantes
+          </h3>
+          <div className="relative overflow-hidden glass py-3 rounded-2xl">
+            <div className="flex animate-marquee">
+              {/* Primera copia de los equipos */}
+              {allTeams.map(team => (
+                <div key={team.id} className="flex items-center gap-3 mx-6 flex-shrink-0">
+                  {team.logo ? (
+                    <img src={team.logo} alt={team.name} className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover border border-slate-700" />
+                  ) : (
+                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-full" style={{ backgroundColor: team.color || '#3b82f6' }}></div>
+                  )}
+                  <span className="text-sm md:text-base font-semibold whitespace-nowrap">{team.name}</span>
+                </div>
+              ))}
+              {/* Segunda copia para continuidad infinita */}
+              {allTeams.map(team => (
+                <div key={`dup-${team.id}`} className="flex items-center gap-3 mx-6 flex-shrink-0">
+                  {team.logo ? (
+                    <img src={team.logo} alt={team.name} className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover border border-slate-700" />
+                  ) : (
+                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-full" style={{ backgroundColor: team.color || '#3b82f6' }}></div>
+                  )}
+                  <span className="text-sm md:text-base font-semibold whitespace-nowrap">{team.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Estadísticas */}
       <div className="grid grid-cols-3 gap-3 md:gap-4 mb-8">
@@ -102,12 +139,7 @@ export default function Home() {
         </div>
       ) : publicTournaments.length === 0 ? (
         <div className="text-center py-20 glass rounded-2xl">
-          {/* Imagen de escudo en lugar del icono de copa */}
-          <img
-            src="/torneo-trend-sport.png"
-            alt="Escudo"
-            className="w-16 h-16 mx-auto mb-4 object-contain"
-          />
+          <img src="/torneo-trend-sport.png" alt="Escudo" className="w-16 h-16 mx-auto mb-4 object-contain" />
           <h3 className="text-xl font-bold text-slate-400 mb-2">No hay torneos públicos aún</h3>
           <p className="text-slate-600 mb-6">Sé el primero en crear uno</p>
           <Link to={user ? "/tournaments/create" : "/register"} className="btn-primary">
