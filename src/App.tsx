@@ -8,6 +8,9 @@ import Dashboard from './pages/Dashboard';
 import TournamentCreate from './pages/TournamentCreate';
 import TournamentDetail from './pages/TournamentDetail';
 import PublicTournament from './pages/PublicTournament';
+import AvisoLegal from './pages/AvisoLegal';
+import PoliticaPrivacidad from './pages/PoliticaPrivacidad';
+import TerminosCondiciones from './pages/TerminosCondiciones';
 
 function App() {
   return (
@@ -21,6 +24,9 @@ function App() {
           <Route path="tournaments/create" element={<TournamentCreate />} />
           <Route path="tournaments/:id" element={<TournamentDetail />} />
           <Route path="t/:shareCode" element={<PublicTournament />} />
+          <Route path="aviso-legal" element={<AvisoLegal />} />
+          <Route path="politica-privacidad" element={<PoliticaPrivacidad />} />
+          <Route path="terminos-condiciones" element={<TerminosCondiciones />} />
         </Route>
       </Routes>
     </AuthProvider>
