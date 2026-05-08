@@ -17,11 +17,11 @@ export default function Layout() {
         <footer className="border-t border-slate-800/50 mt-12 md:mt-20 py-6 md:py-8">
           <div className="max-w-7xl mx-auto px-4 text-center text-slate-500 text-sm space-y-2">
             <div className="flex justify-center gap-4 flex-wrap">
-              <Link to="/aviso-legal" className="hover:text-white transition-colors">Aviso Legal</Link>
-              <Link to="/politica-privacidad" className="hover:text-white transition-colors">Política de Privacidad</Link>
-              <Link to="/terminos-condiciones" className="hover:text-white transition-colors">Términos</Link>
+              <Link to="/AvisoLegal" className="hover:text-white transition-colors">Aviso Legal</Link>
+              <Link to="/PoliticaPrivacidad" className="hover:text-white transition-colors">Política de Privacidad</Link>
+              <Link to="/TerminosCondiciones" className="hover:text-white transition-colors">Términos</Link>
             </div>
-            <p>Torneos TrendSport · Gestor de Torneos 100% Gratuito</p>
+            <p>Torneos TrendSport · Gestor de Torneos</p>
           </div>
         </footer>
       )}
