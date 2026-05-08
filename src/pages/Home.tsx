@@ -26,7 +26,7 @@ export default function Home() {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentAd((prev) => (prev + 1) % ads.length);
-    }, 4000);
+    }, 3000);
     return () => clearInterval(interval);
   }, []);
 
