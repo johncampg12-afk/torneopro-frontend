@@ -8,6 +8,7 @@ const ads = [
   { id: 1, image: '/sponsors/dental-fresh-plus-hrz.jpeg', link: '#' },
   { id: 2, image: '/sponsors/trend-sport-hrz.png', link: '#' },
   { id: 3, image: '/sponsors/EMPRENDE-CONMIGO-TREND-SPORT.png', link: '#' },
+  { id: 3, image: '/sponsors/trend-sport-logo.png', link: '#' },
 ];
 
 export default function Home() {
