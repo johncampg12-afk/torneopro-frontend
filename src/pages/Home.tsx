@@ -5,13 +5,14 @@ import { useAuth } from '../contexts/AuthContext';
 
 // Datos del carrusel de publicidad (solo imágenes)
 const ads = [
-  { id: 1, image: '/sponsors/dental-fresh-plus-hrz.jpeg', link: '#' },
-  { id: 2, image: '/sponsors/trend-sport-hrz.png', link: '#' },
+  { id: 1, image: '/sponsors/dental-fresh-plus-hrz.jpeg', link: '' },
+  { id: 2, image: '/sponsors/trend-sport-hrz.png', link: '' },
   { id: 3, image: '/sponsors/igana.png', link: 'https://www.igpro-analyzer.com/' },
-  { id: 4, image: '/sponsors/dental.jpeg', link: '#' },
-  { id: 5, image: '/sponsors/EMPRENDE-CONMIGO-TREND-SPORT.png', link: '#' },
-  { id: 6, image: '/sponsors/trend-sport-logo.jpeg', link: '#' },
-  { id: 7, image: '/sponsors/ig.png', link: 'https://www.igpro-analyzer.com/' },
+  { id: 4, image: '/sponsors/anentBanner.png', link: '' },
+  { id: 5, image: '/sponsors/dental.jpeg', link: '' },
+  { id: 6, image: '/sponsors/EMPRENDE-CONMIGO-TREND-SPORT.png', link: '' },
+  { id: 7, image: '/sponsors/trend-sport-logo.jpeg', link: '' },
+  { id: 8, image: '/sponsors/ig.png', link: 'https://www.igpro-analyzer.com/' },
 ];
 
 export default function Home() {
