@@ -54,6 +54,8 @@ export default function PublicTournament() {
         home.played++; away.played++;
         home.gf += match.homeScore; home.ga += match.awayScore;
         away.gf += match.awayScore; away.ga += match.homeScore;
+        home.gd = home.gf - home.ga;
+        away.gd = away.gf - away.ga;
         if (match.homeScore > match.awayScore) {
           home.wins++; away.losses++;
           home.points += pts.win; away.points += pts.loss;
