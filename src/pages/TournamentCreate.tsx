@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
@@ -29,13 +29,28 @@ export default function TournamentCreate() {
     name: '', sport: 'futbol', format: 'liga', doubleRound: false,
     description: '', startDate: '', location: '', isPublic: true,
   });
-  // Cada equipo ahora incluye logo base64 (inicialmente null)
   const [teams, setTeams] = useState([{ name: '', color: colors[0], logo: null as string | null }]);
+
+  // Almacena el templateId asociado a cada equipo (por índice)
+  const [importTemplates, setImportTemplates] = useState<Record<string, string>>({});
+
+  // Plantillas
+  const [showTemplatesModal, setShowTemplatesModal] = useState(false);
+  const [userTemplates, setUserTemplates] = useState<any[]>([]);
 
   if (!user) {
     navigate('/login');
     return null;
   }
+
+  // Cargar plantillas cuando se abre el modal
+  useEffect(() => {
+    if (showTemplatesModal) {
+      api.get('/team-templates')
+        .then(res => setUserTemplates(res.data))
+        .catch(() => alert('Error al cargar las plantillas.'));
+    }
+  }, [showTemplatesModal]);
 
   const addTeam = () => setTeams([...teams, { name: '', color: colors[teams.length % colors.length], logo: null }]);
   const updateTeam = (idx: number, field: string, value: string) => {
@@ -47,7 +62,6 @@ export default function TournamentCreate() {
     if (teams.length > 2) setTeams(teams.filter((_, i) => i !== idx));
   };
 
-  // Convierte una imagen a base64 y la guarda en la propiedad logo del equipo
   const handleLogoChange = (idx: number, file: File) => {
     if (!file) return;
     if (file.size > 200000) {
@@ -62,7 +76,6 @@ export default function TournamentCreate() {
   };
 
   const handleCreate = async () => {
-    // Filtramos equipos con nombre y nos aseguramos de que logo sea string o null (no undefined)
     const validTeams = teams
       .filter(t => t.name.trim())
       .map(t => ({
@@ -77,7 +90,23 @@ export default function TournamentCreate() {
     setLoading(true);
     try {
       const res = await api.post('/tournaments', { ...data, teams: validTeams });
-      navigate(`/tournaments/${res.data.id}`);
+      const createdTournament = res.data;
+
+      // Importar jugadores desde plantillas a los equipos recién creados
+      for (const [indexStr, templateId] of Object.entries(importTemplates)) {
+        const teamIndex = parseInt(indexStr);
+        if (teamIndex < createdTournament.teams.length) {
+          const team = createdTournament.teams[teamIndex];
+          try {
+            await api.post(`/team-templates/${templateId}/import-to-team/${team.id}`);
+          } catch {
+            // Si falla la importación, no detenemos la navegación
+            console.error(`Error importando jugadores para el equipo ${team.name}`);
+          }
+        }
+      }
+
+      navigate(`/tournaments/${createdTournament.id}`);
     } catch (err: any) {
       alert(err.response?.data?.message || 'Error al crear torneo');
     } finally {
@@ -179,14 +208,30 @@ export default function TournamentCreate() {
         <div className="glass p-6 md:p-8 animate-fade-in">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-xl font-bold">Equipos ({teams.filter(t => t.name.trim()).length})</h3>
-            <button onClick={addTeam} className="btn-secondary text-sm">
-              <i className="fas fa-plus"></i> Agregar Equipo
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={async () => {
+                  try {
+                    const res = await api.get('/team-templates');
+                    if (res.data.length === 0) {
+                      alert('No tienes plantillas guardadas. Guarda un equipo desde un torneo primero.');
+                      return;
+                    }
+                    setShowTemplatesModal(true);
+                  } catch { alert('Error al cargar plantillas'); }
+                }}
+                className="btn-secondary text-sm"
+              >
+                <i className="fas fa-folder-open"></i> Cargar plantilla
+              </button>
+              <button onClick={addTeam} className="btn-secondary text-sm">
+                <i className="fas fa-plus"></i> Agregar Equipo
+              </button>
+            </div>
           </div>
           <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
             {teams.map((team, idx) => (
               <div key={idx} className="flex items-center gap-3 bg-slate-800/50 rounded-xl p-3 border border-slate-800">
-                {/* Previsualización del color o del logo */}
                 {team.logo ? (
                   <img src={team.logo} alt="escudo" className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
                 ) : (
@@ -202,7 +247,6 @@ export default function TournamentCreate() {
                       style={{ backgroundColor: c }}></button>
                   ))}
                 </div>
-                {/* Botón para subir logo */}
                 <div className="flex items-center">
                   <input
                     type="file"
@@ -274,6 +318,39 @@ export default function TournamentCreate() {
             <button onClick={handleCreate} disabled={loading} className="btn-accent">
               {loading ? <i className="fas fa-circle-notch fa-spin"></i> : <><i className="fas fa-check"></i> Crear Torneo</>}
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de plantillas */}
+      {showTemplatesModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowTemplatesModal(false)}>
+          <div className="bg-dark-900 p-6 rounded-2xl w-full max-w-lg max-h-96 overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <h3 className="text-xl font-bold mb-4">Selecciona una plantilla</h3>
+            {userTemplates.map(template => (
+              <div
+                key={template.id}
+                className="flex items-center justify-between p-3 hover:bg-slate-800 rounded-xl cursor-pointer"
+                onClick={() => {
+                  // Al seleccionar plantilla, guardamos el templateId para el nuevo equipo
+                  const newIndex = teams.length;
+                  setTeams([...teams, { name: template.name, color: template.color || colors[newIndex % colors.length], logo: template.logo || null }]);
+                  setImportTemplates(prev => ({ ...prev, [newIndex]: template.id }));
+                  setShowTemplatesModal(false);
+                }}
+              >
+                <div className="flex items-center gap-3">
+                  {template.logo ? (
+                    <img src={template.logo} className="w-8 h-8 rounded-full object-cover" />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full" style={{ backgroundColor: template.color || '#3b82f6' }}></div>
+                  )}
+                  <span className="font-medium">{template.name}</span>
+                </div>
+                <span className="text-xs text-slate-400">{template.players?.length || 0} jug.</span>
+              </div>
+            ))}
+            <button onClick={() => setShowTemplatesModal(false)} className="mt-4 btn-secondary w-full">Cancelar</button>
           </div>
         </div>
       )}

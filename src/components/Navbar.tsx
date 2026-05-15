@@ -59,6 +59,7 @@ export default function Navbar() {
           {user ? (
             <>
               <Link to="/dashboard" onClick={() => setMobileOpen(false)} className="block text-slate-400 hover:text-white py-3 px-2 rounded-lg">Mis Torneos</Link>
+              <Link to="/templates" className="text-slate-400 hover:text-white transition-colors font-medium">Plantillas</Link>
               <Link to="/tournaments/create" onClick={() => setMobileOpen(false)} className="block text-white bg-primary-600 py-3 px-2 rounded-lg text-center font-medium">Nuevo Torneo</Link>
               <button onClick={() => { logout(); navigate('/'); setMobileOpen(false); }} className="block w-full text-left text-red-400 py-3 px-2 rounded-lg">Cerrar sesión</button>
             </>

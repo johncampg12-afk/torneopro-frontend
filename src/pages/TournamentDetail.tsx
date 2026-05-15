@@ -510,7 +510,32 @@ export default function TournamentDetail() {
                   ) : (
                     <>
                       <TeamBadge team={team} size="lg" />
-                      <button onClick={() => startEditTeam(team)} className="text-slate-500 hover:text-slate-300 ml-auto" title="Editar nombre"><i className="fas fa-pen text-xs"></i></button>
+                      <div className="ml-auto flex items-center gap-1">
+                        <button onClick={() => startEditTeam(team)} className="text-slate-500 hover:text-slate-300" title="Editar nombre">
+                          <i className="fas fa-pen text-xs"></i>
+                        </button>
+                        <button
+                          onClick={async () => {
+                            const players = playersByTeam[team.id] || [];
+                            const dto = {
+                              name: team.name,
+                              color: team.color,
+                              logo: team.logo,
+                              players: players.map(p => ({ name: p.name, number: p.number })),
+                            };
+                            try {
+                              await api.post('/team-templates', dto);
+                              alert('Plantilla guardada correctamente');
+                            } catch (err: any) {
+                              alert(err.response?.data?.message || 'Error al guardar plantilla');
+                            }
+                          }}
+                          className="text-slate-500 hover:text-primary-400 text-xs"
+                          title="Guardar como plantilla"
+                        >
+                          <i className="fas fa-save"></i>
+                        </button>
+                      </div>
                     </>
                   )}
                 </div>
