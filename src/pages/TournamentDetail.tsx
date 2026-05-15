@@ -32,6 +32,8 @@ const confettiPieces = Array.from({ length: 60 }).map((_, i) => ({
   duration: 2 + Math.random() * 3,
 }));
 
+const colors = ['#3b82f6', '#ef4444', '#22c55e', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316', '#84cc16', '#6366f1'];
+
 export default function TournamentDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -69,6 +71,10 @@ export default function TournamentDetail() {
   // Animación del campeón
   const [showChampion, setShowChampion] = useState(false);
   const [championTeam, setChampionTeam] = useState<any>(null);
+
+  // Añadir equipos a torneo existente
+  const [showAddTeamsModal, setShowAddTeamsModal] = useState(false);
+  const [newTeams, setNewTeams] = useState([{ name: '', color: colors[0], logo: null as string | null }]);
 
   const standings = useMemo(() => {
     if (!tournament) return [];
@@ -183,9 +189,7 @@ export default function TournamentDetail() {
     const time = (document.getElementById('matchTime') as HTMLInputElement).value;
     const location = (document.getElementById('matchLocation') as HTMLInputElement).value;
 
-    // Preparar el cuerpo del PATCH
     const body: any = { homeScore, awayScore, date, time, location };
-    // Si el partido no se ha jugado, enviar los posibles cambios de equipos
     if (!editMatch.played) {
       body.homeTeamId = editMatch.homeTeamId;
       body.awayTeamId = editMatch.awayTeamId;
@@ -196,7 +200,6 @@ export default function TournamentDetail() {
       const res = await api.get(`/tournaments/${id}`);
       setTournament(res.data);
 
-      // Detectar si es la final y hay un ganador para mostrar animación
       const updatedMatch = res.data.rounds
         .flatMap((r: any) => r.matches)
         .find((m: any) => m.id === editMatch.id);
@@ -281,6 +284,41 @@ export default function TournamentDetail() {
       try { await api.patch(`/teams/${teamId}`, { logo: reader.result as string }); const res = await api.get(`/tournaments/${id}`); setTournament(res.data); } catch { alert('Error al subir el escudo'); }
     };
     reader.readAsDataURL(file);
+  };
+
+  // Añadir equipos
+  const handleAddTeamRow = () => setNewTeams([...newTeams, { name: '', color: colors[newTeams.length % colors.length], logo: null }]);
+  const updateNewTeam = (idx: number, field: string, value: string) => {
+    const updated = [...newTeams];
+    updated[idx] = { ...updated[idx], [field]: value };
+    setNewTeams(updated);
+  };
+  const removeNewTeam = (idx: number) => {
+    if (newTeams.length > 1) setNewTeams(newTeams.filter((_, i) => i !== idx));
+  };
+  const handleNewTeamLogo = (idx: number, file: File) => {
+    if (!file) return;
+    if (file.size > 200000) { alert('La imagen no debe superar 200 KB'); return; }
+    const reader = new FileReader();
+    reader.onload = () => updateNewTeam(idx, 'logo', reader.result as string);
+    reader.readAsDataURL(file);
+  };
+  const handleAddTeams = async () => {
+    const validTeams = newTeams.filter(t => t.name.trim()).map(t => ({
+      name: t.name.trim(),
+      color: t.color,
+      logo: t.logo || null,
+    }));
+    if (validTeams.length === 0) return alert('Añade al menos un equipo');
+    try {
+      await api.post(`/teams/bulk/${id}`, { teams: validTeams });
+      const res = await api.get(`/tournaments/${id}`);
+      setTournament(res.data);
+      setShowAddTeamsModal(false);
+      setNewTeams([{ name: '', color: colors[0], logo: null }]);
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Error al añadir equipos');
+    }
   };
 
   // Eventos de partido
@@ -419,7 +457,6 @@ export default function TournamentDetail() {
               </div>
             </div>
           ))}
-          {/* Contenedor de campeón justo debajo del fixture */}
           {showChampion && championTeam && (
             <div className="relative overflow-hidden rounded-2xl p-6 md:p-10 glass animate-champion-appear">
               <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -491,89 +528,95 @@ export default function TournamentDetail() {
         </div>
       )}
 
-      {/* Teams (editar equipos, escudo y jugadores) */}
+      {/* Teams con botón para añadir equipos */}
       {tab === 'teams' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-fade-in">
-          {tournament.teams.map((team: any) => {
-            const teamStats = standings.find((s: any) => s.id === team.id);
-            const players = playersByTeam[team.id] || [];
-            const isEditingThisTeam = editingTeamId === team.id;
-            return (
-              <div key={team.id} className="glass p-4 md:p-6 hover-lift">
-                <div className="flex items-center gap-2 mb-4">
-                  {isEditingThisTeam ? (
-                    <div className="flex-1 space-y-3">
-                      <div className="flex gap-2">
-                        <input value={editingTeamName} onChange={e => setEditingTeamName(e.target.value)} className="input-dark flex-1 text-sm py-1" autoFocus onKeyDown={e => e.key === 'Enter' && saveEditTeam()} />
-                        <button onClick={saveEditTeam} className="btn-primary text-xs px-2 py-1"><i className="fas fa-check"></i></button>
-                        <button onClick={() => setEditingTeamId(null)} className="btn-secondary text-xs px-2 py-1"><i className="fas fa-times"></i></button>
+        <>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xl font-bold">Equipos ({tournament.teams.length})</h3>
+            <button onClick={() => setShowAddTeamsModal(true)} className="btn-secondary text-sm">
+              <i className="fas fa-plus"></i> Añadir equipos
+            </button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-fade-in">
+            {tournament.teams.map((team: any) => {
+              const teamStats = standings.find((s: any) => s.id === team.id);
+              const players = playersByTeam[team.id] || [];
+              const isEditingThisTeam = editingTeamId === team.id;
+              return (
+                <div key={team.id} className="glass p-4 md:p-6 hover-lift">
+                  <div className="flex items-center gap-2 mb-4">
+                    {isEditingThisTeam ? (
+                      <div className="flex-1 space-y-3">
+                        <div className="flex gap-2">
+                          <input value={editingTeamName} onChange={e => setEditingTeamName(e.target.value)} className="input-dark flex-1 text-sm py-1" autoFocus onKeyDown={e => e.key === 'Enter' && saveEditTeam()} />
+                          <button onClick={saveEditTeam} className="btn-primary text-xs px-2 py-1"><i className="fas fa-check"></i></button>
+                          <button onClick={() => setEditingTeamId(null)} className="btn-secondary text-xs px-2 py-1"><i className="fas fa-times"></i></button>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <input type="file" accept="image/*" id={`edit-logo-${team.id}`} className="hidden" onChange={(e) => { if (e.target.files?.[0]) handleTeamLogoChange(team.id, e.target.files[0]); }} />
+                          <button type="button" onClick={() => document.getElementById(`edit-logo-${team.id}`)?.click()} className="text-xs text-primary-400 hover:text-primary-300 flex items-center gap-1">
+                            <i className="fas fa-image"></i> {team.logo ? 'Cambiar escudo' : 'Añadir escudo'}
+                          </button>
+                          {team.logo && <img src={team.logo} alt="Vista previa" className="w-6 h-6 rounded object-cover border border-slate-700" />}
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <input type="file" accept="image/*" id={`edit-logo-${team.id}`} className="hidden" onChange={(e) => { if (e.target.files?.[0]) handleTeamLogoChange(team.id, e.target.files[0]); }} />
-                        <button type="button" onClick={() => document.getElementById(`edit-logo-${team.id}`)?.click()} className="text-xs text-primary-400 hover:text-primary-300 flex items-center gap-1">
-                          <i className="fas fa-image"></i> {team.logo ? 'Cambiar escudo' : 'Añadir escudo'}
-                        </button>
-                        {team.logo && <img src={team.logo} alt="Vista previa" className="w-6 h-6 rounded object-cover border border-slate-700" />}
-                      </div>
-                    </div>
-                  ) : (
-                    <>
-                      <TeamBadge team={team} size="lg" />
-                      <div className="ml-auto flex items-center gap-1">
-                        <button onClick={() => startEditTeam(team)} className="text-slate-500 hover:text-slate-300" title="Editar nombre">
-                          <i className="fas fa-pen text-xs"></i>
-                        </button>
-                        <button
-                          onClick={async () => {
-                            const players = playersByTeam[team.id] || [];
-                            const dto = {
-                              name: team.name,
-                              color: team.color,
-                              logo: team.logo,
-                              players: players.map(p => ({ name: p.name, number: p.number })),
-                            };
-                            try {
-                              await api.post('/team-templates', dto);
-                              alert('Plantilla guardada correctamente');
-                            } catch (err: any) {
-                              alert(err.response?.data?.message || 'Error al guardar plantilla');
-                            }
-                          }}
-                          className="text-slate-500 hover:text-primary-400 text-xs"
-                          title="Guardar como plantilla"
-                        >
-                          <i className="fas fa-save"></i>
-                        </button>
-                      </div>
-                    </>
-                  )}
-                </div>
-                <p className="text-sm text-slate-500 mb-4">{teamStats?.points || 0} pts · {teamStats?.played || 0} PJ</p>
-                <div className="grid grid-cols-3 gap-2 text-center mb-4">
-                  <div className="bg-slate-800/50 rounded-lg p-2"><div className="text-lg font-bold text-accent-400">{teamStats?.wins || 0}</div><div className="text-xs text-slate-500">Victorias</div></div>
-                  <div className="bg-slate-800/50 rounded-lg p-2"><div className="text-lg font-bold text-yellow-400">{teamStats?.draws || 0}</div><div className="text-xs text-slate-500">Empates</div></div>
-                  <div className="bg-slate-800/50 rounded-lg p-2"><div className="text-lg font-bold text-red-400">{teamStats?.losses || 0}</div><div className="text-xs text-slate-500">Derrotas</div></div>
-                </div>
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-slate-400 font-medium">Jugadores ({players.length})</span>
-                    <button onClick={() => setAddPlayerForTeam(team.id)} className="text-xs text-primary-400 hover:text-primary-300">+ Añadir</button>
+                    ) : (
+                      <>
+                        <TeamBadge team={team} size="lg" />
+                        <div className="ml-auto flex items-center gap-1">
+                          <button onClick={() => startEditTeam(team)} className="text-slate-500 hover:text-slate-300" title="Editar nombre"><i className="fas fa-pen text-xs"></i></button>
+                          <button
+                            onClick={async () => {
+                              const players = playersByTeam[team.id] || [];
+                              const dto = {
+                                name: team.name,
+                                color: team.color,
+                                logo: team.logo,
+                                players: players.map(p => ({ name: p.name, number: p.number })),
+                              };
+                              try {
+                                await api.post('/team-templates', dto);
+                                alert('Plantilla guardada correctamente');
+                              } catch (err: any) {
+                                alert(err.response?.data?.message || 'Error al guardar plantilla');
+                              }
+                            }}
+                            className="text-slate-500 hover:text-primary-400 text-xs"
+                            title="Guardar como plantilla"
+                          >
+                            <i className="fas fa-save"></i>
+                          </button>
+                        </div>
+                      </>
+                    )}
                   </div>
-                  {players.length === 0 && <p className="text-xs text-slate-500">Sin jugadores</p>}
-                  {players.map((player: any) => (
-                    <div key={player.id} className="flex items-center justify-between text-sm py-1 group">
-                      <span className="truncate">{player.number ? <span className="text-slate-500 mr-1">#{player.number}</span> : ''}{player.name}</span>
-                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button onClick={() => handleEditPlayer(player)} className="text-slate-500 hover:text-primary-400" title="Editar"><i className="fas fa-pen text-xs"></i></button>
-                        <button onClick={() => deletePlayer(player.id, team.id)} className="text-slate-500 hover:text-red-400" title="Eliminar"><i className="fas fa-trash text-xs"></i></button>
-                      </div>
+                  <p className="text-sm text-slate-500 mb-4">{teamStats?.points || 0} pts · {teamStats?.played || 0} PJ</p>
+                  <div className="grid grid-cols-3 gap-2 text-center mb-4">
+                    <div className="bg-slate-800/50 rounded-lg p-2"><div className="text-lg font-bold text-accent-400">{teamStats?.wins || 0}</div><div className="text-xs text-slate-500">Victorias</div></div>
+                    <div className="bg-slate-800/50 rounded-lg p-2"><div className="text-lg font-bold text-yellow-400">{teamStats?.draws || 0}</div><div className="text-xs text-slate-500">Empates</div></div>
+                    <div className="bg-slate-800/50 rounded-lg p-2"><div className="text-lg font-bold text-red-400">{teamStats?.losses || 0}</div><div className="text-xs text-slate-500">Derrotas</div></div>
+                  </div>
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm text-slate-400 font-medium">Jugadores ({players.length})</span>
+                      <button onClick={() => setAddPlayerForTeam(team.id)} className="text-xs text-primary-400 hover:text-primary-300">+ Añadir</button>
                     </div>
-                  ))}
+                    {players.length === 0 && <p className="text-xs text-slate-500">Sin jugadores</p>}
+                    {players.map((player: any) => (
+                      <div key={player.id} className="flex items-center justify-between text-sm py-1 group">
+                        <span className="truncate">{player.number ? <span className="text-slate-500 mr-1">#{player.number}</span> : ''}{player.name}</span>
+                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button onClick={() => handleEditPlayer(player)} className="text-slate-500 hover:text-primary-400" title="Editar"><i className="fas fa-pen text-xs"></i></button>
+                          <button onClick={() => deletePlayer(player.id, team.id)} className="text-slate-500 hover:text-red-400" title="Eliminar"><i className="fas fa-trash text-xs"></i></button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        </>
       )}
 
       {/* Stats */}
@@ -632,7 +675,7 @@ export default function TournamentDetail() {
         </>
       )}
 
-      {/* Modal Editar Partido con edición/eliminación de eventos Y cambio de equipos */}
+      {/* Modal Editar Partido con cambio de equipos y eventos */}
       {editMatch && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-2 md:p-4 animate-fade-in">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setEditMatch(null)}></div>
@@ -653,31 +696,19 @@ export default function TournamentDetail() {
               </div>
             </div>
 
-            {/* Sección para cambiar equipos (solo si el partido NO está jugado) */}
+            {/* Cambiar equipos (solo si no está jugado) */}
             {!editMatch.played && (
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
                   <label className="block text-xs text-slate-400 mb-1">Cambiar local</label>
-                  <select
-                    value={editMatch.homeTeamId || ''}
-                    onChange={e => setEditMatch({ ...editMatch, homeTeamId: e.target.value || null })}
-                    className="input-dark text-xs"
-                  >
-                    {tournament.teams.map((team: any) => (
-                      <option key={team.id} value={team.id}>{team.name}</option>
-                    ))}
+                  <select value={editMatch.homeTeamId || ''} onChange={e => setEditMatch({ ...editMatch, homeTeamId: e.target.value || null })} className="input-dark text-xs">
+                    {tournament.teams.map((team: any) => (<option key={team.id} value={team.id}>{team.name}</option>))}
                   </select>
                 </div>
                 <div>
                   <label className="block text-xs text-slate-400 mb-1">Cambiar visitante</label>
-                  <select
-                    value={editMatch.awayTeamId || ''}
-                    onChange={e => setEditMatch({ ...editMatch, awayTeamId: e.target.value || null })}
-                    className="input-dark text-xs"
-                  >
-                    {tournament.teams.map((team: any) => (
-                      <option key={team.id} value={team.id}>{team.name}</option>
-                    ))}
+                  <select value={editMatch.awayTeamId || ''} onChange={e => setEditMatch({ ...editMatch, awayTeamId: e.target.value || null })} className="input-dark text-xs">
+                    {tournament.teams.map((team: any) => (<option key={team.id} value={team.id}>{team.name}</option>))}
                   </select>
                 </div>
               </div>
@@ -693,7 +724,7 @@ export default function TournamentDetail() {
             </div>
             <div className="mb-6"><label className="block text-sm font-medium text-slate-400 mb-1.5">Ubicación</label><input type="text" defaultValue={editMatch.location || ''} id="matchLocation" placeholder="Cancha, estadio, etc." className="input-dark" /></div>
 
-            {/* Eventos del partido con editar/eliminar */}
+            {/* Eventos */}
             <div className="mb-6">
               <h4 className="text-sm font-medium text-slate-400 mb-2">Eventos</h4>
               {matchEvents.length === 0 && <p className="text-xs text-slate-500">Sin eventos registrados</p>}
@@ -755,6 +786,57 @@ export default function TournamentDetail() {
             <input value={editingPlayerName} onChange={e => setEditingPlayerName(e.target.value)} placeholder="Nombre" className="input-dark mb-2" />
             <input value={editingPlayerNumber} onChange={e => setEditingPlayerNumber(e.target.value)} placeholder="Número" className="input-dark mb-2" />
             <button onClick={saveEditPlayer} className="btn-primary text-sm w-full">Guardar cambios</button>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Añadir Equipos al torneo */}
+      {showAddTeamsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowAddTeamsModal(false)}>
+          <div className="bg-dark-900 p-6 rounded-2xl w-full max-w-lg max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <h3 className="text-xl font-bold mb-4">Añadir Equipos al Torneo</h3>
+            <div className="space-y-3">
+              {newTeams.map((team, idx) => (
+                <div key={idx} className="flex items-center gap-3 bg-slate-800/50 rounded-xl p-3 border border-slate-800">
+                  {team.logo ? (
+                    <img src={team.logo} alt="escudo" className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
+                  ) : (
+                    <div className="w-10 h-10 rounded-lg flex-shrink-0" style={{ backgroundColor: team.color }}></div>
+                  )}
+                  <input
+                    value={team.name}
+                    onChange={e => updateNewTeam(idx, 'name', e.target.value)}
+                    placeholder={`Equipo ${idx + 1}`}
+                    className="flex-1 bg-transparent border-none focus:outline-none text-white placeholder-slate-600 text-sm"
+                  />
+                  <div className="flex gap-1">
+                    {colors.slice(0, 5).map(c => (
+                      <button key={c} onClick={() => updateNewTeam(idx, 'color', c)}
+                        className={`w-6 h-6 rounded-full border-2 transition-all ${team.color === c ? 'border-white scale-110' : 'border-transparent'}`}
+                        style={{ backgroundColor: c }}></button>
+                    ))}
+                  </div>
+                  <div className="flex items-center">
+                    <input type="file" accept="image/*" className="hidden" id={`new-logo-${idx}`} onChange={e => { if (e.target.files?.[0]) handleNewTeamLogo(idx, e.target.files[0]); }} />
+                    <button type="button" onClick={() => document.getElementById(`new-logo-${idx}`)?.click()} className="text-xs text-slate-400 hover:text-white flex items-center gap-1">
+                      <i className="fas fa-image"></i> <span className="hidden sm:inline">Escudo</span>
+                    </button>
+                  </div>
+                  {newTeams.length > 1 && (
+                    <button onClick={() => removeNewTeam(idx)} className="w-8 h-8 rounded-lg hover:bg-red-500/20 text-slate-500 hover:text-red-400 flex items-center justify-center transition-colors">
+                      <i className="fas fa-times"></i>
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+            <button onClick={handleAddTeamRow} className="mt-3 text-sm text-primary-400 hover:text-primary-300 flex items-center gap-1">
+              <i className="fas fa-plus"></i> Otro equipo
+            </button>
+            <div className="flex justify-between mt-6">
+              <button onClick={() => setShowAddTeamsModal(false)} className="btn-secondary">Cancelar</button>
+              <button onClick={handleAddTeams} className="btn-primary">Añadir equipos</button>
+            </div>
           </div>
         </div>
       )}
