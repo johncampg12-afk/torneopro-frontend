@@ -182,8 +182,17 @@ export default function TournamentDetail() {
     const date = (document.getElementById('matchDate') as HTMLInputElement).value;
     const time = (document.getElementById('matchTime') as HTMLInputElement).value;
     const location = (document.getElementById('matchLocation') as HTMLInputElement).value;
+
+    // Preparar el cuerpo del PATCH
+    const body: any = { homeScore, awayScore, date, time, location };
+    // Si el partido no se ha jugado, enviar los posibles cambios de equipos
+    if (!editMatch.played) {
+      body.homeTeamId = editMatch.homeTeamId;
+      body.awayTeamId = editMatch.awayTeamId;
+    }
+
     try {
-      await api.patch(`/matches/${editMatch.id}`, { homeScore, awayScore, date, time, location });
+      await api.patch(`/matches/${editMatch.id}`, body);
       const res = await api.get(`/tournaments/${id}`);
       setTournament(res.data);
 
@@ -623,7 +632,7 @@ export default function TournamentDetail() {
         </>
       )}
 
-      {/* Modal Editar Partido con edición/eliminación de eventos */}
+      {/* Modal Editar Partido con edición/eliminación de eventos Y cambio de equipos */}
       {editMatch && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-2 md:p-4 animate-fade-in">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setEditMatch(null)}></div>
@@ -643,6 +652,37 @@ export default function TournamentDetail() {
                 <div className="font-bold text-sm md:text-base">{getTeam(editMatch.awayTeamId).name}</div>
               </div>
             </div>
+
+            {/* Sección para cambiar equipos (solo si el partido NO está jugado) */}
+            {!editMatch.played && (
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-xs text-slate-400 mb-1">Cambiar local</label>
+                  <select
+                    value={editMatch.homeTeamId || ''}
+                    onChange={e => setEditMatch({ ...editMatch, homeTeamId: e.target.value || null })}
+                    className="input-dark text-xs"
+                  >
+                    {tournament.teams.map((team: any) => (
+                      <option key={team.id} value={team.id}>{team.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs text-slate-400 mb-1">Cambiar visitante</label>
+                  <select
+                    value={editMatch.awayTeamId || ''}
+                    onChange={e => setEditMatch({ ...editMatch, awayTeamId: e.target.value || null })}
+                    className="input-dark text-xs"
+                  >
+                    {tournament.teams.map((team: any) => (
+                      <option key={team.id} value={team.id}>{team.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-2 gap-4 mb-6">
               <div><label className="block text-sm text-slate-400 mb-2 text-center">Local</label><input type="number" min="0" defaultValue={editMatch.homeScore ?? ''} id="homeScore" className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-3 md:px-4 md:py-4 text-center text-2xl md:text-3xl font-black text-white focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20" /></div>
               <div><label className="block text-sm text-slate-400 mb-2 text-center">Visitante</label><input type="number" min="0" defaultValue={editMatch.awayScore ?? ''} id="awayScore" className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-3 md:px-4 md:py-4 text-center text-2xl md:text-3xl font-black text-white focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20" /></div>
@@ -652,6 +692,8 @@ export default function TournamentDetail() {
               <div><label className="block text-sm font-medium text-slate-400 mb-1.5">Hora</label><input type="time" defaultValue={editMatch.time || ''} id="matchTime" className="input-dark" /></div>
             </div>
             <div className="mb-6"><label className="block text-sm font-medium text-slate-400 mb-1.5">Ubicación</label><input type="text" defaultValue={editMatch.location || ''} id="matchLocation" placeholder="Cancha, estadio, etc." className="input-dark" /></div>
+
+            {/* Eventos del partido con editar/eliminar */}
             <div className="mb-6">
               <h4 className="text-sm font-medium text-slate-400 mb-2">Eventos</h4>
               {matchEvents.length === 0 && <p className="text-xs text-slate-500">Sin eventos registrados</p>}
@@ -685,6 +727,7 @@ export default function TournamentDetail() {
               </div>
               <button onClick={handleAddEvent} className="mt-2 btn-secondary text-xs">Añadir evento</button>
             </div>
+
             <div className="flex gap-3">
               <button onClick={() => setEditMatch(null)} className="flex-1 btn-secondary justify-center">Cancelar</button>
               <button onClick={saveMatch} className="flex-1 btn-primary justify-center"><i className="fas fa-save"></i> Guardar</button>
