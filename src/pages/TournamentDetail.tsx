@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
 
+const colors = ['#3b82f6', '#ef4444', '#22c55e', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316', '#84cc16', '#6366f1'];
+
 // Componente auxiliar: muestra logo si existe, si no, círculo de color
 const TeamBadge = ({ team, size = 'md' }: { team: any; size?: 'sm' | 'md' | 'lg' }) => {
   const sizes = {
