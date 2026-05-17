@@ -8,7 +8,7 @@ const ads = [
   { id: 1, image: '/sponsors/dental-fresh-plus-hrz.jpeg', link: '' },
   { id: 2, image: '/sponsors/trend-sport-hrz.png', link: '' },
   { id: 3, image: '/sponsors/igana.png', link: 'https://www.igpro-analyzer.com/' },
-  { id: 4, image: '/sponsors/anentBanner.jpeg', link: '' },
+  { id: 4, image: '/sponsors/anentBanner.jpeg', link: 'https://www.anentlab.com/' },
   { id: 5, image: '/sponsors/dental.jpeg', link: '' },
   { id: 6, image: '/sponsors/EMPRENDE-CONMIGO-TREND-SPORT.png', link: '' },
   { id: 7, image: '/sponsors/trend-sport-logo.jpeg', link: '' },
