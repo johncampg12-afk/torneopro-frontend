@@ -8,11 +8,7 @@ import App from './App';
 import { theme } from './theme';
 
 // Fuentes locales
-import '@fontsource/instrument-sans/400.css';
-import '@fontsource/instrument-sans/500.css';
-import '@fontsource/instrument-sans/600.css';
-import '@fontsource/instrument-sans/700.css';
-import '@fontsource/instrument-sans/800.css';
+import '@fontsource-variable/instrument-sans';   // UNA sola línea, cubre 100-900
 import '@fontsource/fragment-mono/400.css';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
