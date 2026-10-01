@@ -10,9 +10,6 @@ import { api } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
 import { SMOOTH, BLACK } from '../theme';
 
-
-const isOrganizer = user?.role === 'organizer';
-
 const fadeInUp = keyframes`
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
@@ -37,6 +34,7 @@ const formatName = (f: string) =>
 
 export default function Home() {
   const { user } = useAuth();
+  const isOrganizer = user?.role === 'organizer';
   const [publicTournaments, setPublicTournaments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentAd, setCurrentAd] = useState(0);
