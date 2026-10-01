@@ -1,10 +1,16 @@
 import { useEffect, useState, useMemo } from 'react';
 import {
-  Box, Typography, Button, Stack, Chip, Skeleton, keyframes,
+  Box, Typography, Button, Stack, Chip, keyframes, Collapse, IconButton,
 } from '@mui/material';
 import { useParams, Link } from 'react-router-dom';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import TableChartIcon from '@mui/icons-material/TableChart';
 import GroupsIcon from '@mui/icons-material/Groups';
+import BarChartIcon from '@mui/icons-material/BarChart';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ViewListIcon from '@mui/icons-material/ViewList';
+import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import { api } from '../lib/api';
 import { BracketView } from '../components/BracketView';
 import { BLACK, SMOOTH } from '../theme';
@@ -77,6 +83,8 @@ export default function PublicTournament() {
   const [error, setError] = useState('');
   const [topScorers, setTopScorers] = useState<any[]>([]);
   const [view, setView] = useState<'list' | 'bracket'>('list');
+  const [openRounds, setOpenRounds] = useState<Record<string, boolean>>({});
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({ liga: true, eliminatorias: true });
 
   // ── Standings ──
   const standings = useMemo(() => {
@@ -188,6 +196,207 @@ export default function PublicTournament() {
     ? tournament.rounds
     : tournament.rounds.filter((r: any) => r.phase === 'elimination');
   const hasEliminationView = eliminationRounds.length > 0;
+
+  // ── Toggle helpers ──
+  const toggleRound = (key: string) =>
+    setOpenRounds(prev => ({ ...prev, [key]: prev[key] === false ? true : false }));
+
+  const toggleSection = (key: string) =>
+    setOpenSections(prev => ({ ...prev, [key]: prev[key] === false ? true : false }));
+
+  // ── Render partido ──
+  const renderMatch = (match: any) => {
+    const home = getTeam(match.homeTeamId);
+    const away = getTeam(match.awayTeamId);
+    return (
+      <Box
+        key={match.id}
+        sx={{
+          p: { xs: 1.5, sm: 2 },
+          borderRadius: '14px',
+          bgcolor: match.played ? 'rgba(17,17,17,0.02)' : '#FAFAF8',
+          border: '1px solid',
+          borderColor: match.played ? 'rgba(17,17,17,0.08)' : 'rgba(17,17,17,0.04)',
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box sx={{ flex: 1, minWidth: 0, display: 'flex', justifyContent: 'flex-end' }}>
+            <TeamBadge team={home} size="sm" reverse />
+          </Box>
+
+          <Box
+            sx={{
+              px: 2,
+              py: 0.75,
+              borderRadius: '10px',
+              bgcolor: match.played ? BLACK : 'transparent',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              flexShrink: 0,
+            }}
+          >
+            {match.played ? (
+              <>
+                <Typography sx={{ fontSize: 22, fontWeight: 900, color: 'white', fontFamily: '"Instrument Sans", system-ui, sans-serif', lineHeight: 1 }}>
+                  {match.homeScore}
+                </Typography>
+                <Typography sx={{ fontSize: 16, fontWeight: 700, color: 'rgba(255,255,255,0.4)' }}>–</Typography>
+                <Typography sx={{ fontSize: 22, fontWeight: 900, color: 'white', fontFamily: '"Instrument Sans", system-ui, sans-serif', lineHeight: 1 }}>
+                  {match.awayScore}
+                </Typography>
+              </>
+            ) : (
+              <Typography sx={{ fontSize: 12, fontWeight: 700, color: 'rgba(17,17,17,0.4)', letterSpacing: 0.5 }}>
+                VS
+              </Typography>
+            )}
+          </Box>
+
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <TeamBadge team={away} size="sm" />
+          </Box>
+        </Box>
+
+        {(match.date || match.time || match.location) && (
+          <Box sx={{ display: 'flex', gap: 2, mt: 1.25, justifyContent: 'center', flexWrap: 'wrap' }}>
+            {match.date && (
+              <Typography sx={{ fontSize: 11, color: 'rgba(17,17,17,0.45)' }}>
+                {new Date(match.date).toLocaleDateString('es-ES')}
+              </Typography>
+            )}
+            {match.time && (
+              <Typography sx={{ fontSize: 11, color: 'rgba(17,17,17,0.45)' }}>{match.time}</Typography>
+            )}
+            {match.location && (
+              <Typography sx={{ fontSize: 11, color: 'rgba(17,17,17,0.45)' }}>{match.location}</Typography>
+            )}
+          </Box>
+        )}
+      </Box>
+    );
+  };
+
+  // ── Render ronda colapsable ──
+  const renderCollapsibleRound = (round: any, keyPrefix = '') => {
+    const key = `${keyPrefix}${round.id}`;
+    const isOpen = openRounds[key] !== false;
+    return (
+      <Box
+        key={round.id}
+        sx={{
+          borderRadius: '20px',
+          bgcolor: 'white',
+          border: '1px solid rgba(17,17,17,0.06)',
+          overflow: 'hidden',
+        }}
+      >
+        <Box
+          onClick={() => toggleRound(key)}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            p: { xs: 2, md: 2.5 },
+            cursor: 'pointer',
+            transition: `background-color 0.2s ${SMOOTH}`,
+            '&:hover': { bgcolor: 'rgba(17,17,17,0.015)' },
+          }}
+        >
+          <Box sx={{ minWidth: 0, flex: 1 }}>
+            <Typography
+              sx={{
+                fontSize: 15.5,
+                fontWeight: 800,
+                color: BLACK,
+                letterSpacing: -0.3,
+                fontFamily: '"Instrument Sans", system-ui, sans-serif',
+              }}
+            >
+              {tournament.format === 'eliminatoria' || round.phase === 'elimination'
+                ? round.name
+                : `Jornada ${round.number}`}
+            </Typography>
+            <Typography sx={{ fontSize: 12, color: 'rgba(17,17,17,0.5)', mt: 0.25 }}>
+              {round.matches.filter((m: any) => m.played).length}/{round.matches.length} jugados
+            </Typography>
+          </Box>
+          <ExpandMoreIcon
+            sx={{
+              fontSize: 22,
+              color: 'rgba(17,17,17,0.4)',
+              transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+              transition: `transform 0.25s ${SMOOTH}`,
+            }}
+          />
+        </Box>
+
+        <Collapse in={isOpen} timeout={250}>
+          <Box sx={{ px: { xs: 2, md: 2.5 }, pb: { xs: 2, md: 2.5 }, display: 'flex', flexDirection: 'column', gap: 1 }}>
+            {round.matches.map((m: any) => renderMatch(m))}
+          </Box>
+        </Collapse>
+      </Box>
+    );
+  };
+
+  // ── Render sección (grupos + eliminatorias) ──
+  const renderSection = (sectionKey: string, title: string, subtitle: string, content: React.ReactNode) => {
+    const isOpen = openSections[sectionKey] !== false;
+    return (
+      <Box
+        sx={{
+          borderRadius: '20px',
+          bgcolor: 'white',
+          border: '1px solid rgba(17,17,17,0.06)',
+          overflow: 'hidden',
+        }}
+      >
+        <Box
+          onClick={() => toggleSection(sectionKey)}
+          sx={{
+            p: { xs: 2, md: 2.5 },
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            '&:hover': { bgcolor: 'rgba(17,17,17,0.015)' },
+          }}
+        >
+          <Box>
+            <Typography
+              sx={{
+                fontSize: 17,
+                fontWeight: 800,
+                color: BLACK,
+                letterSpacing: -0.4,
+                fontFamily: '"Instrument Sans", system-ui, sans-serif',
+              }}
+            >
+              {title}
+            </Typography>
+            <Typography sx={{ fontSize: 12, color: 'rgba(17,17,17,0.5)', mt: 0.25 }}>
+              {subtitle}
+            </Typography>
+          </Box>
+          <ExpandMoreIcon
+            sx={{
+              fontSize: 22,
+              color: 'rgba(17,17,17,0.4)',
+              transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+              transition: `transform 0.25s ${SMOOTH}`,
+            }}
+          />
+        </Box>
+
+        <Collapse in={isOpen} timeout={250}>
+          <Box sx={{ px: { xs: 2, md: 2.5 }, pb: { xs: 2, md: 2.5 }, pt: 0.5, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+            {content}
+          </Box>
+        </Collapse>
+      </Box>
+    );
+  };
 
   return (
     <Box sx={{ minHeight: '100dvh', bgcolor: '#FAFAF8' }}>
@@ -373,7 +582,7 @@ export default function PublicTournament() {
           </Box>
         </Box>
 
-        {/* ═══════ TABS ═══════ */}
+        {/* ═══════ TABS con iconos ═══════ */}
         <Box
           sx={{
             display: 'flex',
@@ -388,10 +597,10 @@ export default function PublicTournament() {
           }}
         >
           {[
-            { id: 'fixture', label: 'Partidos' },
-            { id: 'standings', label: 'Tabla' },
-            { id: 'teams', label: 'Equipos' },
-            { id: 'stats', label: 'Stats' },
+            { id: 'fixture', label: 'Partidos', Icon: CalendarMonthIcon },
+            { id: 'standings', label: 'Tabla', Icon: TableChartIcon },
+            { id: 'teams', label: 'Equipos', Icon: GroupsIcon },
+            { id: 'stats', label: 'Stats', Icon: BarChartIcon },
           ].map(t => (
             <Button
               key={t.id}
@@ -401,7 +610,8 @@ export default function PublicTournament() {
                 minWidth: 0,
                 height: 40,
                 borderRadius: '999px',
-                px: 2,
+                px: { xs: 1, sm: 2 },
+                gap: 0.75,
                 fontWeight: 700,
                 fontSize: 13.5,
                 color: tab === t.id ? 'white' : 'rgba(17,17,17,0.6)',
@@ -410,7 +620,8 @@ export default function PublicTournament() {
                 '&:hover': { bgcolor: tab === t.id ? BLACK : 'rgba(17,17,17,0.04)' },
               }}
             >
-              {t.label}
+              <t.Icon sx={{ fontSize: 18, flexShrink: 0 }} />
+              <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>{t.label}</Box>
             </Button>
           ))}
         </Box>
@@ -436,7 +647,8 @@ export default function PublicTournament() {
                     sx={{
                       height: 32,
                       borderRadius: '999px',
-                      px: 2,
+                      px: 1.75,
+                      gap: 0.5,
                       fontWeight: 700,
                       fontSize: 12.5,
                       color: view === 'list' ? 'white' : 'rgba(17,17,17,0.6)',
@@ -444,14 +656,16 @@ export default function PublicTournament() {
                       '&:hover': { bgcolor: view === 'list' ? BLACK : 'rgba(17,17,17,0.04)' },
                     }}
                   >
-                    Lista
+                    <ViewListIcon sx={{ fontSize: 16 }} />
+                    <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>Lista</Box>
                   </Button>
                   <Button
                     onClick={() => setView('bracket')}
                     sx={{
                       height: 32,
                       borderRadius: '999px',
-                      px: 2,
+                      px: 1.75,
+                      gap: 0.5,
                       fontWeight: 700,
                       fontSize: 12.5,
                       color: view === 'bracket' ? 'white' : 'rgba(17,17,17,0.6)',
@@ -459,7 +673,8 @@ export default function PublicTournament() {
                       '&:hover': { bgcolor: view === 'bracket' ? BLACK : 'rgba(17,17,17,0.04)' },
                     }}
                   >
-                    Árbol
+                    <AccountTreeIcon sx={{ fontSize: 16 }} />
+                    <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>Árbol</Box>
                   </Button>
                 </Box>
               </Box>
@@ -476,112 +691,42 @@ export default function PublicTournament() {
               >
                 <BracketView rounds={eliminationRounds} getTeam={getTeam} />
               </Box>
-            ) : (
+            ) : tournament.format === 'grupos' ? (
+              /* ── Grupos + Eliminatorias: dos secciones ── */
               <>
-                {tournament.rounds.map((round: any) => (
-                  <Box
-                    key={round.id}
-                    sx={{
-                      p: { xs: 2, md: 2.5 },
-                      borderRadius: '20px',
-                      bgcolor: 'white',
-                      border: '1px solid rgba(17,17,17,0.06)',
-                    }}
-                  >
-                    <Box sx={{ mb: 2 }}>
-                      <Typography
-                        sx={{
-                          fontSize: 15.5,
-                          fontWeight: 800,
-                          color: BLACK,
-                          letterSpacing: -0.3,
-                          fontFamily: '"Instrument Sans", system-ui, sans-serif',
-                        }}
-                      >
-                        {tournament.format === 'eliminatoria' || round.phase === 'elimination'
-                          ? round.name
-                          : `Jornada ${round.number}`}
-                      </Typography>
-                      <Typography sx={{ fontSize: 12, color: 'rgba(17,17,17,0.5)', mt: 0.25 }}>
-                        {round.matches.filter((m: any) => m.played).length}/{round.matches.length} jugados
-                      </Typography>
-                    </Box>
+                {(() => {
+                  const leagueRounds = tournament.rounds.filter((r: any) => r.phase === 'league');
+                  const elimRounds = tournament.rounds.filter((r: any) => r.phase === 'elimination');
+                  const leaguePlayed = leagueRounds.reduce((a: number, r: any) => a + r.matches.filter((m: any) => m.played).length, 0);
+                  const leagueTotal = leagueRounds.reduce((a: number, r: any) => a + r.matches.length, 0);
+                  const elimPlayed = elimRounds.reduce((a: number, r: any) => a + r.matches.filter((m: any) => m.played).length, 0);
+                  const elimTotal = elimRounds.reduce((a: number, r: any) => a + r.matches.length, 0);
 
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                      {round.matches.map((match: any) => {
-                        const home = getTeam(match.homeTeamId);
-                        const away = getTeam(match.awayTeamId);
-                        return (
-                          <Box
-                            key={match.id}
-                            sx={{
-                              p: { xs: 1.5, sm: 2 },
-                              borderRadius: '14px',
-                              bgcolor: match.played ? 'rgba(17,17,17,0.02)' : '#FAFAF8',
-                              border: '1px solid',
-                              borderColor: match.played ? 'rgba(17,17,17,0.08)' : 'rgba(17,17,17,0.04)',
-                            }}
-                          >
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <Box sx={{ flex: 1, minWidth: 0, display: 'flex', justifyContent: 'flex-end' }}>
-                                <TeamBadge team={home} size="sm" reverse />
-                              </Box>
+                  return (
+                    <>
+                      {leagueRounds.length > 0 &&
+                        renderSection(
+                          'liga',
+                          'Liga',
+                          `${leaguePlayed}/${leagueTotal} partidos jugados`,
+                          leagueRounds.map((r: any) => renderCollapsibleRound(r, 'liga-'))
+                        )}
 
-                              <Box
-                                sx={{
-                                  px: 2,
-                                  py: 0.75,
-                                  borderRadius: '10px',
-                                  bgcolor: match.played ? BLACK : 'transparent',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: 1,
-                                  flexShrink: 0,
-                                }}
-                              >
-                                {match.played ? (
-                                  <>
-                                    <Typography sx={{ fontSize: 22, fontWeight: 900, color: 'white', fontFamily: '"Instrument Sans", system-ui, sans-serif', lineHeight: 1 }}>
-                                      {match.homeScore}
-                                    </Typography>
-                                    <Typography sx={{ fontSize: 16, fontWeight: 700, color: 'rgba(255,255,255,0.4)' }}>–</Typography>
-                                    <Typography sx={{ fontSize: 22, fontWeight: 900, color: 'white', fontFamily: '"Instrument Sans", system-ui, sans-serif', lineHeight: 1 }}>
-                                      {match.awayScore}
-                                    </Typography>
-                                  </>
-                                ) : (
-                                  <Typography sx={{ fontSize: 12, fontWeight: 700, color: 'rgba(17,17,17,0.4)', letterSpacing: 0.5 }}>
-                                    VS
-                                  </Typography>
-                                )}
-                              </Box>
-
-                              <Box sx={{ flex: 1, minWidth: 0 }}>
-                                <TeamBadge team={away} size="sm" />
-                              </Box>
-                            </Box>
-
-                            {(match.date || match.time || match.location) && (
-                              <Box sx={{ display: 'flex', gap: 2, mt: 1.25, justifyContent: 'center', flexWrap: 'wrap' }}>
-                                {match.date && (
-                                  <Typography sx={{ fontSize: 11, color: 'rgba(17,17,17,0.45)' }}>
-                                    {new Date(match.date).toLocaleDateString('es-ES')}
-                                  </Typography>
-                                )}
-                                {match.time && (
-                                  <Typography sx={{ fontSize: 11, color: 'rgba(17,17,17,0.45)' }}>{match.time}</Typography>
-                                )}
-                                {match.location && (
-                                  <Typography sx={{ fontSize: 11, color: 'rgba(17,17,17,0.45)' }}>{match.location}</Typography>
-                                )}
-                              </Box>
-                            )}
-                          </Box>
-                        );
-                      })}
-                    </Box>
-                  </Box>
-                ))}
+                      {elimRounds.length > 0 &&
+                        renderSection(
+                          'eliminatorias',
+                          'Eliminatorias',
+                          `${elimPlayed}/${elimTotal} partidos jugados`,
+                          elimRounds.map((r: any) => renderCollapsibleRound(r, 'elim-'))
+                        )}
+                    </>
+                  );
+                })()}
+              </>
+            ) : (
+              /* ── Liga pura o Eliminatoria pura: cada ronda un collapsible ── */
+              <>
+                {tournament.rounds.map((round: any) => renderCollapsibleRound(round))}
               </>
             )}
           </Box>
@@ -778,7 +923,6 @@ export default function PublicTournament() {
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, animation: `${fadeInUp} 0.4s ${SMOOTH} both` }}>
             <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' }, gap: 2.5 }}>
 
-              {/* Goles a favor */}
               <Box sx={{ p: 2.5, borderRadius: '20px', bgcolor: 'white', border: '1px solid rgba(17,17,17,0.06)' }}>
                 <Typography sx={{ fontSize: 15, fontWeight: 800, color: BLACK, mb: 2, fontFamily: '"Instrument Sans", system-ui, sans-serif' }}>
                   Goles a favor
@@ -805,7 +949,6 @@ export default function PublicTournament() {
                 </Stack>
               </Box>
 
-              {/* % Victorias */}
               <Box sx={{ p: 2.5, borderRadius: '20px', bgcolor: 'white', border: '1px solid rgba(17,17,17,0.06)' }}>
                 <Typography sx={{ fontSize: 15, fontWeight: 800, color: BLACK, mb: 2, fontFamily: '"Instrument Sans", system-ui, sans-serif' }}>
                   % Victorias
@@ -836,7 +979,6 @@ export default function PublicTournament() {
               </Box>
             </Box>
 
-            {/* Resumen */}
             <Box sx={{ p: 2.5, borderRadius: '20px', bgcolor: 'white', border: '1px solid rgba(17,17,17,0.06)' }}>
               <Typography sx={{ fontSize: 15, fontWeight: 800, color: BLACK, mb: 2, fontFamily: '"Instrument Sans", system-ui, sans-serif' }}>
                 Resumen
@@ -877,7 +1019,6 @@ export default function PublicTournament() {
               </Box>
             </Box>
 
-            {/* Goleadores */}
             <Box sx={{ p: 2.5, borderRadius: '20px', bgcolor: 'white', border: '1px solid rgba(17,17,17,0.06)' }}>
               <Typography sx={{ fontSize: 15, fontWeight: 800, color: BLACK, mb: 2, fontFamily: '"Instrument Sans", system-ui, sans-serif' }}>
                 Máximos goleadores
