@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import {
   Box, Typography, Button, IconButton, Stack, Dialog, DialogTitle,
-  DialogContent, DialogActions, TextField, Drawer, keyframes, useMediaQuery,
+  DialogContent, DialogActions, TextField, keyframes, useMediaQuery,
   Chip, Tooltip,
 } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -14,15 +14,17 @@ import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import SaveOutlinedIcon from '@mui/icons-material/SaveOutlined';
 import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined';
-import SportsSoccerIcon from '@mui/icons-material/SportsSoccer';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import TableChartIcon from '@mui/icons-material/TableChart';
 import GroupsIcon from '@mui/icons-material/Groups';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import CloseIcon from '@mui/icons-material/Close';
+import ViewListIcon from '@mui/icons-material/ViewList';
+import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import { api } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
+import { BracketView } from '../components/BracketView';
 import { SMOOTH, SPRING, BLACK } from '../theme';
 
 const fadeInUp = keyframes`
@@ -59,6 +61,7 @@ export default function TournamentDetail() {
 
   const [tournament, setTournament] = useState<any>(null);
   const [tab, setTab] = useState('fixture');
+  const [view, setView] = useState<'list' | 'bracket'>('list');
   const [loading, setLoading] = useState(true);
 
   const [editMatch, setEditMatch] = useState<any>(null);
@@ -195,6 +198,12 @@ export default function TournamentDetail() {
   const playedMatches = tournament.rounds.reduce((a: number, r: any) => a + r.matches.filter((m: any) => m.played).length, 0);
   const totalMatches = tournament.rounds.reduce((a: number, r: any) => a + r.matches.length, 0);
   const progress = Math.round((playedMatches / Math.max(1, totalMatches)) * 100);
+
+  // Rondas de eliminatoria para el bracket
+  const eliminationRounds = tournament.format === 'eliminatoria'
+    ? tournament.rounds
+    : tournament.rounds.filter((r: any) => r.phase === 'elimination');
+  const hasEliminationView = eliminationRounds.length > 0;
 
   // ── Handlers ──
 
@@ -681,9 +690,62 @@ export default function TournamentDetail() {
         {/* ═══════════ FIXTURE ═══════════ */}
         {tab === 'fixture' && (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, animation: `${fadeInUp} 0.4s ${SMOOTH} both` }}>
-            {tournament.rounds.map((round: any) => (
+
+            {/* Toggle Lista / Árbol */}
+            {hasEliminationView && (
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <Box
+                  sx={{
+                    display: 'inline-flex',
+                    p: 0.5,
+                    borderRadius: '999px',
+                    bgcolor: 'white',
+                    border: '1px solid rgba(17,17,17,0.06)',
+                  }}
+                >
+                  <Button
+                    onClick={() => setView('list')}
+                    sx={{
+                      height: 32,
+                      borderRadius: '999px',
+                      px: 1.75,
+                      gap: 0.5,
+                      fontWeight: 700,
+                      fontSize: 12.5,
+                      color: view === 'list' ? 'white' : 'rgba(17,17,17,0.6)',
+                      bgcolor: view === 'list' ? BLACK : 'transparent',
+                      transition: `all 0.25s ${SMOOTH}`,
+                      '&:hover': { bgcolor: view === 'list' ? BLACK : 'rgba(17,17,17,0.04)' },
+                    }}
+                  >
+                    <ViewListIcon sx={{ fontSize: 16 }} />
+                    <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>Lista</Box>
+                  </Button>
+                  <Button
+                    onClick={() => setView('bracket')}
+                    sx={{
+                      height: 32,
+                      borderRadius: '999px',
+                      px: 1.75,
+                      gap: 0.5,
+                      fontWeight: 700,
+                      fontSize: 12.5,
+                      color: view === 'bracket' ? 'white' : 'rgba(17,17,17,0.6)',
+                      bgcolor: view === 'bracket' ? BLACK : 'transparent',
+                      transition: `all 0.25s ${SMOOTH}`,
+                      '&:hover': { bgcolor: view === 'bracket' ? BLACK : 'rgba(17,17,17,0.04)' },
+                    }}
+                  >
+                    <AccountTreeIcon sx={{ fontSize: 16 }} />
+                    <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>Árbol</Box>
+                  </Button>
+                </Box>
+              </Box>
+            )}
+
+            {/* Vista bracket */}
+            {view === 'bracket' && hasEliminationView ? (
               <Box
-                key={round.id}
                 sx={{
                   p: { xs: 2, md: 2.5 },
                   borderRadius: '20px',
@@ -691,150 +753,163 @@ export default function TournamentDetail() {
                   border: '1px solid rgba(17,17,17,0.06)',
                 }}
               >
-                {/* Header de ronda */}
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-                  <Box>
-                    <Typography
-                      sx={{
-                        fontSize: 16,
-                        fontWeight: 800,
-                        color: BLACK,
-                        letterSpacing: -0.3,
-                        fontFamily: '"Instrument Sans", system-ui, sans-serif',
-                      }}
-                    >
-                      {tournament.format === 'eliminatoria' ? round.name : `Jornada ${round.number}`}
-                    </Typography>
-                    <Typography sx={{ fontSize: 12, color: 'rgba(17,17,17,0.5)', mt: 0.25 }}>
-                      {round.matches.filter((m: any) => m.played).length}/{round.matches.length} jugados
-                    </Typography>
-                  </Box>
-                  <Button
-                    onClick={() => setAddMatchDialog(round.id)}
-                    startIcon={<AddIcon sx={{ fontSize: 16 }} />}
+                <BracketView rounds={eliminationRounds} getTeam={getTeam} />
+              </Box>
+            ) : (
+              /* Vista lista */
+              <>
+                {tournament.rounds.map((round: any) => (
+                  <Box
+                    key={round.id}
                     sx={{
-                      height: 34,
-                      borderRadius: '999px',
-                      px: 1.75,
-                      fontWeight: 600,
-                      fontSize: 12.5,
-                      color: BLACK,
-                      border: '1px solid rgba(17,17,17,0.1)',
-                      '&:hover': { borderColor: 'rgba(17,17,17,0.3)', bgcolor: 'transparent' },
+                      p: { xs: 2, md: 2.5 },
+                      borderRadius: '20px',
+                      bgcolor: 'white',
+                      border: '1px solid rgba(17,17,17,0.06)',
                     }}
                   >
-                    Partido
-                  </Button>
-                </Box>
-
-                {/* Partidos */}
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  {round.matches.map((match: any) => {
-                    const home = getTeam(match.homeTeamId);
-                    const away = getTeam(match.awayTeamId);
-                    return (
-                      <Box
-                        key={match.id}
-                        sx={{
-                          position: 'relative',
-                          p: { xs: 1.5, sm: 2 },
-                          borderRadius: '14px',
-                          bgcolor: match.played ? 'rgba(17,17,17,0.02)' : '#FAFAF8',
-                          border: '1px solid',
-                          borderColor: match.played ? 'rgba(17,17,17,0.08)' : 'rgba(17,17,17,0.04)',
-                          cursor: 'pointer',
-                          transition: `all 0.2s ${SMOOTH}`,
-                          '&:hover': {
-                            borderColor: 'rgba(17,17,17,0.2)',
-                            '& .delete-btn': { opacity: 1 },
-                          },
-                        }}
-                        onClick={() => { setEditMatch(match); setEditRound(round); }}
-                      >
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          {/* Local */}
-                          <Box sx={{ flex: 1, minWidth: 0, display: 'flex', justifyContent: 'flex-end' }}>
-                            <TeamBadge team={home} size="sm" reverse />
-                          </Box>
-
-                          {/* Marcador */}
-                          <Box
-                            sx={{
-                              px: 2,
-                              py: 0.75,
-                              borderRadius: '10px',
-                              bgcolor: match.played ? BLACK : 'transparent',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: 1,
-                              flexShrink: 0,
-                            }}
-                          >
-                            {match.played ? (
-                              <>
-                                <Typography sx={{ fontSize: 22, fontWeight: 900, color: 'white', fontFamily: '"Instrument Sans", system-ui, sans-serif', lineHeight: 1 }}>
-                                  {match.homeScore}
-                                </Typography>
-                                <Typography sx={{ fontSize: 16, fontWeight: 700, color: 'rgba(255,255,255,0.4)' }}>
-                                  –
-                                </Typography>
-                                <Typography sx={{ fontSize: 22, fontWeight: 900, color: 'white', fontFamily: '"Instrument Sans", system-ui, sans-serif', lineHeight: 1 }}>
-                                  {match.awayScore}
-                                </Typography>
-                              </>
-                            ) : (
-                              <Typography sx={{ fontSize: 12, fontWeight: 700, color: 'rgba(17,17,17,0.4)', letterSpacing: 0.5 }}>
-                                VS
-                              </Typography>
-                            )}
-                          </Box>
-
-                          {/* Visitante */}
-                          <Box sx={{ flex: 1, minWidth: 0 }}>
-                            <TeamBadge team={away} size="sm" />
-                          </Box>
-
-                          {/* Botón eliminar */}
-                          <IconButton
-                            className="delete-btn"
-                            size="small"
-                            onClick={(e) => { e.stopPropagation(); handleDeleteMatch(match.id); }}
-                            sx={{
-                              position: 'absolute',
-                              top: 6, right: 6,
-                              width: 26, height: 26,
-                              opacity: 0,
-                              transition: `opacity 0.2s ${SMOOTH}`,
-                              color: 'rgba(17,17,17,0.4)',
-                              bgcolor: 'white',
-                              '&:hover': { color: '#DC2626', bgcolor: '#FEF2F2' },
-                            }}
-                          >
-                            <DeleteOutlinedIcon sx={{ fontSize: 14 }} />
-                          </IconButton>
-                        </Box>
-
-                        {(match.date || match.time || match.location) && (
-                          <Box sx={{ display: 'flex', gap: 2, mt: 1.25, justifyContent: 'center', flexWrap: 'wrap' }}>
-                            {match.date && (
-                              <Typography sx={{ fontSize: 11, color: 'rgba(17,17,17,0.45)' }}>
-                                {new Date(match.date).toLocaleDateString('es-ES')}
-                              </Typography>
-                            )}
-                            {match.time && (
-                              <Typography sx={{ fontSize: 11, color: 'rgba(17,17,17,0.45)' }}>{match.time}</Typography>
-                            )}
-                            {match.location && (
-                              <Typography sx={{ fontSize: 11, color: 'rgba(17,17,17,0.45)' }}>{match.location}</Typography>
-                            )}
-                          </Box>
-                        )}
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                      <Box>
+                        <Typography
+                          sx={{
+                            fontSize: 16,
+                            fontWeight: 800,
+                            color: BLACK,
+                            letterSpacing: -0.3,
+                            fontFamily: '"Instrument Sans", system-ui, sans-serif',
+                          }}
+                        >
+                          {tournament.format === 'eliminatoria' || round.phase === 'elimination'
+                            ? round.name
+                            : `Jornada ${round.number}`}
+                        </Typography>
+                        <Typography sx={{ fontSize: 12, color: 'rgba(17,17,17,0.5)', mt: 0.25 }}>
+                          {round.matches.filter((m: any) => m.played).length}/{round.matches.length} jugados
+                        </Typography>
                       </Box>
-                    );
-                  })}
-                </Box>
-              </Box>
-            ))}
+                      <Button
+                        onClick={() => setAddMatchDialog(round.id)}
+                        startIcon={<AddIcon sx={{ fontSize: 16 }} />}
+                        sx={{
+                          height: 34,
+                          borderRadius: '999px',
+                          px: 1.75,
+                          fontWeight: 600,
+                          fontSize: 12.5,
+                          color: BLACK,
+                          border: '1px solid rgba(17,17,17,0.1)',
+                          '&:hover': { borderColor: 'rgba(17,17,17,0.3)', bgcolor: 'transparent' },
+                        }}
+                      >
+                        Partido
+                      </Button>
+                    </Box>
+
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                      {round.matches.map((match: any) => {
+                        const home = getTeam(match.homeTeamId);
+                        const away = getTeam(match.awayTeamId);
+                        return (
+                          <Box
+                            key={match.id}
+                            sx={{
+                              position: 'relative',
+                              p: { xs: 1.5, sm: 2 },
+                              borderRadius: '14px',
+                              bgcolor: match.played ? 'rgba(17,17,17,0.02)' : '#FAFAF8',
+                              border: '1px solid',
+                              borderColor: match.played ? 'rgba(17,17,17,0.08)' : 'rgba(17,17,17,0.04)',
+                              cursor: 'pointer',
+                              transition: `all 0.2s ${SMOOTH}`,
+                              '&:hover': {
+                                borderColor: 'rgba(17,17,17,0.2)',
+                                '& .delete-btn': { opacity: 1 },
+                              },
+                            }}
+                            onClick={() => { setEditMatch(match); setEditRound(round); }}
+                          >
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Box sx={{ flex: 1, minWidth: 0, display: 'flex', justifyContent: 'flex-end' }}>
+                                <TeamBadge team={home} size="sm" reverse />
+                              </Box>
+
+                              <Box
+                                sx={{
+                                  px: 2,
+                                  py: 0.75,
+                                  borderRadius: '10px',
+                                  bgcolor: match.played ? BLACK : 'transparent',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: 1,
+                                  flexShrink: 0,
+                                }}
+                              >
+                                {match.played ? (
+                                  <>
+                                    <Typography sx={{ fontSize: 22, fontWeight: 900, color: 'white', fontFamily: '"Instrument Sans", system-ui, sans-serif', lineHeight: 1 }}>
+                                      {match.homeScore}
+                                    </Typography>
+                                    <Typography sx={{ fontSize: 16, fontWeight: 700, color: 'rgba(255,255,255,0.4)' }}>
+                                      –
+                                    </Typography>
+                                    <Typography sx={{ fontSize: 22, fontWeight: 900, color: 'white', fontFamily: '"Instrument Sans", system-ui, sans-serif', lineHeight: 1 }}>
+                                      {match.awayScore}
+                                    </Typography>
+                                  </>
+                                ) : (
+                                  <Typography sx={{ fontSize: 12, fontWeight: 700, color: 'rgba(17,17,17,0.4)', letterSpacing: 0.5 }}>
+                                    VS
+                                  </Typography>
+                                )}
+                              </Box>
+
+                              <Box sx={{ flex: 1, minWidth: 0 }}>
+                                <TeamBadge team={away} size="sm" />
+                              </Box>
+
+                              <IconButton
+                                className="delete-btn"
+                                size="small"
+                                onClick={(e) => { e.stopPropagation(); handleDeleteMatch(match.id); }}
+                                sx={{
+                                  position: 'absolute',
+                                  top: 6, right: 6,
+                                  width: 26, height: 26,
+                                  opacity: 0,
+                                  transition: `opacity 0.2s ${SMOOTH}`,
+                                  color: 'rgba(17,17,17,0.4)',
+                                  bgcolor: 'white',
+                                  '&:hover': { color: '#DC2626', bgcolor: '#FEF2F2' },
+                                }}
+                              >
+                                <DeleteOutlinedIcon sx={{ fontSize: 14 }} />
+                              </IconButton>
+                            </Box>
+
+                            {(match.date || match.time || match.location) && (
+                              <Box sx={{ display: 'flex', gap: 2, mt: 1.25, justifyContent: 'center', flexWrap: 'wrap' }}>
+                                {match.date && (
+                                  <Typography sx={{ fontSize: 11, color: 'rgba(17,17,17,0.45)' }}>
+                                    {new Date(match.date).toLocaleDateString('es-ES')}
+                                  </Typography>
+                                )}
+                                {match.time && (
+                                  <Typography sx={{ fontSize: 11, color: 'rgba(17,17,17,0.45)' }}>{match.time}</Typography>
+                                )}
+                                {match.location && (
+                                  <Typography sx={{ fontSize: 11, color: 'rgba(17,17,17,0.45)' }}>{match.location}</Typography>
+                                )}
+                              </Box>
+                            )}
+                          </Box>
+                        );
+                      })}
+                    </Box>
+                  </Box>
+                ))}
+              </>
+            )}
 
             {/* ── Campeón ── */}
             {showChampion && championTeam && (
@@ -848,7 +923,6 @@ export default function TournamentDetail() {
                   animation: `${scaleIn} 0.6s ${SPRING} both`,
                 }}
               >
-                {/* Confeti */}
                 <Box sx={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
                   {confettiPieces.map(p => (
                     <Box
@@ -1050,7 +1124,6 @@ export default function TournamentDetail() {
         {/* ═══════════ TEAMS ═══════════ */}
         {tab === 'teams' && (
           <Box sx={{ animation: `${fadeInUp} 0.4s ${SMOOTH} both` }}>
-            {/* Header con botón añadir */}
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
               <Typography sx={{ fontSize: 15, fontWeight: 700, color: BLACK }}>
                 {tournament.teams.length} equipos
@@ -1090,7 +1163,6 @@ export default function TournamentDetail() {
                       '&:hover': { borderColor: 'rgba(17,17,17,0.15)' },
                     }}
                   >
-                    {/* Nombre + acciones */}
                     <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, mb: 2 }}>
                       {isEditing ? (
                         <Stack spacing={1.5} sx={{ flex: 1 }}>
@@ -1187,7 +1259,6 @@ export default function TournamentDetail() {
                       )}
                     </Box>
 
-                    {/* Stats mini */}
                     <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1, mb: 2 }}>
                       {[
                         { label: 'G', value: teamStats?.wins || 0, color: '#16A34A' },
@@ -1213,7 +1284,6 @@ export default function TournamentDetail() {
                       ))}
                     </Box>
 
-                    {/* Jugadores */}
                     <Box sx={{ pt: 2, borderTop: '1px solid rgba(17,17,17,0.06)' }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
                         <Typography sx={{ fontSize: 11.5, fontWeight: 700, letterSpacing: 0.4, textTransform: 'uppercase', color: 'rgba(17,17,17,0.45)' }}>
@@ -1297,7 +1367,6 @@ export default function TournamentDetail() {
         {tab === 'stats' && (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, animation: `${fadeInUp} 0.4s ${SMOOTH} both` }}>
             <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' }, gap: 2.5 }}>
-              {/* Goles a favor */}
               <Box sx={{ p: 2.5, borderRadius: '20px', bgcolor: 'white', border: '1px solid rgba(17,17,17,0.06)' }}>
                 <Typography sx={{ fontSize: 15, fontWeight: 800, color: BLACK, mb: 2, fontFamily: '"Instrument Sans", system-ui, sans-serif' }}>
                   Goles a favor
@@ -1317,7 +1386,6 @@ export default function TournamentDetail() {
                 </Stack>
               </Box>
 
-              {/* % Victorias */}
               <Box sx={{ p: 2.5, borderRadius: '20px', bgcolor: 'white', border: '1px solid rgba(17,17,17,0.06)' }}>
                 <Typography sx={{ fontSize: 15, fontWeight: 800, color: BLACK, mb: 2, fontFamily: '"Instrument Sans", system-ui, sans-serif' }}>
                   % Victorias
@@ -1340,7 +1408,6 @@ export default function TournamentDetail() {
               </Box>
             </Box>
 
-            {/* Resumen */}
             <Box sx={{ p: 2.5, borderRadius: '20px', bgcolor: 'white', border: '1px solid rgba(17,17,17,0.06)' }}>
               <Typography sx={{ fontSize: 15, fontWeight: 800, color: BLACK, mb: 2, fontFamily: '"Instrument Sans", system-ui, sans-serif' }}>
                 Resumen
@@ -1364,7 +1431,6 @@ export default function TournamentDetail() {
               </Box>
             </Box>
 
-            {/* Goleadores */}
             <Box sx={{ p: 2.5, borderRadius: '20px', bgcolor: 'white', border: '1px solid rgba(17,17,17,0.06)' }}>
               <Typography sx={{ fontSize: 15, fontWeight: 800, color: BLACK, mb: 2, fontFamily: '"Instrument Sans", system-ui, sans-serif' }}>
                 Máximos goleadores
@@ -1454,7 +1520,6 @@ export default function TournamentDetail() {
 
         {editMatch && (
           <>
-            {/* VS + escudos */}
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, mb: 3 }}>
               <Stack alignItems="center" spacing={1} sx={{ flex: 1, minWidth: 0 }}>
                 {getTeam(editMatch.homeTeamId).logo ? (
@@ -1481,7 +1546,6 @@ export default function TournamentDetail() {
               </Stack>
             </Box>
 
-            {/* Cambio de equipos */}
             {!editMatch.played && (
               <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.5, mb: 2.5 }}>
                 <Box>
@@ -1513,7 +1577,6 @@ export default function TournamentDetail() {
               </Box>
             )}
 
-            {/* Marcador */}
             <Box sx={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 1.5, alignItems: 'center', mb: 2.5 }}>
               <Box>
                 <Typography sx={{ ...labelSx, textAlign: 'center' }}>Local</Typography>
@@ -1540,7 +1603,6 @@ export default function TournamentDetail() {
               </Box>
             </Box>
 
-            {/* Fecha/Hora/Lugar */}
             <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', md: '1fr 1fr 2fr' }, gap: 1.5, mb: 2.5 }}>
               <Box>
                 <Typography sx={labelSx}>Fecha</Typography>
@@ -1576,7 +1638,6 @@ export default function TournamentDetail() {
               </Box>
             </Box>
 
-            {/* Eventos */}
             <Box sx={{ pt: 2, borderTop: '1px solid rgba(17,17,17,0.08)' }}>
               <Typography sx={{ fontSize: 13, fontWeight: 800, color: BLACK, mb: 1.5 }}>
                 Eventos del partido
@@ -1660,7 +1721,6 @@ export default function TournamentDetail() {
                 </Stack>
               )}
 
-              {/* Añadir evento */}
               <Box sx={{ p: 1.5, borderRadius: '12px', bgcolor: 'rgba(17,17,17,0.03)' }}>
                 <Stack spacing={1}>
                   <TextField
@@ -1717,7 +1777,6 @@ export default function TournamentDetail() {
               </Box>
             </Box>
 
-            {/* Footer */}
             <Box sx={{ display: 'flex', gap: 1, mt: 3 }}>
               <Button
                 onClick={() => setEditMatch(null)}
