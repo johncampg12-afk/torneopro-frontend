@@ -82,7 +82,7 @@ export const AuthPage = () => {
       if (isRegistering) {
         body.name = onboarding.fullName;
         body.username = onboarding.username;
-        body.city = onboarding.city;
+        body.age = onboarding.age;
         body.role = isOrganizer ? 'organizer' : 'user';
         body.terms_version = TERMS_VERSION;
         if (isOrganizer) {

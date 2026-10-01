@@ -5,7 +5,7 @@ export type UserRole = 'user' | 'organizer';
 export interface OnboardingData {
   fullName: string;
   username: string;
-  city: string;
+  age: string;
   photo?: File;
   role: UserRole;
 }
@@ -19,7 +19,7 @@ interface OnboardingContextType {
 const defaultData: OnboardingData = {
   fullName: '',
   username: '',
-  city: '',
+  age: '',
   role: 'user',
 };
 

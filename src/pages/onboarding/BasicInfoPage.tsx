@@ -18,30 +18,49 @@ export const BasicInfoPage = () => {
   const { data, setData } = useOnboarding();
   const [mounted, setMounted] = useState(false);
 
-  const [fullName, setFullName] = useState(data.fullName || '');
+  // Cargar nombre y apellidos separados desde fullName previo
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [username, setUsername] = useState(data.username || '');
-  const [city, setCity] = useState(data.city || '');
+  const [age, setAge] = useState(data.age || '');
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
 
-  const [touched, setTouched] = useState({ fullName: false, username: false, city: false });
+  const [touched, setTouched] = useState({
+    firstName: false,
+    lastName: false,
+    username: false,
+    age: false,
+  });
   const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken'>('idle');
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { setMounted(true); }, []);
+
+  // Hidratar desde el contexto si venimos de una visita anterior
   useEffect(() => {
+    if (data.fullName) {
+      const parts = data.fullName.trim().split(' ');
+      if (parts.length > 1) {
+        setLastName(parts.pop() || '');
+        setFirstName(parts.join(' '));
+      } else {
+        setFirstName(parts[0] || '');
+      }
+    }
     if (data.photo) {
       setPhotoPreview(URL.createObjectURL(data.photo));
       setPhotoFile(data.photo);
     }
-  }, [data.photo]);
+  }, [data.fullName, data.photo]);
 
-  const isFullNameValid = fullName.trim().length >= 2;
+  const isFirstNameValid = firstName.trim().length >= 2;
+  const isLastNameValid = lastName.trim().length >= 2;
   const isUsernameValid = /^[a-z0-9_.]{3,}$/.test(username.trim());
-  const isCityValid = city.trim().length >= 2;
+  const isAgeValid = /^\d+$/.test(age) && parseInt(age) >= 13 && parseInt(age) <= 99;
   const isUsernameAvailable = usernameStatus === 'available';
-  const isValid = isFullNameValid && isUsernameValid && isCityValid && isUsernameAvailable;
+  const isValid = isFirstNameValid && isLastNameValid && isUsernameValid && isAgeValid && isUsernameAvailable;
 
   useEffect(() => {
     if (!isUsernameValid) { setUsernameStatus('idle'); return; }
@@ -65,12 +84,13 @@ export const BasicInfoPage = () => {
   };
 
   const handleContinue = () => {
-    setTouched({ fullName: true, username: true, city: true });
+    setTouched({ firstName: true, lastName: true, username: true, age: true });
     if (!isValid) return;
+    const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
     setData({
-      fullName: fullName.trim(),
+      fullName,
       username: username.trim().toLowerCase(),
-      city: city.trim(),
+      age,
       photo: photoFile || undefined,
     });
     navigate('/auth');
@@ -99,6 +119,9 @@ export const BasicInfoPage = () => {
     ml: 0.5,
   } as const;
 
+  // Nombre completo para el preview
+  const previewFullName = `${firstName.trim()} ${lastName.trim()}`.trim();
+
   return (
     <Box
       sx={{
@@ -112,7 +135,6 @@ export const BasicInfoPage = () => {
         transition: 'opacity 0.4s ease',
       }}
     >
-      {/* Fondo editorial aislado */}
       <Box sx={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 0 }}>
         <EditorialBackground />
       </Box>
@@ -173,7 +195,6 @@ export const BasicInfoPage = () => {
               <ArrowBackIcon sx={{ fontSize: 18 }} />
             </Button>
 
-            {/* Indicador de progreso (2 de 3) */}
             <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
               <Box sx={{ width: 8, height: 8, borderRadius: 4, bgcolor: BLACK }} />
               <Box sx={{ width: 24, height: 8, borderRadius: 4, bgcolor: BLACK }} />
@@ -183,7 +204,7 @@ export const BasicInfoPage = () => {
             <Box sx={{ width: 40 }} />
           </Box>
 
-          {/* ── Hero (título + subtítulo) ── */}
+          {/* ── Hero ── */}
           <Box
             sx={{
               mt: { xs: 4, md: 6 },
@@ -302,27 +323,54 @@ export const BasicInfoPage = () => {
               animation: `${fadeInUp} 0.6s ${SMOOTH} both 0.25s`,
             }}
           >
-            {/* Nombre completo (full width) */}
-            <Box sx={{ gridColumn: { md: '1 / -1' } }}>
-              <Typography sx={labelSx}>Nombre completo</Typography>
-              <Box sx={inputBoxSx(touched.fullName && !isFullNameValid)}>
+            {/* Nombre */}
+            <Box>
+              <Typography sx={labelSx}>Nombre</Typography>
+              <Box sx={inputBoxSx(touched.firstName && !isFirstNameValid)}>
                 <InputBase
-                  value={fullName}
+                  value={firstName}
                   onChange={(e) => {
-                    setFullName(e.target.value);
-                    setTouched(s => ({ ...s, fullName: true }));
+                    setFirstName(e.target.value);
+                    setTouched(s => ({ ...s, firstName: true }));
                   }}
-                  placeholder="Alex García"
+                  placeholder="Alex"
                   sx={{ flex: 1, fontSize: 15, fontWeight: 500, color: BLACK }}
                 />
-                {touched.fullName && isFullNameValid && (
+                {touched.firstName && isFirstNameValid && (
                   <span style={{ color: BLACK, fontSize: 16 }}>✓</span>
                 )}
-                {touched.fullName && !isFullNameValid && (
+                {touched.firstName && !isFirstNameValid && (
                   <span style={{ color: '#EF4444', fontSize: 14 }}>✕</span>
                 )}
               </Box>
-              {touched.fullName && !isFullNameValid && (
+              {touched.firstName && !isFirstNameValid && (
+                <Typography sx={{ fontSize: 12, color: '#EF4444', mt: 0.5, ml: 0.5 }}>
+                  Mínimo 2 caracteres
+                </Typography>
+              )}
+            </Box>
+
+            {/* Apellidos */}
+            <Box>
+              <Typography sx={labelSx}>Apellidos</Typography>
+              <Box sx={inputBoxSx(touched.lastName && !isLastNameValid)}>
+                <InputBase
+                  value={lastName}
+                  onChange={(e) => {
+                    setLastName(e.target.value);
+                    setTouched(s => ({ ...s, lastName: true }));
+                  }}
+                  placeholder="García"
+                  sx={{ flex: 1, fontSize: 15, fontWeight: 500, color: BLACK }}
+                />
+                {touched.lastName && isLastNameValid && (
+                  <span style={{ color: BLACK, fontSize: 16 }}>✓</span>
+                )}
+                {touched.lastName && !isLastNameValid && (
+                  <span style={{ color: '#EF4444', fontSize: 14 }}>✕</span>
+                )}
+              </Box>
+              {touched.lastName && !isLastNameValid && (
                 <Typography sx={{ fontSize: 12, color: '#EF4444', mt: 0.5, ml: 0.5 }}>
                   Mínimo 2 caracteres
                 </Typography>
@@ -374,35 +422,37 @@ export const BasicInfoPage = () => {
               )}
             </Box>
 
-            {/* Ciudad */}
+            {/* Edad */}
             <Box>
-              <Typography sx={labelSx}>Ciudad</Typography>
-              <Box sx={inputBoxSx(touched.city && !isCityValid)}>
+              <Typography sx={labelSx}>Edad</Typography>
+              <Box sx={inputBoxSx(touched.age && !isAgeValid)}>
                 <InputBase
-                  value={city}
+                  value={age}
                   onChange={(e) => {
-                    setCity(e.target.value);
-                    setTouched(s => ({ ...s, city: true }));
+                    const v = e.target.value.replace(/\D/g, '').slice(0, 2);
+                    setAge(v);
+                    setTouched(s => ({ ...s, age: true }));
                   }}
-                  placeholder="Valencia"
+                  placeholder="24"
+                  inputProps={{ inputMode: 'numeric' }}
                   sx={{ flex: 1, fontSize: 15, fontWeight: 500, color: BLACK }}
                 />
-                {touched.city && isCityValid && (
+                {touched.age && isAgeValid && (
                   <span style={{ color: BLACK, fontSize: 16 }}>✓</span>
                 )}
-                {touched.city && !isCityValid && (
+                {touched.age && !isAgeValid && (
                   <span style={{ color: '#EF4444', fontSize: 14 }}>✕</span>
                 )}
               </Box>
-              {touched.city && !isCityValid && (
+              {touched.age && !isAgeValid && (
                 <Typography sx={{ fontSize: 12, color: '#EF4444', mt: 0.5, ml: 0.5 }}>
-                  Mínimo 2 caracteres
+                  Entre 13 y 99 años
                 </Typography>
               )}
             </Box>
           </Box>
 
-          {/* ── Botón Continuar (fixed en móvil, en flujo en desktop) ── */}
+          {/* ── Botón Continuar ── */}
           <Box
             sx={{
               position: { xs: 'fixed', md: 'static' },
@@ -533,7 +583,7 @@ export const BasicInfoPage = () => {
                     fontFamily: '"Instrument Sans", system-ui, sans-serif',
                   }}
                 >
-                  {fullName.trim() || 'Tu nombre'}
+                  {previewFullName || 'Tu nombre'}
                 </Typography>
                 <Typography
                   sx={{
@@ -546,7 +596,7 @@ export const BasicInfoPage = () => {
                 >
                   @{username.trim() || 'usuario'}
                 </Typography>
-                {city.trim() && (
+                {age && (
                   <Typography
                     sx={{
                       fontSize: 13,
@@ -555,7 +605,7 @@ export const BasicInfoPage = () => {
                       mt: 1.5,
                     }}
                   >
-                    📍 {city.trim()}
+                    {age} años
                   </Typography>
                 )}
               </Box>
