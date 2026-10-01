@@ -9,6 +9,7 @@ import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
 import { api } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
+import { OrangeLinesBackground } from '../components/OrangeLinesBackground';
 import { SMOOTH, BLACK } from '../theme';
 
 const fadeInUp = keyframes`
@@ -527,8 +528,11 @@ export default function Home() {
         overflowX: 'clip',
         bgcolor: '#FAFAF8',
         pb: { xs: showBottomAd ? '72px' : 0, md: 0 },
+        position: 'relative',
       }}
     >
+      <OrangeLinesBackground opacity={0.35} />
+
       <Box
         sx={{
           maxWidth: MAX_WIDTH,
@@ -539,6 +543,8 @@ export default function Home() {
           display: 'flex',
           flexDirection: 'column',
           gap: { xs: 3, md: 4 },
+          position: 'relative',
+          zIndex: 1,
         }}
       >
         {/* ═══════════ HERO AD ═══════════ */}
