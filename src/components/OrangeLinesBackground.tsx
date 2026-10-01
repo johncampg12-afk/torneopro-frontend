@@ -1,340 +1,211 @@
-import { Box, keyframes } from '@mui/material';
+import { useState } from 'react';
+import { Dialog, Box, Typography, Button, InputBase, keyframes } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import { api } from '../lib/api';
+import { useAuth } from '../contexts/AuthContext';
+import { SMOOTH, SPRING, BLACK } from '../theme';
 
-// ── Movimientos tipo lámpara de lava ──
-const blob1 = keyframes`
-  0%   { transform: translate(0, 0) scale(1); }
-  25%  { transform: translate(18vw, -14vh) scale(1.12); }
-  50%  { transform: translate(-10vw, 20vh) scale(0.92); }
-  75%  { transform: translate(-22vw, -8vh) scale(1.06); }
-  100% { transform: translate(0, 0) scale(1); }
-`;
-const blob2 = keyframes`
-  0%   { transform: translate(0, 0) scale(1); }
-  30%  { transform: translate(-16vw, 12vh) scale(1.08); }
-  60%  { transform: translate(14vw, -20vh) scale(0.94); }
-  100% { transform: translate(0, 0) scale(1); }
-`;
-const blob3 = keyframes`
-  0%   { transform: translate(0, 0) scale(1); }
-  20%  { transform: translate(10vw, 18vh) scale(1.1); }
-  50%  { transform: translate(-24vw, 6vh) scale(0.96); }
-  80%  { transform: translate(16vw, -10vh) scale(1.04); }
-  100% { transform: translate(0, 0) scale(1); }
-`;
-const blob4 = keyframes`
-  0%   { transform: translate(0, 0) scale(1); }
-  40%  { transform: translate(-20vw, -12vh) scale(1.15); }
-  70%  { transform: translate(12vw, 14vh) scale(0.9); }
-  100% { transform: translate(0, 0) scale(1); }
-`;
-const blob5 = keyframes`
-  0%   { transform: translate(0, 0) scale(1); }
-  35%  { transform: translate(22vw, 8vh) scale(1.05); }
-  65%  { transform: translate(-8vw, -18vh) scale(1.1); }
-  100% { transform: translate(0, 0) scale(1); }
-`;
-
-// ── Movimientos de triángulos (flotación + rotación lenta) ──
-const triFloatA = keyframes`
-  0%   { transform: translate(0, 0) rotate(0deg); }
-  25%  { transform: translate(6vw, -8vh) rotate(45deg); }
-  50%  { transform: translate(-4vw, 10vh) rotate(120deg); }
-  75%  { transform: translate(-8vw, -6vh) rotate(200deg); }
-  100% { transform: translate(0, 0) rotate(360deg); }
-`;
-const triFloatB = keyframes`
-  0%   { transform: translate(0, 0) rotate(0deg); }
-  30%  { transform: translate(-10vw, 8vh) rotate(-60deg); }
-  60%  { transform: translate(8vw, -12vh) rotate(-180deg); }
-  100% { transform: translate(0, 0) rotate(-360deg); }
-`;
-const triFloatC = keyframes`
-  0%   { transform: translate(0, 0) rotate(0deg); }
-  40%  { transform: translate(12vw, 6vh) rotate(90deg); }
-  70%  { transform: translate(-6vw, -10vh) rotate(220deg); }
-  100% { transform: translate(0, 0) rotate(360deg); }
-`;
-const triFloatD = keyframes`
-  0%   { transform: translate(0, 0) rotate(0deg); }
-  20%  { transform: translate(-8vw, -12vh) rotate(-45deg); }
-  55%  { transform: translate(10vw, 10vh) rotate(-150deg); }
-  85%  { transform: translate(-4vw, 6vh) rotate(-280deg); }
-  100% { transform: translate(0, 0) rotate(-360deg); }
+const scaleIn = keyframes`
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
 `;
 
 interface Props {
-  opacity?: number;
-  color?: string;
+  open: boolean;
+  onClose: () => void;
 }
 
-export const OrangeLinesBackground = ({
-  opacity = 0.6,
-  color = '#f97316',
-}: Props) => {
-  const warmColors = [color, '#ea580c', '#f59e0b', '#fb923c', '#fbbf24', '#fb7185'];
+export const OrganizerAccessModal = ({ open, onClose }: Props) => {
+  const [user, setUser] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const { login } = useAuth();
+
+  const handleSubmit = async () => {
+    if (!user || !password) return;
+    setLoading(true);
+    setError('');
+    try {
+      const res = await api.post('/auth/verify-organizer', { user, password });
+      if (res.data?.ok && res.data.token && res.data.user) {
+        login(res.data.token, res.data.user);
+        onClose();
+        navigate('/dashboard');
+      } else {
+        setError('Credenciales incorrectas');
+      }
+    } catch (e: any) {
+      setError(e.response?.data?.message || 'Credenciales incorrectas');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const inputSx = {
+    flex: 1,
+    fontSize: 15,
+    fontWeight: 500,
+    color: BLACK,
+    '& input::placeholder': { color: 'rgba(17,17,17,0.3)' },
+  } as const;
+
+  const boxSx = (hasError: boolean) => ({
+    mt: 2,
+    height: 52,
+    display: 'flex',
+    alignItems: 'center',
+    borderBottom: '1.5px solid',
+    borderColor: hasError ? '#DC2626' : 'rgba(17,17,17,0.14)',
+    transition: `border-color 0.25s ${SMOOTH}`,
+    '&:focus-within': { borderColor: BLACK },
+  });
 
   return (
-    <Box
-      sx={{
-        position: 'absolute',
-        inset: 0,
-        overflow: 'hidden',
-        pointerEvents: 'none',
-        zIndex: 0,
-        opacity,
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="xs"
+      fullWidth
+      slotProps={{
+        backdrop: {
+          sx: { bgcolor: 'rgba(10,10,10,0.6)', backdropFilter: 'blur(8px)' },
+        },
+        paper: {
+          sx: {
+            borderRadius: '24px',
+            bgcolor: '#FAFAF8',
+            p: 3.5,
+            backgroundImage: 'none',
+            animation: `${scaleIn} 0.5s ${SPRING} both`,
+            boxShadow: '0 24px 80px rgba(0,0,0,0.3)',
+          },
+        },
       }}
     >
-      {/* ═══════════ FONDO LAVA (blobs con gooey) ═══════════ */}
-      <svg style={{ position: 'absolute', width: 0, height: 0 }} aria-hidden="true">
-        <defs>
-          <filter id="lava-goo">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="30" result="blur" />
-            <feColorMatrix
-              in="blur"
-              mode="matrix"
-              values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 28 -12"
-              result="goo"
-            />
-          </filter>
-        </defs>
-      </svg>
-
-      <Box
+      <Typography
         sx={{
-          position: 'absolute',
-          inset: '-10%',
-          filter: 'url(#lava-goo)',
+          fontSize: 11,
+          fontWeight: 700,
+          letterSpacing: 1.4,
+          textTransform: 'uppercase',
+          color: 'rgba(17,17,17,0.4)',
+          mb: 1.5,
         }}
       >
-        <Box
-          sx={{
-            position: 'absolute', top: '8%', left: '10%',
-            width: '32vw', height: '32vw', maxWidth: 480, maxHeight: 480,
-            borderRadius: '50%', bgcolor: warmColors[0],
-            animation: `${blob1} 32s ease-in-out infinite`,
-          }}
-        />
-        <Box
-          sx={{
-            position: 'absolute', top: '15%', right: '12%',
-            width: '26vw', height: '26vw', maxWidth: 400, maxHeight: 400,
-            borderRadius: '50%', bgcolor: warmColors[2],
-            animation: `${blob2} 38s ease-in-out infinite`,
-          }}
-        />
-        <Box
-          sx={{
-            position: 'absolute', top: '40%', left: '35%',
-            width: '30vw', height: '30vw', maxWidth: 440, maxHeight: 440,
-            borderRadius: '50%', bgcolor: warmColors[1],
-            animation: `${blob3} 45s ease-in-out infinite`,
-          }}
-        />
-        <Box
-          sx={{
-            position: 'absolute', bottom: '12%', left: '8%',
-            width: '28vw', height: '28vw', maxWidth: 420, maxHeight: 420,
-            borderRadius: '50%', bgcolor: warmColors[3],
-            animation: `${blob4} 40s ease-in-out infinite`,
-          }}
-        />
-        <Box
-          sx={{
-            position: 'absolute', bottom: '8%', right: '10%',
-            width: '24vw', height: '24vw', maxWidth: 360, maxHeight: 360,
-            borderRadius: '50%', bgcolor: warmColors[4],
-            animation: `${blob5} 36s ease-in-out infinite`,
-          }}
-        />
-      </Box>
-
-      {/* ═══════════ TRIÁNGULOS DE LÍNEA NEGRA FLOTANDO ═══════════ */}
-      <Box
+        Acceso restringido
+      </Typography>
+      <Typography
         sx={{
-          position: 'absolute',
-          inset: 0,
-          overflow: 'hidden',
+          fontSize: 26,
+          fontWeight: 800,
+          letterSpacing: -0.8,
+          lineHeight: 1.1,
+          color: BLACK,
+          fontFamily: '"Instrument Sans", system-ui, sans-serif',
         }}
       >
-        {/* Triángulo 1 · grande arriba-izquierda */}
-        <Box
-          component="svg"
-          viewBox="0 0 100 100"
-          sx={{
-            position: 'absolute',
-            top: '10%',
-            left: '8%',
-            width: { xs: 90, md: 140 },
-            height: { xs: 90, md: 140 },
-            opacity: 0.28,
-            animation: `${triFloatA} 55s ease-in-out infinite`,
-          }}
-        >
-          <polygon
-            points="50,8 92,92 8,92"
-            fill="none"
-            stroke="#0A0A0A"
-            strokeWidth="1"
-            strokeLinejoin="round"
-            vectorEffect="non-scaling-stroke"
-          />
-        </Box>
+        Acceso organizadores
+      </Typography>
+      <Typography
+        sx={{
+          mt: 2,
+          fontSize: 14,
+          color: 'rgba(17,17,17,0.6)',
+          lineHeight: 1.55,
+          fontWeight: 500,
+        }}
+      >
+        Introduce tus credenciales de organización para entrar directamente.
+      </Typography>
 
-        {/* Triángulo 2 · medio derecha */}
-        <Box
-          component="svg"
-          viewBox="0 0 100 100"
+      {/* Usuario */}
+      <Box sx={{ mt: 3 }}>
+        <Typography
           sx={{
-            position: 'absolute',
-            top: '35%',
-            right: '12%',
-            width: { xs: 70, md: 110 },
-            height: { xs: 70, md: 110 },
-            opacity: 0.22,
-            animation: `${triFloatB} 62s ease-in-out infinite`,
+            fontSize: 11,
+            fontWeight: 700,
+            letterSpacing: 1,
+            textTransform: 'uppercase',
+            color: 'rgba(17,17,17,0.45)',
+            mb: 1,
           }}
         >
-          <polygon
-            points="50,8 92,92 8,92"
-            fill="none"
-            stroke="#0A0A0A"
-            strokeWidth="1"
-            strokeLinejoin="round"
-            vectorEffect="non-scaling-stroke"
-          />
-        </Box>
-
-        {/* Triángulo 3 · pequeño abajo-izquierda */}
-        <Box
-          component="svg"
-          viewBox="0 0 100 100"
-          sx={{
-            position: 'absolute',
-            bottom: '15%',
-            left: '18%',
-            width: { xs: 60, md: 90 },
-            height: { xs: 60, md: 90 },
-            opacity: 0.32,
-            animation: `${triFloatC} 48s ease-in-out infinite`,
-          }}
-        >
-          <polygon
-            points="50,8 92,92 8,92"
-            fill="none"
-            stroke="#0A0A0A"
-            strokeWidth="1"
-            strokeLinejoin="round"
-            vectorEffect="non-scaling-stroke"
-          />
-        </Box>
-
-        {/* Triángulo 4 · mediano abajo-derecha */}
-        <Box
-          component="svg"
-          viewBox="0 0 100 100"
-          sx={{
-            position: 'absolute',
-            bottom: '20%',
-            right: '22%',
-            width: { xs: 80, md: 120 },
-            height: { xs: 80, md: 120 },
-            opacity: 0.24,
-            animation: `${triFloatD} 58s ease-in-out infinite`,
-          }}
-        >
-          <polygon
-            points="50,8 92,92 8,92"
-            fill="none"
-            stroke="#0A0A0A"
-            strokeWidth="1"
-            strokeLinejoin="round"
-            vectorEffect="non-scaling-stroke"
-          />
-        </Box>
-
-        {/* Triángulo 5 · mini arriba-centro */}
-        <Box
-          component="svg"
-          viewBox="0 0 100 100"
-          sx={{
-            position: 'absolute',
-            top: '18%',
-            left: '48%',
-            width: { xs: 50, md: 70 },
-            height: { xs: 50, md: 70 },
-            opacity: 0.35,
-            animation: `${triFloatA} 45s ease-in-out infinite 3s`,
-          }}
-        >
-          <polygon
-            points="50,8 92,92 8,92"
-            fill="none"
-            stroke="#0A0A0A"
-            strokeWidth="1"
-            strokeLinejoin="round"
-            vectorEffect="non-scaling-stroke"
-          />
-        </Box>
-
-        {/* Triángulo 6 · mini centro */}
-        <Box
-          component="svg"
-          viewBox="0 0 100 100"
-          sx={{
-            position: 'absolute',
-            top: '60%',
-            left: '42%',
-            width: { xs: 44, md: 64 },
-            height: { xs: 44, md: 64 },
-            opacity: 0.2,
-            animation: `${triFloatB} 52s ease-in-out infinite 5s`,
-          }}
-        >
-          <polygon
-            points="50,8 92,92 8,92"
-            fill="none"
-            stroke="#0A0A0A"
-            strokeWidth="1"
-            strokeLinejoin="round"
-            vectorEffect="non-scaling-stroke"
-          />
-        </Box>
-
-        {/* Triángulo 7 · grande abajo-derecha */}
-        <Box
-          component="svg"
-          viewBox="0 0 100 100"
-          sx={{
-            position: 'absolute',
-            bottom: '5%',
-            right: '5%',
-            width: { xs: 100, md: 150 },
-            height: { xs: 100, md: 150 },
-            opacity: 0.18,
-            animation: `${triFloatC} 70s ease-in-out infinite 2s`,
-          }}
-        >
-          <polygon
-            points="50,8 92,92 8,92"
-            fill="none"
-            stroke="#0A0A0A"
-            strokeWidth="1"
-            strokeLinejoin="round"
-            vectorEffect="non-scaling-stroke"
+          Usuario
+        </Typography>
+        <Box sx={boxSx(false)}>
+          <InputBase
+            value={user}
+            onChange={(e) => setUser(e.target.value.toLowerCase().replace(/\s/g, ''))}
+            placeholder="usuario"
+            autoFocus
+            sx={inputSx}
           />
         </Box>
       </Box>
 
-      {/* ═══════════ Suavizado en los bordes ═══════════ */}
-      <Box
+      {/* Contraseña */}
+      <Box>
+        <Typography
+          sx={{
+            fontSize: 11,
+            fontWeight: 700,
+            letterSpacing: 1,
+            textTransform: 'uppercase',
+            color: 'rgba(17,17,17,0.45)',
+            mt: 2.5,
+            mb: 1,
+          }}
+        >
+          Contraseña
+        </Typography>
+        <Box sx={boxSx(!!error)}>
+          <InputBase
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+            placeholder="••••••••••••"
+            type="password"
+            sx={inputSx}
+          />
+        </Box>
+      </Box>
+
+      {error && (
+        <Typography sx={{ mt: 1.5, fontSize: 13, color: '#DC2626', fontWeight: 500 }}>
+          {error}
+        </Typography>
+      )}
+
+      <Button
+        fullWidth
+        disabled={!user || !password || loading}
+        onClick={handleSubmit}
         sx={{
-          position: 'absolute',
-          inset: 0,
-          background:
-            'radial-gradient(ellipse at center, transparent 40%, rgba(250,250,248,0.6) 95%)',
-          pointerEvents: 'none',
+          mt: 4,
+          height: 56,
+          borderRadius: '16px',
+          fontWeight: 700,
+          fontSize: 15.5,
+          bgcolor: BLACK,
+          color: 'white',
+          '&:disabled': { bgcolor: 'rgba(17,17,17,0.06)', color: 'rgba(17,17,17,0.3)' },
+          '&:hover': { bgcolor: '#1a1a1a' },
+          '&:active': { transform: 'scale(0.985)' },
         }}
-      />
-    </Box>
+      >
+        {loading ? 'Comprobando…' : 'Entrar'}
+      </Button>
+
+      <Box
+        onClick={onClose}
+        sx={{ mt: 2, textAlign: 'center', cursor: 'pointer', '&:hover': { opacity: 0.7 } }}
+      >
+        <Typography sx={{ fontSize: 13.5, fontWeight: 500, color: 'rgba(17,17,17,0.5)' }}>
+          Cancelar
+        </Typography>
+      </Box>
+    </Dialog>
   );
 };
