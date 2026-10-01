@@ -18,14 +18,14 @@ const float2 = keyframes`
 
 const float3 = keyframes`
   0%   { transform: translate(0, 0) rotate(0deg) scale(1); }
-  50%  { transform: translate(10vw, -10vh) rotate(120deg) scale(1.1); }
+  50%  { transform: translate(10vw, -10vh) rotate(120deg) scale(1.08); }
   100% { transform: translate(0, 0) rotate(240deg) scale(1); }
 `;
 
 const float4 = keyframes`
   0%   { transform: translate(0, 0) rotate(0deg) scale(1); }
-  40%  { transform: translate(-12vw, -6vh) rotate(-90deg) scale(0.9); }
-  70%  { transform: translate(8vw, 8vh) rotate(-200deg) scale(1.05); }
+  40%  { transform: translate(-12vw, -6vh) rotate(-90deg) scale(0.94); }
+  70%  { transform: translate(8vw, 8vh) rotate(-200deg) scale(1.04); }
   100% { transform: translate(0, 0) rotate(-360deg) scale(1); }
 `;
 
@@ -48,9 +48,10 @@ interface TriangleProps {
   size: number;
   strokeWidth: number;
   opacity: number;
+  color: string;
 }
 
-const Triangle = ({ size, strokeWidth, opacity }: TriangleProps) => (
+const Triangle = ({ size, strokeWidth, opacity, color }: TriangleProps) => (
   <svg
     width={size}
     height={size}
@@ -61,7 +62,7 @@ const Triangle = ({ size, strokeWidth, opacity }: TriangleProps) => (
   >
     <polygon
       points="50,8 92,88 8,88"
-      stroke="#0A0A0A"
+      stroke={color}
       strokeWidth={strokeWidth}
       strokeLinejoin="round"
       fill="none"
@@ -76,22 +77,66 @@ interface Props {
   color?: string;
 }
 
+// ── Tipos de triángulos por escala ──
+type TriangleConfig = {
+  size: number;
+  stroke: number;
+  opa: number;
+  top?: string;
+  left?: string;
+  right?: string;
+  bottom?: string;
+  anim: any;
+  dur: number;
+  delay?: number;
+};
+
+// GRANDES (muy grandes, muy sutiles, lentos)
+const largeTriangles: TriangleConfig[] = [
+  { size: 380, stroke: 1, opa: 0.18, top: '-4%', left: '-6%', anim: float1, dur: 70 },
+  { size: 340, stroke: 1, opa: 0.16, top: '20%', right: '-8%', anim: float3, dur: 80, delay: 3 },
+  { size: 420, stroke: 1.2, opa: 0.15, bottom: '-8%', left: '25%', anim: float4, dur: 90, delay: 5 },
+  { size: 300, stroke: 0.9, opa: 0.2, top: '55%', right: '20%', anim: float5, dur: 75, delay: 2 },
+];
+
+// MEDIANOS (visibles, ritmo medio)
+const mediumTriangles: TriangleConfig[] = [
+  { size: 180, stroke: 1, opa: 0.35, top: '10%', left: '20%', anim: float2, dur: 55 },
+  { size: 160, stroke: 1, opa: 0.4, top: '35%', right: '8%', anim: float5, dur: 50, delay: 1 },
+  { size: 200, stroke: 1.1, opa: 0.3, bottom: '18%', left: '8%', anim: float6, dur: 60, delay: 4 },
+  { size: 150, stroke: 1, opa: 0.38, bottom: '30%', right: '25%', anim: float1, dur: 48, delay: 2 },
+  { size: 170, stroke: 1, opa: 0.32, top: '70%', left: '40%', anim: float3, dur: 58, delay: 6 },
+  { size: 140, stroke: 0.9, opa: 0.4, top: '15%', right: '35%', anim: float4, dur: 52, delay: 3 },
+];
+
+// PEQUEÑOS (muchos, más visibles en proporción, dan textura)
+const smallTriangles: TriangleConfig[] = [
+  { size: 80, stroke: 1, opa: 0.5, top: '5%', left: '42%', anim: float5, dur: 40 },
+  { size: 70, stroke: 0.9, opa: 0.55, top: '25%', left: '8%', anim: float2, dur: 36, delay: 1 },
+  { size: 90, stroke: 1, opa: 0.45, top: '45%', left: '55%', anim: float6, dur: 44, delay: 2 },
+  { size: 60, stroke: 0.9, opa: 0.6, top: '60%', left: '18%', anim: float1, dur: 38, delay: 3 },
+  { size: 75, stroke: 1, opa: 0.5, top: '80%', right: '12%', anim: float3, dur: 42, delay: 1 },
+  { size: 65, stroke: 0.9, opa: 0.55, bottom: '8%', left: '35%', anim: float4, dur: 40, delay: 4 },
+  { size: 85, stroke: 1, opa: 0.45, bottom: '22%', right: '45%', anim: float5, dur: 46, delay: 2 },
+  { size: 55, stroke: 0.9, opa: 0.6, top: '55%', right: '8%', anim: float2, dur: 34, delay: 5 },
+  { size: 70, stroke: 1, opa: 0.5, top: '35%', left: '30%', anim: float6, dur: 42, delay: 3 },
+  { size: 60, stroke: 0.9, opa: 0.55, bottom: '45%', right: '18%', anim: float1, dur: 38, delay: 6 },
+  { size: 80, stroke: 1, opa: 0.45, top: '75%', left: '62%', anim: float3, dur: 44, delay: 2 },
+  { size: 65, stroke: 0.9, opa: 0.55, top: '12%', left: '70%', anim: float5, dur: 40, delay: 4 },
+  { size: 75, stroke: 1, opa: 0.5, bottom: '15%', left: '55%', anim: float2, dur: 42, delay: 1 },
+  { size: 55, stroke: 0.9, opa: 0.6, top: '90%', right: '35%', anim: float4, dur: 36, delay: 5 },
+  { size: 70, stroke: 1, opa: 0.5, top: '50%', left: '75%', anim: float6, dur: 44, delay: 3 },
+  { size: 60, stroke: 0.9, opa: 0.55, bottom: '50%', left: '45%', anim: float1, dur: 38, delay: 2 },
+];
+
 export const OrangeLinesBackground = ({
   opacity = 0.5,
   color = '#0A0A0A',
 }: Props) => {
-  // Configuración de cada triángulo: tamaño, grosor de línea, opacidad, posición y animación
-  const triangles = [
-    { size: 120, stroke: 1.2, opa: 0.5, top: '8%', left: '6%', anim: float1, dur: 42 },
-    { size: 90, stroke: 1, opa: 0.45, top: '18%', right: '12%', anim: float2, dur: 38 },
-    { size: 160, stroke: 1.4, opa: 0.35, top: '48%', left: '40%', anim: float3, dur: 52 },
-    { size: 70, stroke: 1, opa: 0.5, bottom: '18%', left: '12%', anim: float4, dur: 46 },
-    { size: 100, stroke: 1.2, opa: 0.4, bottom: '12%', right: '8%', anim: float5, dur: 40 },
-    { size: 140, stroke: 1.3, opa: 0.35, top: '30%', right: '35%', anim: float6, dur: 56 },
-    { size: 60, stroke: 0.9, opa: 0.55, top: '65%', right: '22%', anim: float1, dur: 44 },
-    { size: 80, stroke: 1, opa: 0.4, bottom: '40%', left: '55%', anim: float2, dur: 50 },
-    { size: 110, stroke: 1.1, opa: 0.35, top: '80%', left: '30%', anim: float3, dur: 48 },
-    { size: 65, stroke: 0.9, opa: 0.5, top: '22%', left: '55%', anim: float5, dur: 42 },
+  const allTriangles: TriangleConfig[] = [
+    ...largeTriangles,
+    ...mediumTriangles,
+    ...smallTriangles,
   ];
 
   return (
@@ -105,8 +150,7 @@ export const OrangeLinesBackground = ({
         opacity,
       }}
     >
-      {/* Los triángulos, flotando */}
-      {triangles.map((t, i) => (
+      {allTriangles.map((t, i) => (
         <Box
           key={i}
           sx={{
@@ -116,19 +160,16 @@ export const OrangeLinesBackground = ({
             right: t.right,
             bottom: t.bottom,
             animation: `${t.anim} ${t.dur}s ease-in-out infinite`,
+            animationDelay: t.delay ? `${t.delay}s` : '0s',
             willChange: 'transform',
           }}
         >
-          {/* Forzamos el color del stroke por encima */}
-          <Box
-            sx={{
-              '& svg polygon': {
-                stroke: color,
-              },
-            }}
-          >
-            <Triangle size={t.size} strokeWidth={t.stroke} opacity={t.opa} />
-          </Box>
+          <Triangle
+            size={t.size}
+            strokeWidth={t.stroke}
+            opacity={t.opa}
+            color={color}
+          />
         </Box>
       ))}
 
