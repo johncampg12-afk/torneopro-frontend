@@ -134,28 +134,51 @@ export const AuthPage = () => {
 
   // ── Hero ──
   const Hero = (
-    <Box sx={{ animation: `${fadeInUp} 0.7s ${SMOOTH} both 0.1s` }}>
-      <Box sx={{
-        height: 1, bgcolor: 'rgba(17,17,17,0.14)',
-        transformOrigin: 'left center',
-        animation: `${lineGrow} 0.8s ${SMOOTH} both 0.5s`,
-      }} />
-      <Typography sx={{
-        mt: { xs: 5, md: 4 },
-        fontSize: { xs: 42, md: 44, lg: 52 },
-        lineHeight: 1.02, fontWeight: 800, letterSpacing: -1.6,
-        color: BLACK, fontFamily: '"Instrument Sans", system-ui, sans-serif',
-      }}>
-        {isRegistering ? 'Crea tu' : 'Bienvenido,'}<br />
-        <Box component="span" sx={{ color: 'rgba(17,17,17,0.35)', fontWeight: 700 }}>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: { xs: 3, md: 3 },
+        animation: `${fadeInUp} 0.7s ${SMOOTH} both 0.1s`,
+      }}
+    >
+      <Box
+        sx={{
+          width: '100%',
+          height: '1px',
+          bgcolor: 'rgba(17,17,17,0.14)',
+          transformOrigin: 'left center',
+          animation: `${lineGrow} 0.8s ${SMOOTH} both 0.4s`,
+        }}
+      />
+
+      <Typography
+        sx={{
+          fontSize: { xs: 36, sm: 44, md: 52, lg: 64 },
+          lineHeight: 1.02,
+          fontWeight: 800,
+          letterSpacing: -1.8,
+          color: BLACK,
+          fontFamily: '"Instrument Sans", system-ui, sans-serif',
+          mt: { xs: 2, md: 1 },
+        }}
+      >
+        {isRegistering ? 'Crea tu' : 'Bienvenido,'}
+        <br />
+        <Box component="span" sx={{ color: 'rgba(17,17,17,0.32)', fontWeight: 700 }}>
           {isRegistering ? 'cuenta' : (displayName ? displayName.split(' ')[0] : 'de nuevo')}
         </Box>
       </Typography>
-      <Typography sx={{
-        mt: { xs: 2.5, md: 2.5 },
-        fontSize: { xs: 15, md: 15.5 },
-        fontWeight: 500, color: TEXT_SECONDARY, lineHeight: 1.55, maxWidth: 400,
-      }}>
+
+      <Typography
+        sx={{
+          fontSize: { xs: 15, md: 16 },
+          fontWeight: 500,
+          color: TEXT_SECONDARY,
+          lineHeight: 1.6,
+          maxWidth: 400,
+        }}
+      >
         {isRegistering
           ? 'Solo necesitamos tu email y una contraseña para guardar todo.'
           : 'Introduce tus datos para acceder a tus torneos.'}
@@ -165,18 +188,26 @@ export const AuthPage = () => {
 
   // ── Botones auth ──
   const AuthButtons = (
-    <Box sx={{
-      display: 'flex', flexDirection: 'column', gap: 1.5,
-      animation: `${fadeInUp} 0.6s ${SMOOTH} both 0.35s`,
-    }}>
-      <Box sx={{
-        '& > div': { width: '100% !important' },
-        '& iframe': { width: '100% !important' },
-      }}>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 1.5,
+        animation: `${fadeInUp} 0.6s ${SMOOTH} both 0.35s`,
+      }}
+    >
+      <Box
+        sx={{
+          '& > div': { width: '100% !important' },
+          '& iframe': { width: '100% !important' },
+        }}
+      >
         <GoogleLogin
           onSuccess={(cred) => requireTerms(() => handleGoogle(cred.credential))}
           onError={() => setError('Error con Google')}
-          theme="outline" size="large" shape="pill"
+          theme="outline"
+          size="large"
+          shape="pill"
           text={isRegistering ? 'signup_with' : 'signin_with'}
           width={isDesktop ? 400 : 320}
         />
@@ -184,46 +215,79 @@ export const AuthPage = () => {
 
       <Stack direction="row" spacing={2} sx={{ alignItems: 'center', py: 0.5 }}>
         <Box sx={{ flex: 1, height: '1px', bgcolor: 'rgba(17,17,17,0.09)' }} />
-        <Typography sx={{
-          fontSize: 10, fontWeight: 700, letterSpacing: 1.2, textTransform: 'uppercase',
-          color: 'rgba(17,17,17,0.35)',
-        }}>o</Typography>
+        <Typography
+          sx={{
+            fontSize: 10,
+            fontWeight: 700,
+            letterSpacing: 1.2,
+            textTransform: 'uppercase',
+            color: 'rgba(17,17,17,0.35)',
+          }}
+        >
+          o
+        </Typography>
         <Box sx={{ flex: 1, height: '1px', bgcolor: 'rgba(17,17,17,0.09)' }} />
       </Stack>
 
-      <Button fullWidth onClick={() => setSheetOpen(true)}
+      <Button
+        fullWidth
+        onClick={() => setSheetOpen(true)}
         startIcon={<EmailIcon sx={{ fontSize: 19 }} />}
         sx={{
-          height: 54, borderRadius: '16px',
-          fontWeight: 700, fontSize: 15,
-          bgcolor: BLACK, color: 'white',
+          height: 52,
+          borderRadius: '999px',
+          fontWeight: 700,
+          fontSize: 15,
+          letterSpacing: -0.01,
+          bgcolor: BLACK,
+          color: 'white',
           boxShadow: '0 8px 24px rgba(17,17,17,0.15)',
           transition: `all 0.3s ${SMOOTH}`,
-          '&:hover': { bgcolor: '#1a1a1a', transform: 'translateY(-1px)' },
+          '&:hover': {
+            bgcolor: '#1a1a1a',
+            transform: 'translateY(-1px)',
+            boxShadow: '0 12px 32px rgba(17,17,17,0.25)',
+          },
           '&:active': { transform: 'scale(0.985)' },
-        }}>
+        }}
+      >
         {isRegistering ? 'Registrarme con email' : 'Iniciar con email'}
       </Button>
 
-      <Box sx={{
-        display: 'flex', alignItems: 'center',
-        justifyContent: 'center', gap: 2, mt: 0.5,
-      }}>
-        <Typography onClick={() => navigate('/terminos-condiciones')}
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 2,
+          mt: 0.5,
+        }}
+      >
+        <Typography
+          onClick={() => navigate('/terminos-condiciones')}
           sx={{
-            fontSize: 12, fontWeight: 500,
-            color: 'rgba(17,17,17,0.45)', cursor: 'pointer',
+            fontSize: 12,
+            fontWeight: 500,
+            color: 'rgba(17,17,17,0.45)',
+            cursor: 'pointer',
+            transition: `color 0.2s ${SMOOTH}`,
             '&:hover': { color: BLACK },
-          }}>
+          }}
+        >
           Términos
         </Typography>
         <Box sx={{ width: 3, height: 3, borderRadius: '50%', bgcolor: 'rgba(17,17,17,0.25)' }} />
-        <Typography onClick={() => navigate('/politica-privacidad')}
+        <Typography
+          onClick={() => navigate('/politica-privacidad')}
           sx={{
-            fontSize: 12, fontWeight: 500,
-            color: 'rgba(17,17,17,0.45)', cursor: 'pointer',
+            fontSize: 12,
+            fontWeight: 500,
+            color: 'rgba(17,17,17,0.45)',
+            cursor: 'pointer',
+            transition: `color 0.2s ${SMOOTH}`,
             '&:hover': { color: BLACK },
-          }}>
+          }}
+        >
           Privacidad
         </Typography>
       </Box>
@@ -231,66 +295,119 @@ export const AuthPage = () => {
   );
 
   return (
-    <Box sx={{ minHeight: '100dvh', bgcolor: '#FAFAF8', position: 'relative', overflow: 'hidden', color: 'black' }}>
-      <EditorialBackground />
-
-      <Box sx={{
-        position: 'relative', zIndex: 1,
+    <Box
+      sx={{
         minHeight: '100dvh',
-        display: 'flex',
-        flexDirection: { xs: 'column', md: 'row' },
-      }}>
+        width: '100%',
+        maxWidth: '100vw',
+        overflowX: 'clip',
+        bgcolor: '#FAFAF8',
+        position: 'relative',
+        color: 'black',
+      }}
+    >
+      {/* Fondo editorial aislado */}
+      <Box sx={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 0 }}>
+        <EditorialBackground />
+      </Box>
 
-        {/* ═══════════ COLUMNA HERO ═══════════ */}
-        <Box sx={{
-          flex: { md: 1.1 },
-          display: 'flex', flexDirection: 'column',
-          px: { xs: 3, sm: 4, md: 6, lg: 8 },
-          pt: { xs: 'calc(20px + env(safe-area-inset-top, 0px))', md: 5 },
-          pb: { xs: 'calc(24px + env(safe-area-inset-bottom, 0px))', md: 5 },
-          maxWidth: { xs: '100%', md: 580 },
+      <Box
+        sx={{
+          position: 'relative',
+          zIndex: 1,
+          minHeight: '100dvh',
           width: '100%',
-        }}>
-
-          {/* Header */}
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Button onClick={() => navigate(-1)}
+          display: 'flex',
+          flexDirection: { xs: 'column', md: 'row' },
+        }}
+      >
+        {/* ══════════ COLUMNA HERO ══════════ */}
+        <Box
+          sx={{
+            flex: { xs: 1, md: '1 1 0%' },
+            minWidth: 0,
+            maxWidth: { xs: '100%', md: 620 },
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            px: { xs: 3, sm: 5, md: 7, lg: 10 },
+            pt: { xs: 'calc(24px + env(safe-area-inset-top, 0px))', md: 6 },
+            pb: { xs: 'calc(24px + env(safe-area-inset-bottom, 0px))', md: 6 },
+          }}
+        >
+          {/* ── Header ── */}
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              animation: `${fadeInUp} 0.6s ${SMOOTH} both`,
+            }}
+          >
+            <Button
+              onClick={() => navigate(-1)}
               sx={{
-                minWidth: 32, width: 32, height: 32, borderRadius: '50%', bgcolor: '#FFFFFF',
-                border: '1px solid rgba(0,0,0,0.06)', color: 'rgba(0,0,0,0.7)',
-                display: 'grid', placeItems: 'center', p: 0,
-              }}>
-              <ArrowBackIcon sx={{ fontSize: 16 }} />
+                minWidth: 40,
+                width: 40,
+                height: 40,
+                borderRadius: '50%',
+                bgcolor: '#FFFFFF',
+                border: '1px solid rgba(17,17,17,0.06)',
+                color: 'rgba(17,17,17,0.7)',
+                display: 'grid',
+                placeItems: 'center',
+                p: 0,
+                transition: `all 0.2s ${SMOOTH}`,
+                '&:hover': { bgcolor: '#FFFFFF', borderColor: 'rgba(17,17,17,0.2)' },
+                '&:active': { transform: 'scale(0.94)' },
+              }}
+            >
+              <ArrowBackIcon sx={{ fontSize: 18 }} />
             </Button>
-            <Box sx={{
-              px: 1.5, py: 0.6, borderRadius: '999px',
-              border: '1px solid rgba(17,17,17,0.12)',
-              fontSize: 11, fontWeight: 700, letterSpacing: 0.6, textTransform: 'uppercase',
-              color: 'rgba(17,17,17,0.55)',
-            }}>
+
+            <Box
+              sx={{
+                px: 1.5,
+                py: 0.6,
+                borderRadius: '999px',
+                border: '1px solid rgba(17,17,17,0.12)',
+                fontSize: 11,
+                fontWeight: 700,
+                letterSpacing: 0.6,
+                textTransform: 'uppercase',
+                color: 'rgba(17,17,17,0.55)',
+              }}
+            >
               {isOrganizer ? 'Organizador' : 'Cuenta'}
             </Box>
           </Box>
 
-          {/* Hero */}
-          <Box sx={{
-            mt: { xs: 'auto', md: 0 },
-            mb: { xs: 'auto', md: 0 },
-            pt: { xs: 6, md: 0 },
-            flex: { md: 1 },
-            display: { md: 'flex' }, flexDirection: { md: 'column' }, justifyContent: { md: 'center' },
-          }}>
+          {/* ── Hero centrado verticalmente ── */}
+          <Box
+            sx={{
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              py: { xs: 5, md: 0 },
+            }}
+          >
             {Hero}
           </Box>
 
-          {/* Botones (móvil) */}
+          {/* ── Botones (solo móvil) ── */}
           <Box sx={{ display: { xs: 'block', md: 'none' } }}>
             {error && (
-              <Box sx={{
-                mb: 2, p: 1.75, borderRadius: '14px', bgcolor: '#FEF2F2',
-                border: '1px solid #FECACA',
-                animation: `${scaleIn} 0.4s ${SPRING} both`,
-              }}>
+              <Box
+                sx={{
+                  mb: 2,
+                  p: 1.75,
+                  borderRadius: '14px',
+                  bgcolor: '#FEF2F2',
+                  border: '1px solid #FECACA',
+                  animation: `${scaleIn} 0.4s ${SPRING} both`,
+                }}
+              >
                 <Typography sx={{ fontSize: 13, color: '#DC2626', fontWeight: 500 }}>{error}</Typography>
               </Box>
             )}
@@ -298,54 +415,84 @@ export const AuthPage = () => {
           </Box>
         </Box>
 
-        {/* ═══════════ COLUMNA AUTH (desktop) ═══════════ */}
-        <Box sx={{
-          display: { xs: 'none', md: 'flex' },
-          flex: 0.9,
-          alignItems: 'center', justifyContent: 'center',
-          p: { md: 5, lg: 6 },
-          position: 'relative',
-          borderLeft: '1px solid rgba(17,17,17,0.06)',
-        }}>
-          <Box sx={{
-            width: '100%', maxWidth: 420,
-            borderRadius: '28px',
-            bgcolor: 'white',
-            border: '1px solid rgba(17,17,17,0.06)',
-            boxShadow: '0 40px 80px -20px rgba(0,0,0,0.15)',
-            p: { md: 4.5, lg: 5 },
-            animation: `${fadeInUp} 0.9s ${SMOOTH} both 0.2s`,
-          }}>
-            <Typography sx={{
-              fontSize: 10, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase',
-              color: 'rgba(17,17,17,0.35)',
-              fontFamily: '"Fragment Mono", monospace', mb: 2.5,
-            }}>
+        {/* ══════════ COLUMNA AUTH (desktop) ══════════ */}
+        <Box
+          sx={{
+            display: { xs: 'none', md: 'flex' },
+            flex: '1 1 0%',
+            minWidth: 0,
+            alignItems: 'center',
+            justifyContent: 'center',
+            p: { md: 6, lg: 8 },
+            position: 'relative',
+            borderLeft: '1px solid rgba(17,17,17,0.06)',
+          }}
+        >
+          <Box
+            sx={{
+              width: '100%',
+              maxWidth: 440,
+              borderRadius: '28px',
+              bgcolor: 'white',
+              border: '1px solid rgba(17,17,17,0.06)',
+              boxShadow: '0 40px 80px -20px rgba(0,0,0,0.15)',
+              p: { md: 5, lg: 6 },
+              animation: `${fadeInUp} 0.9s ${SMOOTH} both 0.2s`,
+            }}
+          >
+            <Typography
+              sx={{
+                fontSize: 10,
+                fontWeight: 700,
+                letterSpacing: 2,
+                textTransform: 'uppercase',
+                color: 'rgba(17,17,17,0.35)',
+                fontFamily: '"Fragment Mono", monospace',
+                mb: 3,
+              }}
+            >
               {isRegistering ? 'Crear cuenta' : 'Iniciar sesión'}
             </Typography>
 
-            <Typography sx={{
-              fontSize: 24, fontWeight: 800, letterSpacing: -0.6, lineHeight: 1.15,
-              color: BLACK, fontFamily: '"Instrument Sans", system-ui, sans-serif', mb: 1,
-            }}>
+            <Typography
+              sx={{
+                fontSize: 28,
+                fontWeight: 800,
+                letterSpacing: -0.8,
+                lineHeight: 1.15,
+                color: BLACK,
+                fontFamily: '"Instrument Sans", system-ui, sans-serif',
+                mb: 1,
+              }}
+            >
               {isRegistering ? 'Último paso.' : 'Hola de nuevo.'}
             </Typography>
 
-            <Typography sx={{
-              fontSize: 13.5, color: 'rgba(17,17,17,0.55)',
-              fontWeight: 500, lineHeight: 1.5, mb: 3.5,
-            }}>
+            <Typography
+              sx={{
+                fontSize: 14,
+                color: 'rgba(17,17,17,0.55)',
+                fontWeight: 500,
+                lineHeight: 1.5,
+                mb: 4,
+              }}
+            >
               {isRegistering
                 ? 'Elige cómo quieres crear tu cuenta.'
                 : 'Accede con tu método preferido.'}
             </Typography>
 
             {error && (
-              <Box sx={{
-                mb: 2.5, p: 1.75, borderRadius: '14px', bgcolor: '#FEF2F2',
-                border: '1px solid #FECACA',
-                animation: `${scaleIn} 0.4s ${SPRING} both`,
-              }}>
+              <Box
+                sx={{
+                  mb: 3,
+                  p: 1.75,
+                  borderRadius: '14px',
+                  bgcolor: '#FEF2F2',
+                  border: '1px solid #FECACA',
+                  animation: `${scaleIn} 0.4s ${SPRING} both`,
+                }}
+              >
                 <Typography sx={{ fontSize: 13, color: '#DC2626', fontWeight: 500 }}>{error}</Typography>
               </Box>
             )}
@@ -355,79 +502,150 @@ export const AuthPage = () => {
         </Box>
       </Box>
 
-      {/* ═══════════ BOTTOM SHEET EMAIL ═══════════ */}
-      <Drawer anchor="bottom" open={sheetOpen} onClose={() => setSheetOpen(false)}
+      {/* ══════════ BOTTOM SHEET EMAIL ══════════ */}
+      <Drawer
+        anchor="bottom"
+        open={sheetOpen}
+        onClose={() => setSheetOpen(false)}
         slotProps={{
           backdrop: {
             sx: { bgcolor: 'rgba(10,10,10,0.55)', backdropFilter: 'blur(6px)' },
           },
           paper: {
             sx: {
-              borderTopLeftRadius: '28px', borderTopRightRadius: '28px',
-              maxHeight: '90dvh', bgcolor: '#FAFAF8', backgroundImage: 'none',
+              borderTopLeftRadius: '28px',
+              borderTopRightRadius: '28px',
+              maxHeight: '90dvh',
+              bgcolor: '#FAFAF8',
+              backgroundImage: 'none',
               boxShadow: '0 -20px 60px rgba(0,0,0,0.18)',
-              maxWidth: { md: 500 }, mx: { md: 'auto' }, width: { md: '100%' },
+              maxWidth: { md: 500 },
+              mx: { md: 'auto' },
+              width: { md: '100%' },
             },
           },
-        }}>
-        <Box sx={{
-          p: 3, pb: 'calc(28px + env(safe-area-inset-bottom, 0px))',
-          maxWidth: 440, mx: 'auto', width: '100%',
-        }}>
-          <Box sx={{
-            width: 40, height: 4, borderRadius: 2,
-            bgcolor: 'rgba(17,17,17,0.14)', mx: 'auto', mb: 3.5,
-          }} />
-          <Typography sx={{
-            fontSize: 11, fontWeight: 700, letterSpacing: 1.4, textTransform: 'uppercase',
-            color: 'rgba(17,17,17,0.4)', mb: 1.5,
-          }}>
+        }}
+      >
+        <Box
+          sx={{
+            p: 3,
+            pb: 'calc(28px + env(safe-area-inset-bottom, 0px))',
+            maxWidth: 440,
+            mx: 'auto',
+            width: '100%',
+          }}
+        >
+          <Box
+            sx={{
+              width: 40,
+              height: 4,
+              borderRadius: 2,
+              bgcolor: 'rgba(17,17,17,0.14)',
+              mx: 'auto',
+              mb: 3.5,
+            }}
+          />
+          <Typography
+            sx={{
+              fontSize: 11,
+              fontWeight: 700,
+              letterSpacing: 1.4,
+              textTransform: 'uppercase',
+              color: 'rgba(17,17,17,0.4)',
+              mb: 1.5,
+            }}
+          >
             {isRegistering ? 'Nueva cuenta' : 'Iniciar sesión'}
           </Typography>
-          <Typography sx={{
-            fontSize: 26, fontWeight: 800, letterSpacing: -0.8, lineHeight: 1.1,
-            color: BLACK, fontFamily: '"Instrument Sans", system-ui, sans-serif',
-          }}>
+          <Typography
+            sx={{
+              fontSize: 26,
+              fontWeight: 800,
+              letterSpacing: -0.8,
+              lineHeight: 1.1,
+              color: BLACK,
+              fontFamily: '"Instrument Sans", system-ui, sans-serif',
+            }}
+          >
             {isRegistering ? 'Crea tu cuenta' : 'Hola de nuevo'}
           </Typography>
 
           <Stack spacing={2.5} sx={{ mt: 3 }}>
             <Box>
-              <Typography sx={{
-                fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase',
-                color: 'rgba(17,17,17,0.45)', mb: 1,
-              }}>Email</Typography>
-              <Box sx={{
-                height: 52, display: 'flex', alignItems: 'center',
-                borderBottom: '1.5px solid rgba(17,17,17,0.14)',
-                transition: `border-color 0.25s ${SMOOTH}`,
-                '&:focus-within': { borderColor: BLACK },
-              }}>
-                <InputBase value={email} onChange={(e) => setEmail(e.target.value)}
-                  placeholder="tu@email.com" type="email"
+              <Typography
+                sx={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  letterSpacing: 1,
+                  textTransform: 'uppercase',
+                  color: 'rgba(17,17,17,0.45)',
+                  mb: 1,
+                }}
+              >
+                Email
+              </Typography>
+              <Box
+                sx={{
+                  height: 52,
+                  display: 'flex',
+                  alignItems: 'center',
+                  borderBottom: '1.5px solid rgba(17,17,17,0.14)',
+                  transition: `border-color 0.25s ${SMOOTH}`,
+                  '&:focus-within': { borderColor: BLACK },
+                }}
+              >
+                <InputBase
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="tu@email.com"
+                  type="email"
                   sx={{
-                    flex: 1, fontSize: 16, fontWeight: 500, color: BLACK,
+                    flex: 1,
+                    fontSize: 16,
+                    fontWeight: 500,
+                    color: BLACK,
                     '& input::placeholder': { color: 'rgba(17,17,17,0.3)' },
-                  }} />
+                  }}
+                />
               </Box>
             </Box>
+
             <Box>
-              <Typography sx={{
-                fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase',
-                color: 'rgba(17,17,17,0.45)', mb: 1,
-              }}>Contraseña</Typography>
-              <Box sx={{
-                height: 52, display: 'flex', alignItems: 'center',
-                borderBottom: '1.5px solid rgba(17,17,17,0.14)',
-                transition: `border-color 0.25s ${SMOOTH}`,
-                '&:focus-within': { borderColor: BLACK },
-              }}>
-                <InputBase value={password} onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Mínimo 8 caracteres" type={showPass ? 'text' : 'password'}
+              <Typography
+                sx={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  letterSpacing: 1,
+                  textTransform: 'uppercase',
+                  color: 'rgba(17,17,17,0.45)',
+                  mb: 1,
+                }}
+              >
+                Contraseña
+              </Typography>
+              <Box
+                sx={{
+                  height: 52,
+                  display: 'flex',
+                  alignItems: 'center',
+                  borderBottom: '1.5px solid rgba(17,17,17,0.14)',
+                  transition: `border-color 0.25s ${SMOOTH}`,
+                  '&:focus-within': { borderColor: BLACK },
+                }}
+              >
+                <InputBase
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Mínimo 8 caracteres"
+                  type={showPass ? 'text' : 'password'}
                   sx={{
-                    flex: 1, fontSize: 16, fontWeight: 500, color: BLACK,
+                    flex: 1,
+                    fontSize: 16,
+                    fontWeight: 500,
+                    color: BLACK,
                     '& input::placeholder': { color: 'rgba(17,17,17,0.3)' },
-                  }} />
+                  }}
+                />
                 <Box onClick={() => setShowPass(!showPass)} sx={{ p: 0.5, cursor: 'pointer' }}>
                   {showPass
                     ? <VisibilityOffIcon sx={{ fontSize: 20, color: 'rgba(17,17,17,0.5)' }} />
@@ -437,29 +655,47 @@ export const AuthPage = () => {
             </Box>
           </Stack>
 
-          <Button fullWidth disabled={!email || password.length < 8 || loading}
+          <Button
+            fullWidth
+            disabled={!email || password.length < 8 || loading}
             onClick={() => requireTerms(() => handleEmailAuth())}
             sx={{
-              mt: 4, height: 54, borderRadius: '16px',
-              fontWeight: 700, fontSize: 15.5,
-              bgcolor: BLACK, color: 'white',
+              mt: 4,
+              height: 54,
+              borderRadius: '16px',
+              fontWeight: 700,
+              fontSize: 15.5,
+              bgcolor: BLACK,
+              color: 'white',
               boxShadow: '0 8px 24px rgba(17,17,17,0.15)',
-              '&:disabled': { bgcolor: 'rgba(17,17,17,0.06)', color: 'rgba(17,17,17,0.3)', boxShadow: 'none' },
+              '&:disabled': {
+                bgcolor: 'rgba(17,17,17,0.06)',
+                color: 'rgba(17,17,17,0.3)',
+                boxShadow: 'none',
+              },
               '&:hover': { bgcolor: '#1a1a1a' },
               '&:active': { transform: 'scale(0.985)' },
-            }}>
+            }}
+          >
             {loading ? 'Un momento…' : (isRegistering ? 'Crear cuenta' : 'Iniciar sesión')}
           </Button>
 
-          <Box onClick={() => setIsRegistering(!isRegistering)}
-            sx={{ mt: 2, textAlign: 'center', cursor: 'pointer', '&:hover': { opacity: 0.7 } }}>
+          <Box
+            onClick={() => setIsRegistering(!isRegistering)}
+            sx={{ mt: 2, textAlign: 'center', cursor: 'pointer', '&:hover': { opacity: 0.7 } }}
+          >
             <Typography sx={{ fontSize: 13.5, color: 'rgba(17,17,17,0.55)', fontWeight: 500 }}>
               {isRegistering ? '¿Ya tienes cuenta?' : '¿No tienes cuenta?'}{' '}
-              <Box component="span" sx={{
-                color: BLACK, fontWeight: 700,
-                textDecoration: 'underline', textUnderlineOffset: 3,
-                textDecorationColor: 'rgba(17,17,17,0.3)',
-              }}>
+              <Box
+                component="span"
+                sx={{
+                  color: BLACK,
+                  fontWeight: 700,
+                  textDecoration: 'underline',
+                  textUnderlineOffset: 3,
+                  textDecorationColor: 'rgba(17,17,17,0.3)',
+                }}
+              >
                 {isRegistering ? 'Inicia sesión' : 'Regístrate'}
               </Box>
             </Typography>
@@ -467,79 +703,136 @@ export const AuthPage = () => {
         </Box>
       </Drawer>
 
-      {/* ═══════════ MODAL TÉRMINOS ═══════════ */}
-      <Dialog open={termsModalOpen} onClose={() => {}}
-        maxWidth="xs" fullWidth
+      {/* ══════════ MODAL TÉRMINOS ══════════ */}
+      <Dialog
+        open={termsModalOpen}
+        onClose={() => {}}
+        maxWidth="xs"
+        fullWidth
         slotProps={{
           backdrop: {
             sx: { bgcolor: 'rgba(10,10,10,0.6)', backdropFilter: 'blur(8px)' },
           },
           paper: {
             sx: {
-              borderRadius: '24px', bgcolor: '#FAFAF8', p: 3.5, minHeight: 420,
-              display: 'flex', flexDirection: 'column', backgroundImage: 'none',
+              borderRadius: '24px',
+              bgcolor: '#FAFAF8',
+              p: 3.5,
+              minHeight: 420,
+              display: 'flex',
+              flexDirection: 'column',
+              backgroundImage: 'none',
               animation: `${scaleIn} 0.5s ${SPRING} both`,
               boxShadow: '0 24px 80px rgba(0,0,0,0.3)',
             },
           },
-        }}>
-        <Typography sx={{
-          fontSize: 11, fontWeight: 700, letterSpacing: 1.4, textTransform: 'uppercase',
-          color: 'rgba(17,17,17,0.4)', mb: 1.5,
-        }}>
+        }}
+      >
+        <Typography
+          sx={{
+            fontSize: 11,
+            fontWeight: 700,
+            letterSpacing: 1.4,
+            textTransform: 'uppercase',
+            color: 'rgba(17,17,17,0.4)',
+            mb: 1.5,
+          }}
+        >
           Antes de continuar
         </Typography>
-        <Typography sx={{
-          fontSize: 26, fontWeight: 800, letterSpacing: -0.8, lineHeight: 1.1,
-          color: BLACK, fontFamily: '"Instrument Sans", system-ui, sans-serif',
-        }}>
+        <Typography
+          sx={{
+            fontSize: 26,
+            fontWeight: 800,
+            letterSpacing: -0.8,
+            lineHeight: 1.1,
+            color: BLACK,
+            fontFamily: '"Instrument Sans", system-ui, sans-serif',
+          }}
+        >
           Términos y privacidad
         </Typography>
-        <Typography sx={{
-          mt: 2, fontSize: 14, color: 'rgba(17,17,17,0.6)',
-          lineHeight: 1.55, fontWeight: 500,
-        }}>
+        <Typography
+          sx={{
+            mt: 2,
+            fontSize: 14,
+            color: 'rgba(17,17,17,0.6)',
+            lineHeight: 1.55,
+            fontWeight: 500,
+          }}
+        >
           Para crear tu cuenta necesitamos que aceptes nuestros Términos y la Política de Privacidad.
         </Typography>
 
         <Box sx={{ mt: 'auto', pt: 1 }}>
-          <Box onClick={() => setTermsChecked(!termsChecked)}
+          <Box
+            onClick={() => setTermsChecked(!termsChecked)}
             sx={{
-              px: 1.5, py: 1, borderRadius: '12px', border: '1.5px solid',
+              px: 1.5,
+              py: 1,
+              borderRadius: '12px',
+              border: '1.5px solid',
               borderColor: termsChecked ? BLACK : 'rgba(17,17,17,0.12)',
               bgcolor: termsChecked ? 'white' : 'rgba(255,255,255,0.5)',
-              display: 'flex', alignItems: 'center', gap: 1.5, cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1.5,
+              cursor: 'pointer',
               transition: `all 0.25s ${SMOOTH}`,
-            }}>
-            <Box sx={{
-              width: 28, height: 28, borderRadius: '7px', border: '1.5px solid',
-              borderColor: termsChecked ? BLACK : 'rgba(17,17,17,0.2)',
-              bgcolor: termsChecked ? BLACK : 'white',
-              display: 'grid', placeItems: 'center',
-              transition: `all 0.25s ${SPRING}`,
-            }}>
+            }}
+          >
+            <Box
+              sx={{
+                width: 28,
+                height: 28,
+                borderRadius: '7px',
+                border: '1.5px solid',
+                borderColor: termsChecked ? BLACK : 'rgba(17,17,17,0.2)',
+                bgcolor: termsChecked ? BLACK : 'white',
+                display: 'grid',
+                placeItems: 'center',
+                transition: `all 0.25s ${SPRING}`,
+              }}
+            >
               {termsChecked && <CheckIcon sx={{ fontSize: 16, color: 'white' }} />}
             </Box>
-            <Typography sx={{
-              fontSize: 10.5, color: 'rgba(17,17,17,0.7)',
-              lineHeight: 1.4, fontWeight: 500,
-            }}>
-              He leído y acepto los <Box component="span" sx={{ fontWeight: 700, color: BLACK }}>Términos</Box> y la{' '}
+            <Typography
+              sx={{
+                fontSize: 10.5,
+                color: 'rgba(17,17,17,0.7)',
+                lineHeight: 1.4,
+                fontWeight: 500,
+              }}
+            >
+              He leído y acepto los{' '}
+              <Box component="span" sx={{ fontWeight: 700, color: BLACK }}>Términos</Box> y la{' '}
               <Box component="span" sx={{ fontWeight: 700, color: BLACK }}>Política de Privacidad</Box>.
             </Typography>
           </Box>
-          <Button fullWidth disabled={!termsChecked} onClick={acceptTerms}
+
+          <Button
+            fullWidth
+            disabled={!termsChecked}
+            onClick={acceptTerms}
             sx={{
-              mt: 2, height: 54, borderRadius: '16px',
-              fontWeight: 700, fontSize: 15.5,
-              bgcolor: BLACK, color: 'white',
+              mt: 2,
+              height: 54,
+              borderRadius: '16px',
+              fontWeight: 700,
+              fontSize: 15.5,
+              bgcolor: BLACK,
+              color: 'white',
               '&:disabled': { bgcolor: 'rgba(17,17,17,0.06)', color: 'rgba(17,17,17,0.3)' },
               '&:hover': { bgcolor: '#1a1a1a' },
-            }}>
+            }}
+          >
             Aceptar y continuar
           </Button>
-          <Box onClick={() => { setTermsModalOpen(false); pendingActionRef.current = null; }}
-            sx={{ mt: 2, textAlign: 'center', cursor: 'pointer' }}>
+
+          <Box
+            onClick={() => { setTermsModalOpen(false); pendingActionRef.current = null; }}
+            sx={{ mt: 2, textAlign: 'center', cursor: 'pointer' }}
+          >
             <Typography sx={{ fontSize: 13.5, fontWeight: 500, color: 'rgba(17,17,17,0.5)' }}>
               Cancelar
             </Typography>
