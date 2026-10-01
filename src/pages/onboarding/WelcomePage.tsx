@@ -63,36 +63,8 @@ export const WelcomePage = () => {
             pb: { xs: 'calc(24px + env(safe-area-inset-bottom, 0px))', md: 6 },
           }}
         >
-          {/* ── Logo ── */}
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: { xs: 'center', md: 'flex-start' },
-              animation: `${fadeInUp} 0.6s ${SMOOTH} both`,
-            }}
-          >
-            <Box
-              sx={{
-                width: { xs: 88, md: 60 },
-                height: { xs: 88, md: 60 },
-                borderRadius: { xs: '22px', md: '18px' },
-                bgcolor: 'white',
-                p: 0.5,
-                boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-              }}
-            >
-              <Box
-                component="img"
-                src="/torneo-trend-sport.png"
-                sx={{
-                  width: '100%',
-                  height: '100%',
-                  borderRadius: { xs: '18px', md: '14px' },
-                  objectFit: 'cover',
-                }}
-              />
-            </Box>
-          </Box>
+          {/* Espaciador superior (antes logo) */}
+          <Box sx={{ height: { xs: 88, md: 60 } }} />
 
           {/* ── Hero centrado verticalmente ── */}
           <Box
@@ -106,7 +78,7 @@ export const WelcomePage = () => {
               animation: `${fadeInUp} 0.7s ${SMOOTH} both 0.1s`,
             }}
           >
-            {/* Línea completa (igual que AuthPage) */}
+            {/* Línea completa */}
             <Box
               sx={{
                 width: '100%',
@@ -334,7 +306,7 @@ export const WelcomePage = () => {
               }}
             />
 
-            {/* Contenido central: logo gigante */}
+            {/* Contenido central: tag superior */}
             <Box
               sx={{
                 position: 'relative',
@@ -348,23 +320,6 @@ export const WelcomePage = () => {
                 gap: 3,
               }}
             >
-              <Box
-                sx={{
-                  width: 150,
-                  height: 150,
-                  borderRadius: '38px',
-                  bgcolor: 'white',
-                  p: 1,
-                  boxShadow: '0 20px 60px rgba(0,0,0,0.4)',
-                }}
-              >
-                <Box
-                  component="img"
-                  src="/torneo-trend-sport.png"
-                  sx={{ width: '100%', height: '100%', borderRadius: '30px', objectFit: 'cover' }}
-                />
-              </Box>
-
               <Typography
                 sx={{
                   textAlign: 'center',
