@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { Box, Typography, Button, Stack, InputBase, Drawer, Dialog, keyframes, useMediaQuery } from '@mui/material';
+import { Box, Typography, Button, Stack, InputBase, Drawer, Dialog, keyframes } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { GoogleLogin } from '@react-oauth/google';
 import EmailIcon from '@mui/icons-material/Email';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
@@ -33,7 +32,6 @@ export const AuthPage = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
   const { data: onboarding } = useOnboarding();
-  const isDesktop = useMediaQuery('(min-width: 900px)');
 
   const [sheetOpen, setSheetOpen] = useState(false);
   const [isRegistering, setIsRegistering] = useState(true);
@@ -112,33 +110,13 @@ export const AuthPage = () => {
     } finally { setLoading(false); }
   };
 
-  const handleGoogle = async (credential?: string) => {
-    if (!credential) return;
-    setLoading(true); setError('');
-    try {
-      const res = await api.post('/auth/social', {
-        provider: 'google', token: credential,
-        role: isOrganizer ? 'organizer' : 'user',
-        name: onboarding.fullName,
-        username: onboarding.username,
-        city: onboarding.city,
-        terms_version: TERMS_VERSION,
-      });
-      const token = res.data.token || res.data.access_token;
-      login(token, res.data.user);
-      navigate('/');
-    } catch (e: any) {
-      setError(e.response?.data?.message || 'Error con Google');
-    } finally { setLoading(false); }
-  };
-
   // ── Hero ──
   const Hero = (
     <Box
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        gap: { xs: 3, md: 3 },
+        gap: 3,
         animation: `${fadeInUp} 0.7s ${SMOOTH} both 0.1s`,
       }}
     >
@@ -196,39 +174,6 @@ export const AuthPage = () => {
         animation: `${fadeInUp} 0.6s ${SMOOTH} both 0.35s`,
       }}
     >
-      <Box
-        sx={{
-          '& > div': { width: '100% !important' },
-          '& iframe': { width: '100% !important' },
-        }}
-      >
-        <GoogleLogin
-          onSuccess={(cred) => requireTerms(() => handleGoogle(cred.credential))}
-          onError={() => setError('Error con Google')}
-          theme="outline"
-          size="large"
-          shape="pill"
-          text={isRegistering ? 'signup_with' : 'signin_with'}
-          width={isDesktop ? 400 : 320}
-        />
-      </Box>
-
-      <Stack direction="row" spacing={2} sx={{ alignItems: 'center', py: 0.5 }}>
-        <Box sx={{ flex: 1, height: '1px', bgcolor: 'rgba(17,17,17,0.09)' }} />
-        <Typography
-          sx={{
-            fontSize: 10,
-            fontWeight: 700,
-            letterSpacing: 1.2,
-            textTransform: 'uppercase',
-            color: 'rgba(17,17,17,0.35)',
-          }}
-        >
-          o
-        </Typography>
-        <Box sx={{ flex: 1, height: '1px', bgcolor: 'rgba(17,17,17,0.09)' }} />
-      </Stack>
-
       <Button
         fullWidth
         onClick={() => setSheetOpen(true)}
@@ -306,7 +251,6 @@ export const AuthPage = () => {
         color: 'black',
       }}
     >
-      {/* Fondo editorial aislado */}
       <Box sx={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 0 }}>
         <EditorialBackground />
       </Box>
@@ -335,7 +279,6 @@ export const AuthPage = () => {
             pb: { xs: 'calc(24px + env(safe-area-inset-bottom, 0px))', md: 6 },
           }}
         >
-          {/* ── Header ── */}
           <Box
             sx={{
               display: 'flex',
@@ -382,7 +325,6 @@ export const AuthPage = () => {
             </Box>
           </Box>
 
-          {/* ── Hero centrado verticalmente ── */}
           <Box
             sx={{
               flex: 1,
@@ -395,7 +337,6 @@ export const AuthPage = () => {
             {Hero}
           </Box>
 
-          {/* ── Botones (solo móvil) ── */}
           <Box sx={{ display: { xs: 'block', md: 'none' } }}>
             {error && (
               <Box
@@ -478,8 +419,8 @@ export const AuthPage = () => {
               }}
             >
               {isRegistering
-                ? 'Elige cómo quieres crear tu cuenta.'
-                : 'Accede con tu método preferido.'}
+                ? 'Crea tu cuenta con tu email y una contraseña.'
+                : 'Accede con tu email y contraseña.'}
             </Typography>
 
             {error && (
