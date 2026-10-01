@@ -624,12 +624,19 @@ export default function Home() {
                 mt: 1,
                 height: 40,
                 borderRadius: '999px',
-                bgcolor: BLACK,
+                bgcolor: '#f97316',
                 color: 'white',
                 px: 2.5,
                 fontWeight: 700,
                 fontSize: 13,
-                '&:hover': { bgcolor: '#1a1a1a' },
+                boxShadow: '0 8px 24px rgba(249,115,22,0.25)',
+                transition: 'all 0.3s cubic-bezier(0.22, 1, 0.36, 1)',
+                '&:hover': {
+                  bgcolor: '#ea580c',
+                  transform: 'translateY(-1px)',
+                  boxShadow: '0 12px 32px rgba(249,115,22,0.35)',
+                },
+                '&:active': { transform: 'scale(0.98)' },
               }}
             >
               {sponsors[0].cta}
