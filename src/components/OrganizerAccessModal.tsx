@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Dialog, Box, Typography, Button, InputBase, keyframes } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { useOnboarding } from '../contexts/OnboardingContext';
 import { api } from '../lib/api';
+import { useAuth } from '../contexts/AuthContext';
 import { SMOOTH, SPRING, BLACK } from '../theme';
 
 const scaleIn = keyframes`
@@ -16,7 +16,7 @@ export const OrganizerAccessModal = ({ open, onClose }: { open: boolean; onClose
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { setData } = useOnboarding();
+  const { login } = useAuth();
 
   const handleSubmit = async () => {
     if (!user || !password) return;
@@ -24,11 +24,10 @@ export const OrganizerAccessModal = ({ open, onClose }: { open: boolean; onClose
     setError('');
     try {
       const res = await api.post('/auth/verify-organizer', { user, password });
-      if (res.data?.ok) {
-        sessionStorage.setItem('trendsport_organizer_token', res.data.token);
-        setData({ role: 'organizer' });
+      if (res.data?.ok && res.data.token && res.data.user) {
+        login(res.data.token, res.data.user);
         onClose();
-        navigate('/onboarding/basic-info');
+        navigate('/dashboard');
       } else {
         setError('Credenciales incorrectas');
       }
@@ -111,7 +110,7 @@ export const OrganizerAccessModal = ({ open, onClose }: { open: boolean; onClose
           fontWeight: 500,
         }}
       >
-        Introduce tus credenciales de organización para continuar.
+        Introduce tus credenciales de organización para entrar directamente.
       </Typography>
 
       {/* Usuario */}
@@ -189,7 +188,7 @@ export const OrganizerAccessModal = ({ open, onClose }: { open: boolean; onClose
           '&:active': { transform: 'scale(0.985)' },
         }}
       >
-        {loading ? 'Comprobando…' : 'Acceder'}
+        {loading ? 'Comprobando…' : 'Entrar'}
       </Button>
 
       <Box

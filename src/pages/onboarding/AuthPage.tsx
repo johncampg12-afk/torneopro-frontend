@@ -51,11 +51,13 @@ export const AuthPage = () => {
     }
   }, [onboarding.fullName, onboarding.username]);
 
-  const isOrganizer = onboarding.role === 'organizer';
   const displayName = onboarding.fullName || '';
 
   const requireTerms = (action: () => void) => {
-    if (localStorage.getItem(TERMS_STORAGE_KEY) === TERMS_VERSION) { action(); return; }
+    if (localStorage.getItem(TERMS_STORAGE_KEY) === TERMS_VERSION) {
+      action();
+      return;
+    }
     pendingActionRef.current = action;
     setTermsChecked(false);
     setTermsModalOpen(true);
@@ -72,7 +74,8 @@ export const AuthPage = () => {
 
   const handleEmailAuth = async () => {
     if (!email || password.length < 8) return;
-    setLoading(true); setError('');
+    setLoading(true);
+    setError('');
     try {
       const endpoint = isRegistering ? '/auth/register' : '/auth/login';
       const body: any = { email, password };
@@ -81,12 +84,8 @@ export const AuthPage = () => {
         body.name = onboarding.fullName;
         body.username = onboarding.username;
         body.age = onboarding.age;
-        body.role = isOrganizer ? 'organizer' : 'user';
+        body.role = 'user';
         body.terms_version = TERMS_VERSION;
-        if (isOrganizer) {
-          const token = sessionStorage.getItem('trendsport_organizer_token');
-          if (token) body.organizer_token = token;
-        }
       }
 
       const res = await api.post(endpoint, body);
@@ -102,12 +101,13 @@ export const AuthPage = () => {
         } catch {}
       }
 
-      sessionStorage.removeItem('trendsport_organizer_token');
       login(token, res.data.user);
       navigate('/');
     } catch (e: any) {
       setError(e.response?.data?.message || 'Error de autenticación');
-    } finally { setLoading(false); }
+    } finally {
+      setLoading(false);
+    }
   };
 
   // ── Hero ──
@@ -159,7 +159,7 @@ export const AuthPage = () => {
       >
         {isRegistering
           ? 'Solo necesitamos tu email y una contraseña para guardar todo.'
-          : 'Introduce tus datos para acceder a tus torneos.'}
+          : 'Introduce tus datos para acceder a tu cuenta.'}
       </Typography>
     </Box>
   );
@@ -321,7 +321,7 @@ export const AuthPage = () => {
                 color: 'rgba(17,17,17,0.55)',
               }}
             >
-              {isOrganizer ? 'Organizador' : 'Cuenta'}
+              Cuenta
             </Box>
           </Box>
 
