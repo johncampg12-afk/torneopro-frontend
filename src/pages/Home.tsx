@@ -10,6 +10,9 @@ import { api } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
 import { SMOOTH, BLACK } from '../theme';
 
+
+const isOrganizer = user?.role === 'organizer';
+
 const fadeInUp = keyframes`
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
@@ -372,7 +375,7 @@ export default function Home() {
           <Typography sx={{ mt: 1, fontSize: 14, color: 'rgba(17,17,17,0.5)', maxWidth: 380, mx: 'auto' }}>
             Cuando alguien cree y publique un torneo, aparecerá aquí automáticamente.
           </Typography>
-          {user && (
+          {isOrganizer && (
             <Button
               component={Link}
               to="/tournaments/create"

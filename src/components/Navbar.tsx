@@ -17,6 +17,8 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenu, setUserMenu] = useState<null | HTMLElement>(null);
 
+  const isOrganizer = user?.role === 'organizer';
+
   const handleLogout = () => {
     setUserMenu(null);
     logout();
@@ -60,7 +62,6 @@ export default function Navbar() {
             gap: 2,
           }}
         >
-          {/* Logo + nombre */}
           <Box
             component={Link}
             to="/"
@@ -75,8 +76,7 @@ export default function Navbar() {
           >
             <Box
               sx={{
-                width: 40,
-                height: 40,
+                width: 40, height: 40,
                 borderRadius: '12px',
                 bgcolor: 'white',
                 p: 0.25,
@@ -104,7 +104,6 @@ export default function Navbar() {
             </Typography>
           </Box>
 
-          {/* Espaciador */}
           <Box sx={{ flex: 1 }} />
 
           {/* Desktop nav */}
@@ -112,40 +111,44 @@ export default function Navbar() {
             <Button component={Link} to="/" sx={linkSx}>
               Inicio
             </Button>
+
             {user ? (
               <>
-                <Button component={Link} to="/dashboard" sx={linkSx}>
-                  Mis torneos
-                </Button>
-                <Button component={Link} to="/templates" sx={linkSx}>
-                  Plantillas
-                </Button>
-                <Button
-                  component={Link}
-                  to="/tournaments/create"
-                  sx={{
-                    ml: 1,
-                    height: 40,
-                    borderRadius: '999px',
-                    px: 2.5,
-                    fontWeight: 700,
-                    fontSize: 14,
-                    bgcolor: BLACK,
-                    color: 'white',
-                    boxShadow: '0 4px 12px rgba(17,17,17,0.12)',
-                    transition: `all 0.2s ${SMOOTH}`,
-                    '&:hover': {
-                      bgcolor: '#1a1a1a',
-                      transform: 'translateY(-1px)',
-                      boxShadow: '0 8px 20px rgba(17,17,17,0.2)',
-                    },
-                    '&:active': { transform: 'scale(0.98)' },
-                  }}
-                >
-                  Nuevo torneo
-                </Button>
+                {isOrganizer && (
+                  <>
+                    <Button component={Link} to="/dashboard" sx={linkSx}>
+                      Mis torneos
+                    </Button>
+                    <Button component={Link} to="/templates" sx={linkSx}>
+                      Plantillas
+                    </Button>
+                    <Button
+                      component={Link}
+                      to="/tournaments/create"
+                      sx={{
+                        ml: 1,
+                        height: 40,
+                        borderRadius: '999px',
+                        px: 2.5,
+                        fontWeight: 700,
+                        fontSize: 14,
+                        bgcolor: BLACK,
+                        color: 'white',
+                        boxShadow: '0 4px 12px rgba(17,17,17,0.12)',
+                        transition: `all 0.2s ${SMOOTH}`,
+                        '&:hover': {
+                          bgcolor: '#1a1a1a',
+                          transform: 'translateY(-1px)',
+                          boxShadow: '0 8px 20px rgba(17,17,17,0.2)',
+                        },
+                        '&:active': { transform: 'scale(0.98)' },
+                      }}
+                    >
+                      Nuevo torneo
+                    </Button>
+                  </>
+                )}
 
-                {/* Avatar + menú */}
                 <IconButton
                   onClick={(e) => setUserMenu(e.currentTarget)}
                   sx={{ ml: 1.5, p: 0.5 }}
@@ -172,7 +175,7 @@ export default function Navbar() {
                 </Button>
                 <Button
                   component={Link}
-                  to="/auth"
+                  to="/welcome"
                   sx={{
                     ml: 1,
                     height: 40,
@@ -196,7 +199,6 @@ export default function Navbar() {
             )}
           </Box>
 
-          {/* Mobile hamburger */}
           <IconButton
             onClick={() => setMobileOpen(true)}
             sx={{
@@ -240,25 +242,50 @@ export default function Navbar() {
           <Typography sx={{ fontSize: 12, color: 'rgba(17,17,17,0.5)', mt: 0.25 }}>
             {user?.email || ''}
           </Typography>
+          {isOrganizer && (
+            <Box
+              sx={{
+                mt: 1,
+                display: 'inline-block',
+                px: 1,
+                py: 0.25,
+                borderRadius: '6px',
+                bgcolor: 'rgba(34,197,94,0.12)',
+                color: '#16A34A',
+                fontSize: 10,
+                fontWeight: 700,
+                letterSpacing: 0.5,
+                textTransform: 'uppercase',
+              }}
+            >
+              Organizador
+            </Box>
+          )}
         </Box>
         <Divider sx={{ my: 0.5 }} />
-        <MenuItem
-          component={Link}
-          to="/dashboard"
-          onClick={() => setUserMenu(null)}
-          sx={{ borderRadius: '10px', fontSize: 14, fontWeight: 500, py: 1 }}
-        >
-          Mis torneos
-        </MenuItem>
-        <MenuItem
-          component={Link}
-          to="/templates"
-          onClick={() => setUserMenu(null)}
-          sx={{ borderRadius: '10px', fontSize: 14, fontWeight: 500, py: 1 }}
-        >
-          Mis plantillas
-        </MenuItem>
-        <Divider sx={{ my: 0.5 }} />
+
+        {isOrganizer && (
+          <>
+            <MenuItem
+              component={Link}
+              to="/dashboard"
+              onClick={() => setUserMenu(null)}
+              sx={{ borderRadius: '10px', fontSize: 14, fontWeight: 500, py: 1 }}
+            >
+              Mis torneos
+            </MenuItem>
+            <MenuItem
+              component={Link}
+              to="/templates"
+              onClick={() => setUserMenu(null)}
+              sx={{ borderRadius: '10px', fontSize: 14, fontWeight: 500, py: 1 }}
+            >
+              Mis plantillas
+            </MenuItem>
+            <Divider sx={{ my: 0.5 }} />
+          </>
+        )}
+
         <MenuItem
           onClick={handleLogout}
           sx={{
@@ -293,13 +320,11 @@ export default function Navbar() {
         }}
       >
         <Box sx={{ p: 2.5 }}>
-          {/* Header del drawer */}
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
               <Box
                 sx={{
-                  width: 36,
-                  height: 36,
+                  width: 36, height: 36,
                   borderRadius: '10px',
                   bgcolor: 'white',
                   p: 0.25,
@@ -346,12 +371,31 @@ export default function Navbar() {
                 {user.name?.charAt(0).toUpperCase() || '?'}
               </Avatar>
               <Box sx={{ minWidth: 0 }}>
-                <Typography sx={{ fontSize: 14, fontWeight: 700, color: BLACK, truncate: true } as any}>
+                <Typography sx={{ fontSize: 14, fontWeight: 700, color: BLACK }}>
                   {user.name}
                 </Typography>
-                <Typography sx={{ fontSize: 12, color: 'rgba(17,17,17,0.5)', truncate: true } as any}>
+                <Typography sx={{ fontSize: 12, color: 'rgba(17,17,17,0.5)' }}>
                   {user.email}
                 </Typography>
+                {isOrganizer && (
+                  <Box
+                    sx={{
+                      mt: 0.5,
+                      display: 'inline-block',
+                      px: 0.75,
+                      py: 0.15,
+                      borderRadius: '5px',
+                      bgcolor: 'rgba(34,197,94,0.12)',
+                      color: '#16A34A',
+                      fontSize: 9,
+                      fontWeight: 700,
+                      letterSpacing: 0.5,
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    Organizador
+                  </Box>
+                )}
               </Box>
             </Box>
           )}
@@ -369,7 +413,7 @@ export default function Navbar() {
               />
             </ListItemButton>
 
-            {user ? (
+            {isOrganizer && (
               <>
                 <ListItemButton
                   component={Link}
@@ -394,30 +438,31 @@ export default function Navbar() {
                   />
                 </ListItemButton>
               </>
-            ) : null}
+            )}
           </List>
 
-          {/* CTA principal al final del drawer */}
           <Box sx={{ mt: 3, display: 'flex', flexDirection: 'column', gap: 1 }}>
             {user ? (
               <>
-                <Button
-                  component={Link}
-                  to="/tournaments/create"
-                  onClick={() => setMobileOpen(false)}
-                  fullWidth
-                  sx={{
-                    height: 48,
-                    borderRadius: '14px',
-                    fontWeight: 700,
-                    fontSize: 15,
-                    bgcolor: BLACK,
-                    color: 'white',
-                    '&:hover': { bgcolor: '#1a1a1a' },
-                  }}
-                >
-                  Nuevo torneo
-                </Button>
+                {isOrganizer && (
+                  <Button
+                    component={Link}
+                    to="/tournaments/create"
+                    onClick={() => setMobileOpen(false)}
+                    fullWidth
+                    sx={{
+                      height: 48,
+                      borderRadius: '14px',
+                      fontWeight: 700,
+                      fontSize: 15,
+                      bgcolor: BLACK,
+                      color: 'white',
+                      '&:hover': { bgcolor: '#1a1a1a' },
+                    }}
+                  >
+                    Nuevo torneo
+                  </Button>
+                )}
                 <Button
                   onClick={() => { setMobileOpen(false); handleLogout(); }}
                   fullWidth
@@ -437,7 +482,7 @@ export default function Navbar() {
               <>
                 <Button
                   component={Link}
-                  to="/auth"
+                  to="/welcome"
                   onClick={() => setMobileOpen(false)}
                   fullWidth
                   sx={{
@@ -479,12 +524,7 @@ export default function Navbar() {
                 component={Link}
                 to="/aviso-legal"
                 onClick={() => setMobileOpen(false)}
-                sx={{
-                  fontSize: 11.5,
-                  fontFamily: '"Fragment Mono", monospace',
-                  color: 'rgba(17,17,17,0.35)',
-                  textDecoration: 'none',
-                }}
+                sx={{ fontSize: 11.5, fontFamily: '"Fragment Mono", monospace', color: 'rgba(17,17,17,0.35)', textDecoration: 'none' }}
               >
                 Legal
               </Typography>
@@ -492,12 +532,7 @@ export default function Navbar() {
                 component={Link}
                 to="/politica-privacidad"
                 onClick={() => setMobileOpen(false)}
-                sx={{
-                  fontSize: 11.5,
-                  fontFamily: '"Fragment Mono", monospace',
-                  color: 'rgba(17,17,17,0.35)',
-                  textDecoration: 'none',
-                }}
+                sx={{ fontSize: 11.5, fontFamily: '"Fragment Mono", monospace', color: 'rgba(17,17,17,0.35)', textDecoration: 'none' }}
               >
                 Privacidad
               </Typography>
@@ -505,12 +540,7 @@ export default function Navbar() {
                 component={Link}
                 to="/terminos-condiciones"
                 onClick={() => setMobileOpen(false)}
-                sx={{
-                  fontSize: 11.5,
-                  fontFamily: '"Fragment Mono", monospace',
-                  color: 'rgba(17,17,17,0.35)',
-                  textDecoration: 'none',
-                }}
+                sx={{ fontSize: 11.5, fontFamily: '"Fragment Mono", monospace', color: 'rgba(17,17,17,0.35)', textDecoration: 'none' }}
               >
                 Términos
               </Typography>
