@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import {
-  Box, Typography, Button, Chip, Skeleton, keyframes,
+  Box, Typography, Button, Skeleton, keyframes, IconButton,
 } from '@mui/material';
 import { Link } from 'react-router-dom';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import GroupsIcon from '@mui/icons-material/Groups';
 import AddIcon from '@mui/icons-material/Add';
+import CloseIcon from '@mui/icons-material/Close';
 import { api } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
 import { SMOOTH, BLACK } from '../theme';
@@ -26,47 +27,46 @@ const sponsors = [
   {
     id: 1,
     name: 'Dental Fresh Plus',
+    tier: 'Principal',
     image: '/sponsors/dental-fresh-plus-hrz.jpeg',
-    title: 'Tu sonrisa, nuestra victoria.',
-    description: 'Revisión gratuita para jugadores de TrendSport este mes. Clínica oficial del torneo.',
+    cta: 'Reservar cita',
     link: '#',
+    title: 'Tu sonrisa, nuestra victoria.',
+    shortTitle: 'Dental Fresh Plus',
+    description: 'Revisión gratuita para jugadores de TrendSport este mes. Clínica oficial del torneo.',
   },
   {
     id: 2,
     name: 'Trend Sport',
+    tier: 'Oficial',
     image: '/sponsors/trend-sport-hrz.png',
-    title: 'Atrévete a vestir diferente.',
-    description: 'Colección nueva disponible. Descuento especial para participantes del torneo.',
+    cta: 'Ver colección',
     link: '#',
+    title: 'Trend Sport',
+    shortTitle: 'Trend Sport',
+    description: 'Atrévete a vestir diferente. Nueva colección deportiva disponible.',
   },
   {
     id: 3,
     name: 'Emprende Conmigo',
+    tier: 'Colaborador',
     image: '/sponsors/EMPRENDE-CONMIGO-TREND-SPORT.png',
-    title: 'Descubre nuevas oportunidades.',
-    description: 'Programa de mentorías para emprendedores.',
+    cta: 'Apuntarme',
     link: '#',
+    title: 'Emprende Conmigo',
+    shortTitle: 'Emprende',
+    description: 'Descubre nuevas oportunidades de negocio.',
   },
 ];
 
 const formatName = (f: string) =>
   ({ liga: 'Liga', eliminatoria: 'Eliminación Directa', grupos: 'Grupos + Eliminatoria' }[f] || f);
 
-// ── Tarjeta publicitaria: imagen llena el contenedor, título abajo-izq con subrayado difuminado, hover con detalle ──
-function ImageAdCard({
-  image,
-  title,
-  description,
-  link,
-  height = 220,
-  large = false,
+// ── Tile publicitario: imagen full-bleed + título subrayado + hover con detalle ──
+function AdTile({
+  image, title, description, cta, tier, link,
 }: {
-  image: string;
-  title: string;
-  description: string;
-  link: string;
-  height?: any;
-  large?: boolean;
+  image: string; title: string; description: string; cta: string; tier: string; link: string;
 }) {
   return (
     <Box
@@ -77,22 +77,25 @@ function ImageAdCard({
       sx={{
         position: 'relative',
         display: 'block',
-        borderRadius: '24px',
         overflow: 'hidden',
-        height,
-        cursor: 'pointer',
+        borderRadius: '24px',
+        aspectRatio: '4/3',
+        bgcolor: 'white',
         border: '1px solid rgba(17,17,17,0.06)',
         textDecoration: 'none',
-        '& .base-img': { transition: `transform 0.7s ${SMOOTH}` },
-        '&:hover .base-img': { transform: 'scale(1.06)' },
-        '& .overlay': { opacity: 0, transition: `opacity 0.35s ${SMOOTH}` },
-        '&:hover .overlay': { opacity: 1 },
+        transition: `all 0.3s ${SMOOTH}`,
+        '&:hover': {
+          transform: 'translateY(-3px)',
+          boxShadow: '0 20px 40px -12px rgba(0,0,0,0.15)',
+          '& .ad-image': { transform: 'scale(1.05)' },
+          '& .ad-overlay': { opacity: 1 },
+        },
       }}
     >
-      {/* Imagen de fondo llenando todo */}
+      {/* Imagen full-bleed */}
       <Box
+        className="ad-image"
         component="img"
-        className="base-img"
         src={image}
         alt={title}
         sx={{
@@ -101,6 +104,7 @@ function ImageAdCard({
           width: '100%',
           height: '100%',
           objectFit: 'cover',
+          transition: `transform 0.6s ${SMOOTH}`,
         }}
       />
 
@@ -108,91 +112,269 @@ function ImageAdCard({
       <Box
         sx={{
           position: 'absolute',
-          inset: 0,
-          background: 'linear-gradient(180deg, rgba(0,0,0,0) 45%, rgba(0,0,0,0.75) 100%)',
+          left: 0,
+          right: 0,
+          bottom: 0,
+          height: '55%',
+          background: 'linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.2) 55%, transparent 100%)',
           pointerEvents: 'none',
         }}
       />
 
-      {/* Título abajo izquierda + subrayado difuminado */}
+      {/* Título esquina inferior izquierda */}
       <Box
         sx={{
           position: 'absolute',
-          left: 20,
-          right: 20,
-          bottom: 18,
-          zIndex: 1,
-        }}
-      >
-        <Typography
-          sx={{
-            fontSize: large ? { xs: 24, sm: 30, md: 38 } : 18,
-            fontWeight: 800,
-            letterSpacing: large ? -1 : -0.4,
-            lineHeight: 1.15,
-            color: 'white',
-            fontFamily: '"Instrument Sans", system-ui, sans-serif',
-            textShadow: '0 2px 12px rgba(0,0,0,0.4)',
-            mb: 1,
-            maxWidth: 560,
-          }}
-        >
-          {title}
-        </Typography>
-        <Box
-          sx={{
-            width: large ? 48 : 32,
-            height: 3,
-            borderRadius: 2,
-            bgcolor: 'white',
-            filter: 'blur(1.5px)',
-            opacity: 0.9,
-          }}
-        />
-      </Box>
-
-      {/* Overlay al hover con detalle */}
-      <Box
-        className="overlay"
-        sx={{
-          position: 'absolute',
-          inset: 0,
-          bgcolor: 'rgba(10,10,10,0.85)',
-          backdropFilter: 'blur(6px)',
-          WebkitBackdropFilter: 'blur(6px)',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'flex-end',
-          p: { xs: 2.5, md: 3 },
+          left: 22,
+          right: 22,
+          bottom: 20,
           zIndex: 2,
         }}
       >
         <Typography
           sx={{
-            fontSize: large ? { xs: 20, md: 26 } : 16,
+            fontSize: { xs: 18, md: 20 },
             fontWeight: 800,
-            letterSpacing: -0.4,
             color: 'white',
             fontFamily: '"Instrument Sans", system-ui, sans-serif',
+            textDecoration: 'underline',
+            textDecorationColor: 'rgba(255,255,255,0.45)',
+            textUnderlineOffset: '6px',
+            textShadow: '0 2px 14px rgba(0,0,0,0.7), 0 0 28px rgba(0,0,0,0.5)',
+            letterSpacing: -0.4,
+            lineHeight: 1.15,
+          }}
+        >
+          {title}
+        </Typography>
+      </Box>
+
+      {/* Overlay hover con detalle */}
+      <Box
+        className="ad-overlay"
+        sx={{
+          position: 'absolute',
+          inset: 0,
+          bgcolor: 'rgba(10,10,10,0.88)',
+          backdropFilter: 'blur(6px)',
+          WebkitBackdropFilter: 'blur(6px)',
+          p: { xs: 2.5, md: 3 },
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          opacity: 0,
+          transition: `opacity 0.3s ${SMOOTH}`,
+          zIndex: 3,
+        }}
+      >
+        <Typography
+          sx={{
+            fontSize: 10.5,
+            fontWeight: 700,
+            letterSpacing: 1.2,
+            textTransform: 'uppercase',
+            color: 'rgba(255,255,255,0.5)',
             mb: 1,
+          }}
+        >
+          {tier}
+        </Typography>
+        <Typography
+          sx={{
+            fontSize: { xs: 20, md: 22 },
+            fontWeight: 800,
+            color: 'white',
+            fontFamily: '"Instrument Sans", system-ui, sans-serif',
+            lineHeight: 1.1,
+            letterSpacing: -0.5,
+            mb: 1.5,
           }}
         >
           {title}
         </Typography>
         <Typography
           sx={{
-            fontSize: large ? { xs: 14, md: 15 } : 13.5,
+            fontSize: 13.5,
+            color: 'rgba(255,255,255,0.7)',
             lineHeight: 1.5,
-            color: 'rgba(255,255,255,0.78)',
-            mb: 2,
-            maxWidth: 560,
+            mb: 2.5,
           }}
         >
           {description}
         </Typography>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-          <Typography sx={{ fontSize: 12.5, fontWeight: 700, color: 'white' }}>Ver más</Typography>
-          <ArrowForwardIcon sx={{ fontSize: 14, color: 'white' }} />
+        <Box
+          sx={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 1,
+            alignSelf: 'flex-start',
+            px: 2,
+            height: 36,
+            borderRadius: '999px',
+            bgcolor: 'white',
+            color: BLACK,
+            fontSize: 13,
+            fontWeight: 700,
+            transition: `transform 0.2s ${SMOOTH}`,
+          }}
+        >
+          {cta}
+          <ArrowForwardIcon sx={{ fontSize: 16 }} />
+        </Box>
+      </Box>
+    </Box>
+  );
+}
+
+// ── Bottom banner horizontal ──
+function BottomBanner({
+  image, title, description, cta, tier, link,
+}: {
+  image: string; title: string; description: string; cta: string; tier: string; link: string;
+}) {
+  return (
+    <Box
+      component="a"
+      href={link}
+      target="_blank"
+      rel="noopener noreferrer"
+      sx={{
+        position: 'relative',
+        display: 'block',
+        overflow: 'hidden',
+        borderRadius: '24px',
+        height: { xs: 180, md: 200 },
+        textDecoration: 'none',
+        border: '1px solid rgba(17,17,17,0.06)',
+        transition: `all 0.3s ${SMOOTH}`,
+        '&:hover': {
+          '& .banner-image': { transform: 'scale(1.04)' },
+          '& .banner-overlay': { opacity: 1 },
+        },
+      }}
+    >
+      <Box
+        className="banner-image"
+        component="img"
+        src={image}
+        alt={title}
+        sx={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          transition: `transform 0.6s ${SMOOTH}`,
+        }}
+      />
+
+      <Box
+        sx={{
+          position: 'absolute',
+          inset: 0,
+          background: 'linear-gradient(to top, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.25) 55%, transparent 100%)',
+          pointerEvents: 'none',
+        }}
+      />
+
+      <Box
+        sx={{
+          position: 'absolute',
+          left: { xs: 20, md: 28 },
+          right: { xs: 20, md: 28 },
+          bottom: { xs: 18, md: 24 },
+          zIndex: 2,
+        }}
+      >
+        <Typography
+          sx={{
+            fontSize: { xs: 22, md: 28 },
+            fontWeight: 800,
+            color: 'white',
+            fontFamily: '"Instrument Sans", system-ui, sans-serif',
+            textDecoration: 'underline',
+            textDecorationColor: 'rgba(255,255,255,0.45)',
+            textUnderlineOffset: '8px',
+            textShadow: '0 2px 16px rgba(0,0,0,0.75), 0 0 32px rgba(0,0,0,0.5)',
+            letterSpacing: -0.6,
+            lineHeight: 1.1,
+          }}
+        >
+          {title}
+        </Typography>
+      </Box>
+
+      {/* Hover con detalles */}
+      <Box
+        className="banner-overlay"
+        sx={{
+          position: 'absolute',
+          inset: 0,
+          bgcolor: 'rgba(10,10,10,0.88)',
+          backdropFilter: 'blur(6px)',
+          WebkitBackdropFilter: 'blur(6px)',
+          p: { xs: 3, md: 4 },
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          opacity: 0,
+          transition: `opacity 0.3s ${SMOOTH}`,
+          zIndex: 3,
+        }}
+      >
+        <Typography
+          sx={{
+            fontSize: 10.5,
+            fontWeight: 700,
+            letterSpacing: 1.2,
+            textTransform: 'uppercase',
+            color: 'rgba(255,255,255,0.5)',
+            mb: 1,
+          }}
+        >
+          {tier}
+        </Typography>
+        <Typography
+          sx={{
+            fontSize: { xs: 22, md: 26 },
+            fontWeight: 800,
+            color: 'white',
+            fontFamily: '"Instrument Sans", system-ui, sans-serif',
+            lineHeight: 1.1,
+            letterSpacing: -0.6,
+            mb: 1.5,
+          }}
+        >
+          {title}
+        </Typography>
+        <Typography
+          sx={{
+            fontSize: { xs: 13, md: 14 },
+            color: 'rgba(255,255,255,0.7)',
+            lineHeight: 1.5,
+            mb: 2.5,
+            maxWidth: 500,
+          }}
+        >
+          {description}
+        </Typography>
+        <Box
+          sx={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 1,
+            alignSelf: 'flex-start',
+            px: 2.5,
+            height: 38,
+            borderRadius: '999px',
+            bgcolor: 'white',
+            color: BLACK,
+            fontSize: 13.5,
+            fontWeight: 700,
+          }}
+        >
+          {cta}
+          <ArrowForwardIcon sx={{ fontSize: 16 }} />
         </Box>
       </Box>
     </Box>
@@ -206,6 +388,7 @@ export default function Home() {
   const [publicTournaments, setPublicTournaments] = useState<any[]>([]);
   const [allTeams, setAllTeams] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showBottomAd, setShowBottomAd] = useState(true);
 
   useEffect(() => {
     api.get('/tournaments/public')
@@ -237,6 +420,7 @@ export default function Home() {
         maxWidth: '100vw',
         overflowX: 'clip',
         bgcolor: '#FAFAF8',
+        pb: { xs: showBottomAd ? '72px' : 0, md: 0 },
       }}
     >
       <Box
@@ -244,23 +428,95 @@ export default function Home() {
           maxWidth: MAX_WIDTH,
           mx: 'auto',
           width: '100%',
-          px: { xs: 2, sm: 3, md: 4 },
-          py: { xs: 3, md: 5 },
+          px: { xs: 2.5, md: 6 },
+          py: { xs: 3, md: 4 },
           display: 'flex',
           flexDirection: 'column',
           gap: { xs: 3, md: 4 },
         }}
       >
-        {/* ═══════════ HERO AD (imagen llena) ═══════════ */}
-        <Box sx={{ animation: `${fadeInUp} 0.5s ${SMOOTH} both` }}>
-          <ImageAdCard
-            image={sponsors[0].image}
-            title={sponsors[0].title}
-            description={sponsors[0].description}
-            link={sponsors[0].link}
-            height={{ xs: 260, sm: 320, md: 400, lg: 440 }}
-            large
-          />
+        {/* ═══════════ HERO AD ═══════════ */}
+        <Box
+          sx={{
+            p: { xs: 2.5, md: 3.5 },
+            borderRadius: '28px',
+            bgcolor: 'white',
+            border: '1px solid rgba(17,17,17,0.06)',
+            boxShadow: '0 24px 64px -20px rgba(0,0,0,0.12)',
+            display: 'flex',
+            flexDirection: { xs: 'column', md: 'row' },
+            gap: 3,
+            animation: `${fadeInUp} 0.5s ${SMOOTH} both`,
+          }}
+        >
+          <Box
+            sx={{
+              flex: 1.2,
+              minWidth: 0,
+              display: 'grid',
+              placeItems: 'center',
+              bgcolor: '#FAFAF8',
+              borderRadius: '20px',
+              p: 3,
+              aspectRatio: { xs: '16/9', md: '16/7' },
+            }}
+          >
+            <Box
+              component="img"
+              src={sponsors[0].image}
+              alt={sponsors[0].name}
+              sx={{ maxWidth: '100%', maxHeight: 140, objectFit: 'contain' }}
+            />
+          </Box>
+
+          <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 1.5 }}>
+            <Typography
+              sx={{
+                fontSize: 11,
+                fontWeight: 700,
+                letterSpacing: 1.2,
+                textTransform: 'uppercase',
+                color: 'rgba(17,17,17,0.4)',
+              }}
+            >
+              {sponsors[0].tier}
+            </Typography>
+            <Typography
+              sx={{
+                fontSize: { xs: 24, md: 30 },
+                fontWeight: 800,
+                lineHeight: 1,
+                letterSpacing: -1,
+                fontFamily: '"Instrument Sans", system-ui, sans-serif',
+                textTransform: 'uppercase',
+                color: BLACK,
+              }}
+            >
+              Tu sonrisa,
+              <br />
+              nuestra victoria.
+            </Typography>
+            <Typography sx={{ fontSize: 13.5, color: 'rgba(17,17,17,0.5)', lineHeight: 1.5 }}>
+              {sponsors[0].description}
+            </Typography>
+            <Button
+              endIcon={<ArrowForwardIcon sx={{ fontSize: 18 }} />}
+              sx={{
+                alignSelf: 'flex-start',
+                mt: 1,
+                height: 40,
+                borderRadius: '999px',
+                bgcolor: BLACK,
+                color: 'white',
+                px: 2.5,
+                fontWeight: 700,
+                fontSize: 13,
+                '&:hover': { bgcolor: '#1a1a1a' },
+              }}
+            >
+              {sponsors[0].cta}
+            </Button>
+          </Box>
         </Box>
 
         {/* ═══════════ MARQUEE DE EQUIPOS ═══════════ */}
@@ -336,7 +592,7 @@ export default function Home() {
           </Box>
         )}
 
-        {/* ═══════════ TRIPACK DE PUBLICIDAD ═══════════ */}
+        {/* ═══════════ TRIPACK DE IMÁGENES ═══════════ */}
         <Box
           sx={{
             display: 'grid',
@@ -345,26 +601,29 @@ export default function Home() {
             animation: `${fadeInUp} 0.5s ${SMOOTH} both 0.1s`,
           }}
         >
-          <ImageAdCard
+          <AdTile
             image={sponsors[1].image}
-            title={sponsors[1].title}
+            title={sponsors[1].shortTitle}
             description={sponsors[1].description}
+            cta={sponsors[1].cta}
+            tier={sponsors[1].tier}
             link={sponsors[1].link}
-            height={240}
           />
-          <ImageAdCard
+          <AdTile
             image={sponsors[2].image}
-            title={sponsors[2].title}
+            title={sponsors[2].shortTitle}
             description={sponsors[2].description}
+            cta={sponsors[2].cta}
+            tier={sponsors[2].tier}
             link={sponsors[2].link}
-            height={240}
           />
-          <ImageAdCard
+          <AdTile
             image={sponsors[0].image}
-            title={sponsors[0].title}
-            description={sponsors[0].description}
-            link={sponsors[0].link}
-            height={240}
+            title="Próximamente"
+            description="Este espacio puede ser tuyo. Contacta para patrocinar el torneo."
+            cta="Contactar"
+            tier="Disponible"
+            link="#"
           />
         </Box>
 
@@ -378,7 +637,7 @@ export default function Home() {
             animation: `${fadeInUp} 0.5s ${SMOOTH} both 0.15s`,
           }}
         >
-          {/* Feed de torneos (SIN publicidad) */}
+          {/* Columna torneos */}
           <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               <Box sx={{ width: 48, height: 1, bgcolor: 'rgba(17,17,17,0.14)' }} />
@@ -386,12 +645,11 @@ export default function Home() {
                 sx={{
                   fontSize: 11,
                   fontWeight: 700,
-                  letterSpacing: 1.2,
-                  textTransform: 'uppercase',
+                  letterSpacing: 1,
                   color: 'rgba(17,17,17,0.35)',
                 }}
               >
-                Torneos públicos
+                TORNEOS PÚBLICOS
               </Typography>
             </Box>
 
@@ -459,101 +717,103 @@ export default function Home() {
                 )}
               </Box>
             ) : (
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                {publicTournaments.map(t => (
-                  <Box
-                    key={t.id}
-                    component={Link}
-                    to={`/t/${t.shareCode}`}
-                    sx={{
-                      textDecoration: 'none',
-                      color: 'inherit',
-                      p: { xs: 2.5, md: 3 },
-                      borderRadius: '24px',
-                      bgcolor: 'white',
-                      border: '1px solid rgba(17,17,17,0.06)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      gap: 2,
-                      transition: `all 0.3s ${SMOOTH}`,
-                      '&:hover': {
-                        borderColor: 'rgba(17,17,17,0.15)',
-                        transform: 'translateY(-2px)',
-                        boxShadow: '0 12px 32px -12px rgba(0,0,0,0.1)',
-                        '& .arrow-icon': { transform: 'translateX(4px)' },
-                      },
-                    }}
-                  >
-                    <Box sx={{ minWidth: 0, flex: 1 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', mb: 0.5 }}>
-                        <Typography
-                          sx={{
-                            fontSize: { xs: 17, md: 19 },
-                            fontWeight: 800,
-                            letterSpacing: -0.4,
-                            color: BLACK,
-                            fontFamily: '"Instrument Sans", system-ui, sans-serif',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                          }}
-                        >
-                          {t.name}
-                        </Typography>
-                        <Chip
-                          label={t.status === 'active' ? 'En curso' : 'Finalizado'}
-                          size="small"
-                          sx={{
-                            height: 22,
-                            fontSize: 10.5,
-                            fontWeight: 700,
-                            bgcolor: t.status === 'active' ? 'rgba(34,197,94,0.12)' : 'rgba(17,17,17,0.06)',
-                            color: t.status === 'active' ? '#16A34A' : 'rgba(17,17,17,0.6)',
-                          }}
-                        />
-                      </Box>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
-                        <Typography sx={{ fontSize: 12.5, color: 'rgba(17,17,17,0.5)', display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                          <GroupsIcon sx={{ fontSize: 15 }} />
-                          {t._count?.teams || 0} equipos
-                        </Typography>
-                        <Typography sx={{ fontSize: 12.5, color: 'rgba(17,17,17,0.5)' }}>
-                          {formatName(t.format)}
-                        </Typography>
+              publicTournaments.map(t => (
+                <Box
+                  key={t.id}
+                  component={Link}
+                  to={`/t/${t.shareCode}`}
+                  sx={{
+                    textDecoration: 'none',
+                    color: 'inherit',
+                    p: { xs: 2.5, md: 3 },
+                    borderRadius: '24px',
+                    bgcolor: 'white',
+                    border: '1px solid rgba(17,17,17,0.06)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 2,
+                    transition: `all 0.3s ${SMOOTH}`,
+                    '&:hover': {
+                      borderColor: 'rgba(17,17,17,0.15)',
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 12px 32px -12px rgba(0,0,0,0.1)',
+                      '& .arrow-icon': { transform: 'translateX(4px)' },
+                    },
+                  }}
+                >
+                  <Box sx={{ minWidth: 0, flex: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', mb: 0.5 }}>
+                      <Typography
+                        sx={{
+                          fontSize: { xs: 17, md: 19 },
+                          fontWeight: 800,
+                          letterSpacing: -0.4,
+                          color: BLACK,
+                          fontFamily: '"Instrument Sans", system-ui, sans-serif',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {t.name}
+                      </Typography>
+                      <Box
+                        sx={{
+                          px: 1,
+                          py: 0.15,
+                          borderRadius: '6px',
+                          bgcolor: t.status === 'active' ? 'rgba(34,197,94,0.12)' : 'rgba(17,17,17,0.06)',
+                          color: t.status === 'active' ? '#16A34A' : 'rgba(17,17,17,0.6)',
+                          fontSize: 10,
+                          fontWeight: 700,
+                          letterSpacing: 0.3,
+                          flexShrink: 0,
+                        }}
+                      >
+                        {t.status === 'active' ? 'EN CURSO' : 'FINALIZADO'}
                       </Box>
                     </Box>
-
-                    <Box
-                      sx={{
-                        width: 40,
-                        height: 40,
-                        borderRadius: '50%',
-                        bgcolor: BLACK,
-                        display: 'grid',
-                        placeItems: 'center',
-                        color: 'white',
-                        flexShrink: 0,
-                      }}
-                    >
-                      <ArrowForwardIcon
-                        className="arrow-icon"
-                        sx={{ fontSize: 18, transition: `transform 0.25s ${SMOOTH}` }}
-                      />
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
+                      <Typography sx={{ fontSize: 12.5, color: 'rgba(17,17,17,0.5)', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <GroupsIcon sx={{ fontSize: 15 }} />
+                        {t._count?.teams || 0} equipos
+                      </Typography>
+                      <Typography sx={{ fontSize: 12.5, color: 'rgba(17,17,17,0.5)' }}>
+                        {formatName(t.format)}
+                      </Typography>
                     </Box>
                   </Box>
-                ))}
-              </Box>
+
+                  <Box
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: '50%',
+                      bgcolor: BLACK,
+                      display: 'grid',
+                      placeItems: 'center',
+                      color: 'white',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <ArrowForwardIcon
+                      className="arrow-icon"
+                      sx={{ fontSize: 18, transition: `transform 0.25s ${SMOOTH}` }}
+                    />
+                  </Box>
+                </Box>
+              ))
             )}
           </Box>
 
-          {/* SIDEBAR */}
+          {/* Sidebar sticky */}
           <Box
             sx={{
               width: { xs: '100%', lg: 340 },
               flexShrink: 0,
               position: { lg: 'sticky' },
-              top: { lg: 88 },
+              top: { lg: 24 },
               display: 'flex',
               flexDirection: 'column',
               gap: 2,
@@ -570,15 +830,14 @@ export default function Home() {
             >
               <Typography
                 sx={{
-                  fontSize: 10.5,
+                  fontSize: 10,
                   fontWeight: 700,
-                  letterSpacing: 1.2,
-                  textTransform: 'uppercase',
+                  letterSpacing: 1,
                   color: 'rgba(17,17,17,0.35)',
                   mb: 2,
                 }}
               >
-                Resumen
+                RESUMEN
               </Typography>
               <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 1.5 }}>
                 {stats.map(s => (
@@ -611,13 +870,14 @@ export default function Home() {
               </Box>
             </Box>
 
-            {/* Spotlight vertical */}
-            <ImageAdCard
+            {/* Spotlight del mes */}
+            <AdTile
               image={sponsors[0].image}
-              title={sponsors[0].title}
-              description={sponsors[0].description}
+              title="Dental Fresh Plus"
+              description="Clínica oficial del torneo. 200+ jugadores ya han pasado por aquí."
+              cta="Pedir cita"
+              tier="Spotlight del mes"
               link={sponsors[0].link}
-              height={360}
             />
 
             {/* Patrocinadores oficiales */}
@@ -631,15 +891,14 @@ export default function Home() {
             >
               <Typography
                 sx={{
-                  fontSize: 10.5,
+                  fontSize: 10,
                   fontWeight: 700,
-                  letterSpacing: 1.2,
-                  textTransform: 'uppercase',
+                  letterSpacing: 1,
                   color: 'rgba(17,17,17,0.35)',
                   mb: 1.5,
                 }}
               >
-                Patrocinadores oficiales
+                PATROCINADORES OFICIALES
               </Typography>
               <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', alignItems: 'center' }}>
                 {sponsors.map(s => (
@@ -648,13 +907,7 @@ export default function Home() {
                     component="img"
                     src={s.image}
                     alt={s.name}
-                    sx={{
-                      height: 28,
-                      objectFit: 'contain',
-                      opacity: 0.6,
-                      transition: `opacity 0.2s ${SMOOTH}`,
-                      '&:hover': { opacity: 1 },
-                    }}
+                    sx={{ height: 26, objectFit: 'contain', opacity: 0.6, transition: `opacity 0.2s ${SMOOTH}`, '&:hover': { opacity: 1 } }}
                   />
                 ))}
               </Box>
@@ -662,17 +915,131 @@ export default function Home() {
           </Box>
         </Box>
 
-        {/* ═══════════ BANNER HORIZONTAL PUBLICITARIO (al final) ═══════════ */}
-        <Box sx={{ animation: `${fadeInUp} 0.5s ${SMOOTH} both 0.2s` }}>
-          <ImageAdCard
-            image={sponsors[1].image}
-            title={sponsors[1].title}
-            description={sponsors[1].description}
-            link={sponsors[1].link}
-            height={{ xs: 160, sm: 180, md: 200 }}
+        {/* ═══════════ BOTTOM BANNER HORIZONTAL ═══════════ */}
+        <Box sx={{ animation: `${fadeInUp} 0.5s ${SMOOTH} both 0.2s`, display: { xs: 'none', md: 'block' } }}>
+          <BottomBanner
+            image={sponsors[0].image}
+            title="Dental Fresh Plus"
+            description="Clínica dental oficial del torneo. Revisión gratuita para todos los jugadores registrados este mes."
+            cta="Reservar cita"
+            tier="Patrocinador principal"
+            link={sponsors[0].link}
           />
         </Box>
       </Box>
+
+      {/* ═══════════ BOTTOM STICKY (solo móvil) ═══════════ */}
+      {showBottomAd && (
+        <Box
+          component="a"
+          href={sponsors[0].link}
+          target="_blank"
+          rel="noopener noreferrer"
+          sx={{
+            position: 'fixed',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            zIndex: 60,
+            display: { xs: 'flex', md: 'none' },
+            alignItems: 'center',
+            gap: 1.5,
+            px: 2,
+            height: 64,
+            bgcolor: 'rgba(255,255,255,0.95)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+            borderTop: '1px solid rgba(17,17,17,0.08)',
+            pb: 'env(safe-area-inset-bottom)',
+            textDecoration: 'none',
+            overflow: 'hidden',
+          }}
+        >
+          {/* Imagen */}
+          <Box
+            sx={{
+              width: 42,
+              height: 42,
+              borderRadius: '12px',
+              overflow: 'hidden',
+              flexShrink: 0,
+              border: '1px solid rgba(17,17,17,0.06)',
+              bgcolor: 'white',
+            }}
+          >
+            <Box
+              component="img"
+              src={sponsors[0].image}
+              alt={sponsors[0].name}
+              sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
+          </Box>
+
+          {/* Título con subrayado + difuminado */}
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography
+              sx={{
+                fontSize: 13.5,
+                fontWeight: 800,
+                color: BLACK,
+                fontFamily: '"Instrument Sans", system-ui, sans-serif',
+                textDecoration: 'underline',
+                textDecorationColor: 'rgba(17,17,17,0.3)',
+                textUnderlineOffset: '4px',
+                letterSpacing: -0.3,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {sponsors[0].shortTitle}
+            </Typography>
+            <Typography
+              sx={{
+                fontSize: 11,
+                color: 'rgba(17,17,17,0.5)',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                mt: 0.25,
+              }}
+            >
+              {sponsors[0].description}
+            </Typography>
+          </Box>
+
+          {/* CTA + cerrar */}
+          <Box sx={{ display: 'flex', gap: 0.5, flexShrink: 0 }}>
+            <Box
+              sx={{
+                height: 32,
+                borderRadius: '999px',
+                bgcolor: BLACK,
+                color: 'white',
+                fontSize: 12,
+                fontWeight: 700,
+                px: 2,
+                display: 'grid',
+                placeItems: 'center',
+              }}
+            >
+              Ver
+            </Box>
+            <IconButton
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowBottomAd(false); }}
+              size="small"
+              sx={{
+                width: 32,
+                height: 32,
+                color: 'rgba(17,17,17,0.5)',
+                '&:hover': { bgcolor: 'rgba(17,17,17,0.04)', color: BLACK },
+              }}
+            >
+              <CloseIcon sx={{ fontSize: 16 }} />
+            </IconButton>
+          </Box>
+        </Box>
+      )}
     </Box>
   );
 }
