@@ -22,236 +22,388 @@ export const WelcomePage = () => {
   useEffect(() => { setMounted(true); }, []);
 
   return (
-    <Box sx={{
-      minHeight: '100dvh', bgcolor: '#FAFAF8', position: 'relative', overflow: 'hidden',
-      opacity: mounted ? 1 : 0, transition: 'opacity 0.4s ease',
-    }}>
-      <EditorialBackground />
-
-      <Box sx={{
-        position: 'relative', zIndex: 1,
+    <Box
+      sx={{
         minHeight: '100dvh',
-        display: 'flex',
-        flexDirection: { xs: 'column', md: 'row' },
-      }}>
+        width: '100%',
+        maxWidth: '100vw',
+        overflowX: 'clip',
+        bgcolor: '#FAFAF8',
+        position: 'relative',
+        opacity: mounted ? 1 : 0,
+        transition: 'opacity 0.4s ease',
+      }}
+    >
+      {/* Fondo editorial aislado */}
+      <Box sx={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 0 }}>
+        <EditorialBackground />
+      </Box>
 
-        {/* ═══════════ COLUMNA IZQUIERDA ═══════════ */}
-        <Box sx={{
-          flex: { md: 1.1 },
-          display: 'flex', flexDirection: 'column',
-          px: { xs: 2.5, sm: 4, md: 6, lg: 8 },
-          pt: { xs: 'calc(24px + env(safe-area-inset-top, 0px))', md: 5 },
-          pb: { xs: 'calc(24px + env(safe-area-inset-bottom, 0px))', md: 5 },
-          maxWidth: { xs: '100%', md: 560 },
+      <Box
+        sx={{
+          position: 'relative',
+          zIndex: 1,
+          minHeight: '100dvh',
           width: '100%',
-        }}>
-
-          {/* Logo */}
-          <Box sx={{
+          display: 'flex',
+          flexDirection: { xs: 'column', md: 'row' },
+        }}
+      >
+        {/* ══════════ COLUMNA IZQUIERDA ══════════ */}
+        <Box
+          sx={{
+            flex: { xs: 1, md: '1 1 0%' },
+            minWidth: 0,
+            maxWidth: { xs: '100%', md: 620 },
             display: 'flex',
-            justifyContent: { xs: 'center', md: 'flex-start' },
-            animation: `${fadeInUp} 0.6s ${SMOOTH} both`,
-          }}>
-            <Box sx={{
-              width: { xs: 96, md: 56 },
-              height: { xs: 96, md: 56 },
-              borderRadius: { xs: '24px', md: '16px' },
-              bgcolor: 'white',
-              p: 0.5,
-              boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-            }}>
-              <Box component="img" src="/torneo-trend-sport.png"
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            px: { xs: 3, sm: 5, md: 7, lg: 10 },
+            pt: { xs: 'calc(24px + env(safe-area-inset-top, 0px))', md: 6 },
+            pb: { xs: 'calc(24px + env(safe-area-inset-bottom, 0px))', md: 6 },
+          }}
+        >
+          {/* ── Logo ── */}
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: { xs: 'center', md: 'flex-start' },
+              animation: `${fadeInUp} 0.6s ${SMOOTH} both`,
+            }}
+          >
+            <Box
+              sx={{
+                width: { xs: 88, md: 60 },
+                height: { xs: 88, md: 60 },
+                borderRadius: { xs: '22px', md: '18px' },
+                bgcolor: 'white',
+                p: 0.5,
+                boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+              }}
+            >
+              <Box
+                component="img"
+                src="/torneo-trend-sport.png"
                 sx={{
-                  width: '100%', height: '100%',
-                  borderRadius: { xs: '20px', md: '12px' },
+                  width: '100%',
+                  height: '100%',
+                  borderRadius: { xs: '18px', md: '14px' },
                   objectFit: 'cover',
-                }} />
+                }}
+              />
             </Box>
           </Box>
 
-          {/* Hero */}
-          <Box sx={{
-            mt: { xs: 'auto', md: 0 },
-            mb: { xs: 'auto', md: 0 },
-            pt: { xs: 6, md: 0 },
-            flex: { md: 1 },
-            display: { md: 'flex' }, flexDirection: { md: 'column' }, justifyContent: { md: 'center' },
-            animation: `${fadeInUp} 0.7s ${SMOOTH} both 0.1s`,
-          }}>
-            <Box sx={{ height: 1, bgcolor: 'rgba(17,17,17,0.14)', transformOrigin: 'left center',
-              animation: `${lineGrow} 0.8s ${SMOOTH} both 0.5s` }} />
+          {/* ── Hero centrado verticalmente ── */}
+          <Box
+            sx={{
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              gap: { xs: 3, md: 3 },
+              py: { xs: 5, md: 0 },
+              animation: `${fadeInUp} 0.7s ${SMOOTH} both 0.1s`,
+            }}
+          >
+            {/* Línea completa (igual que AuthPage) */}
+            <Box
+              sx={{
+                width: '100%',
+                height: '1px',
+                bgcolor: 'rgba(17,17,17,0.14)',
+                transformOrigin: 'left center',
+                animation: `${lineGrow} 0.8s ${SMOOTH} both 0.4s`,
+              }}
+            />
 
-            <Typography sx={{
-              mt: { xs: 5, md: 4 },
-              fontSize: { xs: 34, sm: 42, md: 44, lg: 52 },
-              lineHeight: 1.02, fontWeight: 800, letterSpacing: -1.6,
-              color: BLACK, fontFamily: '"Instrument Sans", system-ui, sans-serif',
-              textTransform: 'uppercase',
-            }}>
+            <Typography
+              sx={{
+                fontSize: { xs: 36, sm: 44, md: 52, lg: 64 },
+                lineHeight: 1.02,
+                fontWeight: 800,
+                letterSpacing: -1.8,
+                color: BLACK,
+                fontFamily: '"Instrument Sans", system-ui, sans-serif',
+                textTransform: 'uppercase',
+                mt: { xs: 2, md: 1 },
+              }}
+            >
               Torneos<br />
-              <Box component="span" sx={{ color: 'rgba(17,17,17,0.35)', fontWeight: 700 }}>
+              <Box component="span" sx={{ color: 'rgba(17,17,17,0.32)', fontWeight: 700 }}>
                 TrendSport
               </Box>
             </Typography>
 
-            <Typography sx={{
-              mt: { xs: 2.5, md: 2.5 },
-              fontSize: { xs: 15, md: 16 },
-              fontWeight: 500, color: 'rgba(17,17,17,0.55)', lineHeight: 1.55,
-              maxWidth: 400,
-            }}>
+            <Typography
+              sx={{
+                fontSize: { xs: 15, md: 16 },
+                fontWeight: 500,
+                color: 'rgba(17,17,17,0.55)',
+                lineHeight: 1.6,
+                maxWidth: 400,
+              }}
+            >
               La forma más simple de crear, gestionar y compartir torneos locales de fútbol.
             </Typography>
           </Box>
 
-          {/* Botones + legal */}
-          <Box sx={{
-            display: 'flex', flexDirection: 'column',
-            gap: 1.5,
-            animation: `${fadeInUp} 0.6s ${SMOOTH} both 0.35s`,
-          }}>
-            <Box sx={{
+          {/* ── Acciones abajo ── */}
+          <Box
+            sx={{
               display: 'flex',
-              flexDirection: { xs: 'column', sm: 'row' },
-              gap: 1.5,
-            }}>
-              <Button fullWidth onClick={() => navigate('/onboarding/basic-info')}
+              flexDirection: 'column',
+              gap: { xs: 2, md: 2.5 },
+              animation: `${fadeInUp} 0.6s ${SMOOTH} both 0.35s`,
+            }}
+          >
+            {/* Botones */}
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: { xs: 'column', sm: 'row' },
+                gap: 1.5,
+              }}
+            >
+              <Button
+                fullWidth
+                onClick={() => navigate('/onboarding/basic-info')}
                 sx={{
-                  height: 54,
-                  borderRadius: '16px', fontWeight: 700, fontSize: 15, letterSpacing: -0.01,
-                  bgcolor: BLACK, color: 'white', boxShadow: '0 8px 24px rgba(17,17,17,0.15)',
+                  height: 52,
+                  borderRadius: '999px',
+                  fontWeight: 700,
+                  fontSize: 15,
+                  letterSpacing: -0.01,
+                  bgcolor: BLACK,
+                  color: 'white',
+                  boxShadow: '0 8px 24px rgba(17,17,17,0.15)',
                   transition: `all 0.3s ${SMOOTH}`,
-                  '&:hover': { bgcolor: '#1a1a1a', transform: 'translateY(-1px)',
-                    boxShadow: '0 12px 32px rgba(17,17,17,0.25)' },
+                  '&:hover': {
+                    bgcolor: '#1a1a1a',
+                    transform: 'translateY(-1px)',
+                    boxShadow: '0 12px 32px rgba(17,17,17,0.25)',
+                  },
                   '&:active': { transform: 'scale(0.985)' },
-                }}>
+                }}
+              >
                 Empezar
               </Button>
-              <Button fullWidth onClick={() => navigate('/auth')}
+              <Button
+                fullWidth
+                onClick={() => navigate('/auth')}
                 sx={{
-                  height: 54,
-                  borderRadius: '16px', fontWeight: 700, fontSize: 15, letterSpacing: -0.01,
-                  bgcolor: 'white', color: BLACK, border: '1.5px solid rgba(17,17,17,0.1)',
+                  height: 52,
+                  borderRadius: '999px',
+                  fontWeight: 700,
+                  fontSize: 15,
+                  letterSpacing: -0.01,
+                  bgcolor: 'white',
+                  color: BLACK,
+                  border: '1.5px solid rgba(17,17,17,0.1)',
                   boxShadow: '0 2px 12px rgba(0,0,0,0.03)',
                   transition: `all 0.3s ${SMOOTH}`,
-                  '&:hover': { bgcolor: 'white', borderColor: 'rgba(17,17,17,0.35)',
-                    transform: 'translateY(-1px)', boxShadow: '0 8px 24px rgba(0,0,0,0.06)' },
+                  '&:hover': {
+                    bgcolor: 'white',
+                    borderColor: 'rgba(17,17,17,0.35)',
+                    transform: 'translateY(-1px)',
+                    boxShadow: '0 8px 24px rgba(0,0,0,0.06)',
+                  },
                   '&:active': { transform: 'scale(0.985)' },
-                }}>
+                }}
+              >
                 Ya tengo cuenta
               </Button>
             </Box>
 
-            <Box onClick={() => setOrganizerModal(true)}
+            {/* Enlaces secundarios */}
+            <Box
               sx={{
-                textAlign: { xs: 'center', md: 'left' },
-                cursor: 'pointer', mt: 0.5,
-                transition: `opacity 0.2s ${SMOOTH}`, '&:hover': { opacity: 0.7 },
-              }}>
-              <Typography sx={{
-                fontSize: 11, fontWeight: 600, letterSpacing: 0.5,
-                color: 'rgba(17,17,17,0.35)', textTransform: 'uppercase',
-              }}>
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: { xs: 'center', md: 'flex-start' },
+                gap: 1.5,
+                mt: 0.5,
+              }}
+            >
+              <Typography
+                onClick={() => setOrganizerModal(true)}
+                sx={{
+                  fontSize: 11,
+                  fontWeight: 600,
+                  letterSpacing: 0.6,
+                  color: 'rgba(17,17,17,0.35)',
+                  textTransform: 'uppercase',
+                  cursor: 'pointer',
+                  transition: `color 0.2s ${SMOOTH}`,
+                  '&:hover': { color: BLACK },
+                }}
+              >
                 Soy organizador
               </Typography>
-            </Box>
 
-            <Box sx={{
-              display: 'flex', alignItems: 'center', gap: 1.5,
-              mt: { xs: 2, md: 2.5 },
-              justifyContent: { xs: 'center', md: 'flex-start' },
-            }}>
-              <Typography onClick={() => navigate('/terminos-condiciones')}
-                sx={{
-                  fontSize: 11.5, fontFamily: '"Fragment Mono", monospace',
-                  color: 'rgba(17,17,17,0.35)', cursor: 'pointer',
-                  '&:hover': { color: BLACK },
-                }}>
-                Términos
-              </Typography>
-              <Box sx={{ width: 3, height: 3, borderRadius: '50%', bgcolor: 'rgba(17,17,17,0.25)' }} />
-              <Typography onClick={() => navigate('/politica-privacidad')}
-                sx={{
-                  fontSize: 11.5, fontFamily: '"Fragment Mono", monospace',
-                  color: 'rgba(17,17,17,0.35)', cursor: 'pointer',
-                  '&:hover': { color: BLACK },
-                }}>
-                Privacidad
-              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <Typography
+                  onClick={() => navigate('/terminos-condiciones')}
+                  sx={{
+                    fontSize: 11.5,
+                    fontFamily: '"Fragment Mono", monospace',
+                    color: 'rgba(17,17,17,0.35)',
+                    cursor: 'pointer',
+                    transition: `color 0.2s ${SMOOTH}`,
+                    '&:hover': { color: BLACK },
+                  }}
+                >
+                  Términos
+                </Typography>
+                <Box sx={{ width: 3, height: 3, borderRadius: '50%', bgcolor: 'rgba(17,17,17,0.25)' }} />
+                <Typography
+                  onClick={() => navigate('/politica-privacidad')}
+                  sx={{
+                    fontSize: 11.5,
+                    fontFamily: '"Fragment Mono", monospace',
+                    color: 'rgba(17,17,17,0.35)',
+                    cursor: 'pointer',
+                    transition: `color 0.2s ${SMOOTH}`,
+                    '&:hover': { color: BLACK },
+                  }}
+                >
+                  Privacidad
+                </Typography>
+              </Box>
             </Box>
           </Box>
         </Box>
 
-        {/* ═══════════ COLUMNA DERECHA (desktop) ═══════════ */}
-        <Box sx={{
-          display: { xs: 'none', md: 'flex' },
-          flex: 0.9,
-          alignItems: 'center', justifyContent: 'center',
-          p: { md: 5, lg: 6 },
-          position: 'relative',
-          borderLeft: '1px solid rgba(17,17,17,0.06)',
-        }}>
-          <Box sx={{
-            position: 'relative',
-            width: '100%', maxWidth: 400,
-            aspectRatio: '4/5',
-            borderRadius: '28px',
-            overflow: 'hidden',
-            background: 'linear-gradient(160deg, #0A0A0A 0%, #1a1a1a 100%)',
-            boxShadow: '0 40px 80px -20px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.06) inset',
-            display: 'flex', flexDirection: 'column',
-            animation: `${fadeInUp} 0.9s ${SMOOTH} both 0.2s`,
-          }}>
-            <Box sx={{
-              position: 'absolute', top: -90, right: -90,
-              width: 260, height: 260, borderRadius: '50%',
-              border: '1px solid rgba(255,255,255,0.06)',
-              '&::before': {
-                content: '""', position: 'absolute', inset: 36, borderRadius: '50%',
-                border: '1px solid rgba(255,255,255,0.04)',
-              },
-            }} />
-            <Box sx={{
-              position: 'absolute', bottom: -100, left: -70,
-              width: 240, height: 240, borderRadius: '50%',
-              border: '1px solid rgba(255,255,255,0.05)',
-            }} />
+        {/* ══════════ COLUMNA DERECHA (desktop) ══════════ */}
+        <Box
+          sx={{
+            display: { xs: 'none', md: 'flex' },
+            flex: '1 1 0%',
+            minWidth: 0,
+            alignItems: 'center',
+            justifyContent: 'center',
+            p: { md: 6, lg: 8 },
+            borderLeft: '1px solid rgba(17,17,17,0.06)',
+          }}
+        >
+          <Box
+            sx={{
+              position: 'relative',
+              width: '100%',
+              maxWidth: 460,
+              aspectRatio: '4 / 5',
+              borderRadius: '32px',
+              overflow: 'hidden',
+              background: 'linear-gradient(160deg, #0A0A0A 0%, #1a1a1a 100%)',
+              boxShadow:
+                '0 40px 80px -20px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.06) inset',
+              display: 'flex',
+              flexDirection: 'column',
+              animation: `${fadeInUp} 0.9s ${SMOOTH} both 0.2s`,
+            }}
+          >
+            {/* Círculo decorativo arriba derecha */}
+            <Box
+              sx={{
+                position: 'absolute',
+                top: -100,
+                right: -100,
+                width: 300,
+                height: 300,
+                borderRadius: '50%',
+                border: '1px solid rgba(255,255,255,0.06)',
+                '&::before': {
+                  content: '""',
+                  position: 'absolute',
+                  inset: 40,
+                  borderRadius: '50%',
+                  border: '1px solid rgba(255,255,255,0.04)',
+                },
+              }}
+            />
+            {/* Círculo decorativo abajo izquierda */}
+            <Box
+              sx={{
+                position: 'absolute',
+                bottom: -120,
+                left: -80,
+                width: 280,
+                height: 280,
+                borderRadius: '50%',
+                border: '1px solid rgba(255,255,255,0.05)',
+              }}
+            />
 
-            <Box sx={{
-              position: 'relative', zIndex: 1,
-              display: 'flex', flexDirection: 'column',
-              alignItems: 'center', justifyContent: 'center',
-              flex: 1, p: 4, gap: 3,
-            }}>
-              <Box sx={{
-                width: 130, height: 130,
-                borderRadius: '32px', bgcolor: 'white',
-                p: 0.75, boxShadow: '0 20px 60px rgba(0,0,0,0.4)',
-              }}>
-                <Box component="img" src="/torneo-trend-sport.png"
-                  sx={{ width: '100%', height: '100%', borderRadius: '26px', objectFit: 'cover' }} />
+            {/* Contenido central: logo gigante */}
+            <Box
+              sx={{
+                position: 'relative',
+                zIndex: 1,
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                p: 5,
+                gap: 3,
+              }}
+            >
+              <Box
+                sx={{
+                  width: 150,
+                  height: 150,
+                  borderRadius: '38px',
+                  bgcolor: 'white',
+                  p: 1,
+                  boxShadow: '0 20px 60px rgba(0,0,0,0.4)',
+                }}
+              >
+                <Box
+                  component="img"
+                  src="/torneo-trend-sport.png"
+                  sx={{ width: '100%', height: '100%', borderRadius: '30px', objectFit: 'cover' }}
+                />
               </Box>
 
-              <Typography sx={{
-                mt: 1.5, textAlign: 'center',
-                fontSize: 10.5, fontWeight: 700, letterSpacing: 2.5,
-                textTransform: 'uppercase',
-                color: 'rgba(255,255,255,0.4)',
-                fontFamily: '"Fragment Mono", monospace',
-              }}>
+              <Typography
+                sx={{
+                  textAlign: 'center',
+                  fontSize: 11,
+                  fontWeight: 700,
+                  letterSpacing: 3,
+                  textTransform: 'uppercase',
+                  color: 'rgba(255,255,255,0.4)',
+                  fontFamily: '"Fragment Mono", monospace',
+                }}
+              >
                 Fútbol · Torneos · Local
               </Typography>
             </Box>
 
-            <Box sx={{ position: 'relative', zIndex: 1, p: 4, pt: 0 }}>
-              <Box sx={{ pt: 3.5, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-                <Typography sx={{
-                  fontSize: 19, fontWeight: 700, color: 'white',
-                  lineHeight: 1.3, letterSpacing: -0.4,
-                  fontFamily: '"Instrument Sans", system-ui, sans-serif',
-                }}>
-                  Crea el torneo.<br />
-                  Comparte el enlace.<br />
+            {/* Footer de la tarjeta */}
+            <Box
+              sx={{
+                position: 'relative',
+                zIndex: 1,
+                px: 5,
+                pb: 5,
+              }}
+            >
+              <Box sx={{ pt: 4, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+                <Typography
+                  sx={{
+                    fontSize: 22,
+                    fontWeight: 700,
+                    color: 'white',
+                    lineHeight: 1.3,
+                    letterSpacing: -0.5,
+                    fontFamily: '"Instrument Sans", system-ui, sans-serif',
+                  }}
+                >
+                  Crea el torneo.
+                  <br />
+                  Comparte el enlace.
+                  <br />
                   <Box component="span" sx={{ color: 'rgba(255,255,255,0.4)' }}>
                     Todo lo demás es automático.
                   </Box>
