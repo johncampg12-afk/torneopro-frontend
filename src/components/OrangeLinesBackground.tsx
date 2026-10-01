@@ -1,35 +1,71 @@
 import { Box, keyframes } from '@mui/material';
 
-const linesSlide = keyframes`
-  0% { transform: translateY(0) translateX(0); }
-  100% { transform: translateY(-80px) translateX(-80px); }
+// ═══════════════════════════════════════════════════════════════
+// Animaciones de los blobs (lava lamp)
+// Cada blob tiene su propio recorrido y ritmo para que no se sincronicen
+// ═══════════════════════════════════════════════════════════════
+
+const blob1 = keyframes`
+  0%   { transform: translate(0, 0) scale(1); }
+  25%  { transform: translate(18vw, -14vh) scale(1.12); }
+  50%  { transform: translate(-10vw, 20vh) scale(0.92); }
+  75%  { transform: translate(-22vw, -8vh) scale(1.06); }
+  100% { transform: translate(0, 0) scale(1); }
 `;
 
-const pulseGlow = keyframes`
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 0.8; }
+const blob2 = keyframes`
+  0%   { transform: translate(0, 0) scale(1); }
+  30%  { transform: translate(-16vw, 12vh) scale(1.08); }
+  60%  { transform: translate(14vw, -20vh) scale(0.94); }
+  100% { transform: translate(0, 0) scale(1); }
 `;
+
+const blob3 = keyframes`
+  0%   { transform: translate(0, 0) scale(1); }
+  20%  { transform: translate(10vw, 18vh) scale(1.1); }
+  50%  { transform: translate(-24vw, 6vh) scale(0.96); }
+  80%  { transform: translate(16vw, -10vh) scale(1.04); }
+  100% { transform: translate(0, 0) scale(1); }
+`;
+
+const blob4 = keyframes`
+  0%   { transform: translate(0, 0) scale(1); }
+  40%  { transform: translate(-20vw, -12vh) scale(1.15); }
+  70%  { transform: translate(12vw, 14vh) scale(0.9); }
+  100% { transform: translate(0, 0) scale(1); }
+`;
+
+const blob5 = keyframes`
+  0%   { transform: translate(0, 0) scale(1); }
+  35%  { transform: translate(22vw, 8vh) scale(1.05); }
+  65%  { transform: translate(-8vw, -18vh) scale(1.1); }
+  100% { transform: translate(0, 0) scale(1); }
+`;
+
+// ═══════════════════════════════════════════════════════════════
+// Props (mantengo la interfaz anterior para no romper llamadas)
+// - opacity: controla la intensidad global
+// - duration: escala la velocidad de todos los blobs
+// - color: color base (por defecto naranja); se generan variantes
+// - angle y gap: aceptadas por compatibilidad, ya no se usan
+// ═══════════════════════════════════════════════════════════════
 
 interface Props {
-  /** Opacidad global de las líneas (0-1). Default 0.5 */
   opacity?: number;
-  /** Intensidad del color naranja. Default '#f97316' */
   color?: string;
-  /** Velocidad en segundos del ciclo completo. Default 20 */
   duration?: number;
-  /** Ángulo en grados de las líneas. Default 45 */
   angle?: number;
-  /** Espaciado entre líneas en píxeles. Default 60 */
   gap?: number;
 }
 
 export const OrangeLinesBackground = ({
   opacity = 0.5,
   color = '#f97316',
-  duration = 20,
-  angle = 45,
-  gap = 60,
+  duration = 40,
 }: Props) => {
+  // Escala: si duration=40 es la base, valores menores aceleran
+  const speedFactor = duration / 40;
+
   return (
     <Box
       sx={{
@@ -41,62 +77,107 @@ export const OrangeLinesBackground = ({
         opacity,
       }}
     >
-      {/* Capa de líneas desplazándose */}
+      {/* Blob 1 · naranja principal */}
       <Box
         sx={{
           position: 'absolute',
-          // Extendemos más allá del contenedor para que el movimiento no corte
-          top: -160,
-          left: -160,
-          right: -160,
-          bottom: -160,
-          backgroundImage: `repeating-linear-gradient(
-            ${angle}deg,
-            transparent 0px,
-            transparent ${gap - 1.5}px,
-            ${color} ${gap - 1.5}px,
-            ${color} ${gap}px
-          )`,
-          animation: `${linesSlide} ${duration}s linear infinite`,
-        }}
-      />
-
-      {/* Halo naranja superior difuso */}
-      <Box
-        sx={{
-          position: 'absolute',
-          top: '-20%',
-          right: '-10%',
-          width: '60%',
-          height: '60%',
+          top: '10%',
+          left: '15%',
+          width: '55vw',
+          height: '55vw',
+          maxWidth: 720,
+          maxHeight: 720,
           borderRadius: '50%',
-          background: `radial-gradient(circle, ${color}40 0%, transparent 65%)`,
-          filter: 'blur(60px)',
-          animation: `${pulseGlow} ${duration / 2}s ease-in-out infinite`,
+          background: `radial-gradient(circle, ${color} 0%, ${color}00 70%)`,
+          filter: 'blur(90px)',
+          opacity: 0.55,
+          mixBlendMode: 'multiply',
+          animation: `${blob1} ${38 * speedFactor}s ease-in-out infinite`,
         }}
       />
 
-      {/* Halo naranja inferior difuso */}
+      {/* Blob 2 · ámbar */}
       <Box
         sx={{
           position: 'absolute',
-          bottom: '-20%',
-          left: '-10%',
-          width: '50%',
-          height: '50%',
+          top: '40%',
+          right: '10%',
+          width: '50vw',
+          height: '50vw',
+          maxWidth: 640,
+          maxHeight: 640,
           borderRadius: '50%',
-          background: `radial-gradient(circle, ${color}30 0%, transparent 65%)`,
-          filter: 'blur(60px)',
-          animation: `${pulseGlow} ${duration / 2}s ease-in-out infinite reverse`,
+          background: 'radial-gradient(circle, #f59e0b 0%, #f59e0b00 70%)',
+          filter: 'blur(100px)',
+          opacity: 0.5,
+          mixBlendMode: 'multiply',
+          animation: `${blob2} ${45 * speedFactor}s ease-in-out infinite`,
         }}
       />
 
-      {/* Máscara para difuminar los bordes */}
+      {/* Blob 3 · naranja profundo */}
+      <Box
+        sx={{
+          position: 'absolute',
+          bottom: '5%',
+          left: '30%',
+          width: '60vw',
+          height: '60vw',
+          maxWidth: 780,
+          maxHeight: 780,
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, #ea580c 0%, #ea580c00 70%)',
+          filter: 'blur(110px)',
+          opacity: 0.45,
+          mixBlendMode: 'multiply',
+          animation: `${blob3} ${52 * speedFactor}s ease-in-out infinite`,
+        }}
+      />
+
+      {/* Blob 4 · coral cálido */}
+      <Box
+        sx={{
+          position: 'absolute',
+          top: '20%',
+          right: '35%',
+          width: '40vw',
+          height: '40vw',
+          maxWidth: 520,
+          maxHeight: 520,
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, #fb923c 0%, #fb923c00 70%)',
+          filter: 'blur(80px)',
+          opacity: 0.4,
+          mixBlendMode: 'multiply',
+          animation: `${blob4} ${40 * speedFactor}s ease-in-out infinite`,
+        }}
+      />
+
+      {/* Blob 5 · rosado cálido */}
+      <Box
+        sx={{
+          position: 'absolute',
+          bottom: '20%',
+          right: '5%',
+          width: '35vw',
+          height: '35vw',
+          maxWidth: 460,
+          maxHeight: 460,
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, #fb7185 0%, #fb718500 70%)',
+          filter: 'blur(120px)',
+          opacity: 0.3,
+          mixBlendMode: 'multiply',
+          animation: `${blob5} ${48 * speedFactor}s ease-in-out infinite`,
+        }}
+      />
+
+      {/* Capa de suavizado en los bordes */}
       <Box
         sx={{
           position: 'absolute',
           inset: 0,
-          background: 'linear-gradient(180deg, rgba(250,250,248,0.4) 0%, transparent 25%, transparent 75%, rgba(250,250,248,0.6) 100%)',
+          background: 'radial-gradient(ellipse at center, transparent 30%, rgba(250,250,248,0.4) 90%)',
         }}
       />
     </Box>
