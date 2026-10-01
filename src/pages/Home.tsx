@@ -854,7 +854,7 @@ export default function Home() {
                     px: { xs: 3.5, md: 4 },
                     borderRadius: '24px',
                     bgcolor: 'white',
-                    border: '1px solid rgba(17,17,17,0.06)',
+                    border: '1px solid rgba(10,10,10,0.35)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
