@@ -1,27 +1,32 @@
 import { useEffect, useState } from 'react';
+import {
+  Box, Typography, Button, Stack, keyframes, TextField, Checkbox,
+  IconButton, Drawer, useMediaQuery,
+} from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import CheckIcon from '@mui/icons-material/Check';
+import AddIcon from '@mui/icons-material/Add';
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
+import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined';
+import FolderOpenIcon from '@mui/icons-material/FolderOpen';
+import ListAltIcon from '@mui/icons-material/ListAlt';
+import AccountTreeIcon from '@mui/icons-material/AccountTree';
+import LayersIcon from '@mui/icons-material/Layers';
 import { api } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
+import { EditorialBackground } from '../components/EditorialBackground';
+import { SMOOTH, BLACK } from '../theme';
+
+const fadeInUp = keyframes`
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+`;
 
 const formats = [
-  {
-    id: 'liga',
-    name: 'Liga',
-    desc: 'Todos contra todos. Tabla de posiciones automática.',
-    icon: 'fa-list-ol',
-  },
-  {
-    id: 'eliminatoria',
-    name: 'Eliminación Directa',
-    desc: 'Bracket de eliminación. Un perdedor queda fuera.',
-    icon: 'fa-sitemap',
-  },
-  {
-    id: 'grupos',
-    name: 'Grupos + Eliminatoria',
-    desc: 'Fase de grupos y luego los mejores avanzan.',
-    icon: 'fa-layer-group',
-  },
+  { id: 'liga', name: 'Liga', desc: 'Todos contra todos. Tabla automática.', Icon: ListAltIcon },
+  { id: 'eliminatoria', name: 'Eliminación', desc: 'Bracket. El que pierde queda fuera.', Icon: AccountTreeIcon },
+  { id: 'grupos', name: 'Grupos + Elim.', desc: 'Fase de grupos y luego cruces.', Icon: LayersIcon },
 ];
 
 const colors = ['#3b82f6', '#ef4444', '#22c55e', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316', '#84cc16', '#6366f1'];
@@ -35,47 +40,68 @@ const steps = [
 export default function TournamentCreate() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const isDesktop = useMediaQuery('(min-width: 900px)');
+
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState({
-    name: '', format: 'liga', doubleRound: false,
-    description: '', startDate: '', location: '', isPublic: true,
-  });
-  const [teams, setTeams] = useState([{ name: '', color: colors[0], logo: null as string | null }]);
-  const [importTemplates, setImportTemplates] = useState<Record<string, string>>({});
 
-  const [showTemplatesModal, setShowTemplatesModal] = useState(false);
+  const [data, setData] = useState({
+    name: '',
+    format: 'liga',
+    doubleRound: false,
+    description: '',
+    startDate: '',
+    location: '',
+    isPublic: true,
+  });
+
+  const [teams, setTeams] = useState([
+    { name: '', color: colors[0], logo: null as string | null },
+  ]);
+
+  const [importTemplates, setImportTemplates] = useState<Record<string, string>>({});
+  const [templatesDrawer, setTemplatesDrawer] = useState(false);
   const [userTemplates, setUserTemplates] = useState<any[]>([]);
 
-  if (!user) {
-    navigate('/login');
-    return null;
-  }
+  useEffect(() => {
+    if (!user) navigate('/welcome');
+  }, [user, navigate]);
 
   useEffect(() => {
-    if (showTemplatesModal) {
+    if (templatesDrawer) {
       api.get('/team-templates')
         .then(res => setUserTemplates(res.data))
-        .catch(() => alert('Error al cargar las plantillas.'));
+        .catch(() => {});
     }
-  }, [showTemplatesModal]);
+  }, [templatesDrawer]);
 
-  const addTeam = () => setTeams([...teams, { name: '', color: colors[teams.length % colors.length], logo: null }]);
-  const updateTeam = (idx: number, field: string, value: string) => {
+  const addTeam = () =>
+    setTeams([...teams, { name: '', color: colors[teams.length % colors.length], logo: null }]);
+
+  const updateTeam = (idx: number, field: string, value: string | null) => {
     const updated = [...teams];
     updated[idx] = { ...updated[idx], [field]: value };
     setTeams(updated);
   };
+
   const removeTeam = (idx: number) => {
-    if (teams.length > 2) setTeams(teams.filter((_, i) => i !== idx));
+    if (teams.length > 2) {
+      const updated = teams.filter((_, i) => i !== idx);
+      // Recalcular índice de plantillas (índices cambian)
+      const newImport: Record<string, string> = {};
+      Object.entries(importTemplates).forEach(([k, v]) => {
+        const ki = parseInt(k);
+        if (ki < idx) newImport[ki] = v;
+        else if (ki > idx) newImport[ki - 1] = v;
+      });
+      setImportTemplates(newImport);
+      setTeams(updated);
+    }
   };
 
   const handleLogoChange = (idx: number, file: File) => {
     if (!file) return;
-    if (file.size > 200000) {
-      alert('La imagen no debe superar los 200 KB.');
-      return;
-    }
+    if (file.size > 200000) { alert('La imagen no debe superar los 200 KB.'); return; }
     const reader = new FileReader();
     reader.onload = () => updateTeam(idx, 'logo', reader.result as string);
     reader.readAsDataURL(file);
@@ -95,15 +121,20 @@ export default function TournamentCreate() {
 
     setLoading(true);
     try {
-      const res = await api.post('/tournaments', { ...data, sport: 'futbol', teams: validTeams });
+      const res = await api.post('/tournaments', {
+        ...data,
+        sport: 'futbol',
+        teams: validTeams,
+      });
       const created = res.data;
 
+      // Importar jugadores de plantillas
       for (const [indexStr, templateId] of Object.entries(importTemplates)) {
         const teamIndex = parseInt(indexStr);
         if (teamIndex < created.teams.length) {
           try {
             await api.post(`/team-templates/${templateId}/import-to-team/${created.teams[teamIndex].id}`);
-          } catch { /* silencioso */ }
+          } catch {}
         }
       }
 
@@ -115,149 +146,308 @@ export default function TournamentCreate() {
     }
   };
 
+  // ── Inputs comunes ──
+  const inputSx = {
+    '& .MuiOutlinedInput-root': {
+      borderRadius: '14px',
+      bgcolor: 'white',
+      minHeight: 52,
+      '& fieldset': { borderColor: 'rgba(17,17,17,0.08)', borderWidth: '1.5px' },
+      '&:hover fieldset': { borderColor: 'rgba(17,17,17,0.2)' },
+      '&.Mui-focused fieldset': { borderColor: BLACK, borderWidth: '1.5px' },
+    },
+    '& input, & textarea': { fontSize: 15, fontWeight: 500, color: BLACK },
+    '& input::placeholder, & textarea::placeholder': { color: 'rgba(17,17,17,0.3)', opacity: 1 },
+  } as const;
+
+  const labelSx = {
+    fontSize: 11,
+    fontWeight: 700,
+    letterSpacing: 0.6,
+    textTransform: 'uppercase' as const,
+    color: 'rgba(17,17,17,0.45)',
+    mb: 1,
+    ml: 0.5,
+  };
+
   return (
-    <div className="animate-fade-in max-w-3xl mx-auto pb-24">
-      {/* Header */}
-      <div className="flex items-center gap-4 mb-8">
-        <button onClick={() => navigate('/dashboard')} className="w-10 h-10 rounded-xl bg-slate-800 hover:bg-slate-700 flex items-center justify-center transition-colors">
-          <i className="fas fa-arrow-left"></i>
-        </button>
-        <h2 className="text-2xl font-bold">Crear Torneo</h2>
-      </div>
+    <Box
+      sx={{
+        minHeight: '100dvh',
+        width: '100%',
+        maxWidth: '100vw',
+        overflowX: 'clip',
+        bgcolor: '#FAFAF8',
+        position: 'relative',
+      }}
+    >
+      {/* Fondo editorial solo en móvil para no competir con el contenido denso en desktop */}
+      <Box sx={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 0, display: { md: 'none' } }}>
+        <EditorialBackground />
+      </Box>
 
-      {/* Steps indicator */}
-      <div className="flex items-center justify-between mb-8 px-2">
-        {steps.map((s, i) => (
-          <div key={s.n} className="flex items-center flex-1">
-            <div className="flex flex-col items-center">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all ${
-                step > s.n ? 'bg-accent-500 text-white' :
-                step === s.n ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30' :
-                'bg-slate-800 text-slate-500'
-              }`}>
-                {step > s.n ? <i className="fas fa-check"></i> : s.n}
-              </div>
-              <span className={`text-xs mt-2 font-medium ${step >= s.n ? 'text-white' : 'text-slate-500'}`}>{s.label}</span>
-            </div>
-            {i < steps.length - 1 && (
-              <div className={`flex-1 h-0.5 mx-2 transition-all ${step > s.n ? 'bg-accent-500' : 'bg-slate-800'}`}></div>
+      <Box
+        sx={{
+          position: 'relative',
+          zIndex: 1,
+          minHeight: '100dvh',
+          display: 'flex',
+          flexDirection: 'column',
+          maxWidth: 720,
+          mx: 'auto',
+          width: '100%',
+          px: { xs: 3, sm: 4, md: 0 },
+          pt: { xs: 'calc(20px + env(safe-area-inset-top, 0px))', md: 5 },
+          pb: { xs: 'calc(120px + env(safe-area-inset-bottom, 0px))', md: 5 },
+        }}
+      >
+        {/* ── Header ── */}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 2,
+            mb: 4,
+            animation: `${fadeInUp} 0.5s ${SMOOTH} both`,
+          }}
+        >
+          <IconButton
+            onClick={() => navigate('/dashboard')}
+            sx={{
+              width: 40, height: 40,
+              bgcolor: 'white',
+              border: '1px solid rgba(17,17,17,0.06)',
+              color: 'rgba(17,17,17,0.7)',
+              '&:hover': { bgcolor: 'white', borderColor: 'rgba(17,17,17,0.2)' },
+              '&:active': { transform: 'scale(0.94)' },
+            }}
+          >
+            <ArrowBackIcon sx={{ fontSize: 18 }} />
+          </IconButton>
+
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {steps.map((s, i) => (
+              <Box key={s.n} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Box
+                  sx={{
+                    width: step === s.n ? 24 : 8,
+                    height: 8,
+                    borderRadius: 4,
+                    bgcolor: step >= s.n ? BLACK : 'rgba(17,17,17,0.15)',
+                    transition: `all 0.3s ${SMOOTH}`,
+                  }}
+                />
+                {i < steps.length - 1 && step > s.n && (
+                  <Box sx={{ width: 8, height: 1, bgcolor: BLACK }} />
+                )}
+              </Box>
+            ))}
+          </Box>
+
+          <Box sx={{ width: 40 }} />
+        </Box>
+
+        {/* ── Hero ── */}
+        <Box sx={{ mb: 5, animation: `${fadeInUp} 0.6s ${SMOOTH} both 0.05s` }}>
+          <Typography
+            sx={{
+              fontSize: { xs: 32, sm: 38, md: 44 },
+              fontWeight: 800,
+              letterSpacing: -1.4,
+              lineHeight: 1.05,
+              color: BLACK,
+              fontFamily: '"Instrument Sans", system-ui, sans-serif',
+            }}
+          >
+            {step === 1 && <>Nuevo<br />torneo</>}
+            {step === 2 && <>Añade<br />los equipos</>}
+            {step === 3 && <>Todo<br />listo</>}
+          </Typography>
+          <Typography sx={{ mt: 1.5, fontSize: 15, fontWeight: 500, color: 'rgba(17,17,17,0.55)' }}>
+            {step === 1 && 'Configura lo básico del campeonato.'}
+            {step === 2 && `Mínimo 2 equipos. Ahora llevas ${validTeamsCount}.`}
+            {step === 3 && 'Revisa antes de crearlo.'}
+          </Typography>
+        </Box>
+
+        {/* ═══════ PASO 1: Info ═══════ */}
+        {step === 1 && (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, animation: `${fadeInUp} 0.5s ${SMOOTH} both 0.1s` }}>
+            <Box>
+              <Typography sx={labelSx}>Nombre del torneo *</Typography>
+              <TextField
+                fullWidth
+                value={data.name}
+                onChange={e => setData({ ...data, name: e.target.value })}
+                placeholder="Liga de Verano 2026"
+                autoFocus
+                sx={inputSx}
+              />
+            </Box>
+
+            <Box>
+              <Typography sx={labelSx}>Formato</Typography>
+              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' }, gap: 1.5 }}>
+                {formats.map(f => {
+                  const selected = data.format === f.id;
+                  const Icon = f.Icon;
+                  return (
+                    <Box
+                      key={f.id}
+                      onClick={() => setData({ ...data, format: f.id })}
+                      sx={{
+                        p: 2.5,
+                        borderRadius: '18px',
+                        bgcolor: selected ? BLACK : 'white',
+                        border: '1.5px solid',
+                        borderColor: selected ? BLACK : 'rgba(17,17,17,0.08)',
+                        cursor: 'pointer',
+                        transition: `all 0.25s ${SMOOTH}`,
+                        '&:hover': {
+                          borderColor: selected ? BLACK : 'rgba(17,17,17,0.25)',
+                          transform: 'translateY(-1px)',
+                        },
+                      }}
+                    >
+                      <Icon sx={{ fontSize: 22, color: selected ? 'white' : 'rgba(17,17,17,0.5)', mb: 1.5 }} />
+                      <Typography
+                        sx={{
+                          fontSize: 14.5,
+                          fontWeight: 700,
+                          color: selected ? 'white' : BLACK,
+                          mb: 0.5,
+                          fontFamily: '"Instrument Sans", system-ui, sans-serif',
+                        }}
+                      >
+                        {f.name}
+                      </Typography>
+                      <Typography sx={{ fontSize: 12, color: selected ? 'rgba(255,255,255,0.6)' : 'rgba(17,17,17,0.45)', lineHeight: 1.4 }}>
+                        {f.desc}
+                      </Typography>
+                    </Box>
+                  );
+                })}
+              </Box>
+            </Box>
+
+            {data.format === 'liga' && (
+              <Box
+                onClick={() => setData({ ...data, doubleRound: !data.doubleRound })}
+                sx={{
+                  display: 'flex', alignItems: 'center', gap: 2, p: 2,
+                  borderRadius: '14px', bgcolor: 'white',
+                  border: '1.5px solid', borderColor: 'rgba(17,17,17,0.08)',
+                  cursor: 'pointer',
+                  transition: `all 0.2s ${SMOOTH}`,
+                  '&:hover': { borderColor: 'rgba(17,17,17,0.2)' },
+                }}
+              >
+                <Checkbox
+                  checked={data.doubleRound}
+                  onChange={e => setData({ ...data, doubleRound: e.target.checked })}
+                  sx={{
+                    p: 0,
+                    '& .MuiSvgIcon-root': { fontSize: 22, color: 'rgba(17,17,17,0.15)' },
+                    '&.Mui-checked .MuiSvgIcon-root': { color: BLACK },
+                  }}
+                />
+                <Box>
+                  <Typography sx={{ fontSize: 14, fontWeight: 700, color: BLACK }}>
+                    Ida y vuelta
+                  </Typography>
+                  <Typography sx={{ fontSize: 12, color: 'rgba(17,17,17,0.5)' }}>
+                    Cada equipo juega contra todos dos veces
+                  </Typography>
+                </Box>
+              </Box>
             )}
-          </div>
-        ))}
-      </div>
 
-      {/* Paso 1: Información */}
-      {step === 1 && (
-        <div className="glass p-5 md:p-8 rounded-2xl animate-fade-in space-y-5">
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">Nombre del torneo *</label>
-            <input
-              type="text"
-              value={data.name}
-              onChange={e => setData({ ...data, name: e.target.value })}
-              className="input-dark text-lg"
-              placeholder="Ej: Liga de Verano 2026"
-              autoFocus
-            />
-          </div>
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
+              <Box>
+                <Typography sx={labelSx}>Fecha de inicio</Typography>
+                <TextField
+                  fullWidth
+                  type="date"
+                  value={data.startDate}
+                  onChange={e => setData({ ...data, startDate: e.target.value })}
+                  InputLabelProps={{ shrink: true }}
+                  sx={inputSx}
+                />
+              </Box>
+              <Box>
+                <Typography sx={labelSx}>Ubicación</Typography>
+                <TextField
+                  fullWidth
+                  value={data.location}
+                  onChange={e => setData({ ...data, location: e.target.value })}
+                  placeholder="Cancha Municipal"
+                  sx={inputSx}
+                />
+              </Box>
+            </Box>
 
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-3">Formato</label>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {formats.map(f => (
-                <button
-                  key={f.id}
-                  onClick={() => setData({ ...data, format: f.id })}
-                  className={`p-4 rounded-xl border text-left transition-all ${
-                    data.format === f.id
-                      ? 'border-primary-500 bg-primary-500/10 shadow-lg shadow-primary-500/10'
-                      : 'border-slate-700 bg-slate-800/40 hover:border-slate-600'
-                  }`}
-                >
-                  <i className={`fas ${f.icon} text-xl mb-2 ${data.format === f.id ? 'text-primary-400' : 'text-slate-500'}`}></i>
-                  <div className={`font-semibold text-sm mb-1 ${data.format === f.id ? 'text-white' : 'text-slate-300'}`}>{f.name}</div>
-                  <div className="text-xs text-slate-500 leading-snug">{f.desc}</div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {data.format === 'liga' && (
-            <label className="flex items-center gap-3 cursor-pointer p-3 rounded-xl bg-slate-800/40 border border-slate-800">
-              <input
-                type="checkbox"
-                checked={data.doubleRound}
-                onChange={e => setData({ ...data, doubleRound: e.target.checked })}
-                className="w-5 h-5 rounded border-slate-600 bg-slate-800 text-primary-500"
+            <Box>
+              <Typography sx={labelSx}>Descripción (opcional)</Typography>
+              <TextField
+                fullWidth
+                multiline
+                rows={2}
+                value={data.description}
+                onChange={e => setData({ ...data, description: e.target.value })}
+                placeholder="Torneo entre amigos del barrio"
+                sx={inputSx}
               />
-              <div>
-                <div className="text-slate-200 text-sm font-medium">Ida y vuelta</div>
-                <div className="text-xs text-slate-500">Cada equipo juega contra todos dos veces</div>
-              </div>
-            </label>
-          )}
+            </Box>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Fecha de inicio</label>
-              <input
-                type="date"
-                value={data.startDate}
-                onChange={e => setData({ ...data, startDate: e.target.value })}
-                className="input-dark"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Ubicación</label>
-              <input
-                type="text"
-                value={data.location}
-                onChange={e => setData({ ...data, location: e.target.value })}
-                className="input-dark"
-                placeholder="Cancha Municipal"
-              />
-            </div>
-          </div>
+            <Box
+              onClick={() => setData({ ...data, isPublic: !data.isPublic })}
+              sx={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                p: 2, borderRadius: '14px', bgcolor: 'white',
+                border: '1.5px solid rgba(17,17,17,0.08)',
+                cursor: 'pointer',
+                transition: `all 0.2s ${SMOOTH}`,
+                '&:hover': { borderColor: 'rgba(17,17,17,0.2)' },
+              }}
+            >
+              <Box>
+                <Typography sx={{ fontSize: 14, fontWeight: 700, color: BLACK }}>
+                  Torneo público
+                </Typography>
+                <Typography sx={{ fontSize: 12, color: 'rgba(17,17,17,0.5)' }}>
+                  Cualquiera con el enlace podrá verlo
+                </Typography>
+              </Box>
+              <Box
+                sx={{
+                  width: 44, height: 26, borderRadius: 13,
+                  bgcolor: data.isPublic ? BLACK : 'rgba(17,17,17,0.15)',
+                  position: 'relative',
+                  transition: `all 0.3s ${SMOOTH}`,
+                }}
+              >
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: 3, left: data.isPublic ? 21 : 3,
+                    width: 20, height: 20, borderRadius: '50%',
+                    bgcolor: 'white',
+                    transition: `all 0.3s ${SMOOTH}`,
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.15)',
+                  }}
+                />
+              </Box>
+            </Box>
+          </Box>
+        )}
 
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">Descripción <span className="text-slate-500">(opcional)</span></label>
-            <textarea
-              value={data.description}
-              onChange={e => setData({ ...data, description: e.target.value })}
-              className="input-dark h-20 resize-none"
-              placeholder="Ej: Torneo entre amigos del barrio"
-            />
-          </div>
-
-          <label className="flex items-center justify-between p-3 rounded-xl bg-slate-800/40 border border-slate-800 cursor-pointer">
-            <div>
-              <div className="text-slate-200 text-sm font-medium">Torneo público</div>
-              <div className="text-xs text-slate-500">Cualquiera con el enlace podrá verlo</div>
-            </div>
-            <div className="relative">
-              <input
-                type="checkbox"
-                checked={data.isPublic}
-                onChange={e => setData({ ...data, isPublic: e.target.checked })}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-slate-700 rounded-full peer-checked:bg-accent-500 transition-colors"></div>
-              <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform peer-checked:translate-x-5"></div>
-            </div>
-          </label>
-        </div>
-      )}
-
-      {/* Paso 2: Equipos */}
-      {step === 2 && (
-        <div className="glass p-5 md:p-8 rounded-2xl animate-fade-in">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
-            <div>
-              <h3 className="text-xl font-bold">Equipos</h3>
-              <p className="text-sm text-slate-500">{validTeamsCount} de mínimo 2</p>
-            </div>
-            <div className="flex gap-2">
-              <button
+        {/* ═══════ PASO 2: Equipos ═══════ */}
+        {step === 2 && (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, animation: `${fadeInUp} 0.5s ${SMOOTH} both` }}>
+            {/* Acciones */}
+            <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+              <Button
                 onClick={async () => {
                   try {
                     const res = await api.get('/team-templates');
@@ -265,207 +455,468 @@ export default function TournamentCreate() {
                       alert('No tienes plantillas guardadas. Guarda un equipo desde un torneo primero.');
                       return;
                     }
-                    setShowTemplatesModal(true);
+                    setTemplatesDrawer(true);
                   } catch { alert('Error al cargar plantillas'); }
                 }}
-                className="btn-secondary text-sm"
+                startIcon={<FolderOpenIcon sx={{ fontSize: 18 }} />}
+                sx={{
+                  height: 40, borderRadius: '999px', px: 2.5,
+                  fontWeight: 600, fontSize: 13.5, color: BLACK,
+                  border: '1.5px solid rgba(17,17,17,0.1)',
+                  '&:hover': { borderColor: 'rgba(17,17,17,0.3)', bgcolor: 'transparent' },
+                }}
               >
-                <i className="fas fa-folder-open"></i> Plantilla
-              </button>
-              <button onClick={addTeam} className="btn-primary text-sm">
-                <i className="fas fa-plus"></i> Añadir equipo
-              </button>
-            </div>
-          </div>
+                Cargar plantilla
+              </Button>
+            </Box>
 
-          <div className="space-y-3">
-            {teams.map((team, idx) => (
-              <div key={idx} className="bg-slate-800/40 rounded-xl p-3 border border-slate-800 space-y-3">
-                <div className="flex items-center gap-3">
-                  {team.logo ? (
-                    <img src={team.logo} alt="escudo" className="w-12 h-12 rounded-xl object-cover flex-shrink-0 border border-slate-700" />
-                  ) : (
-                    <div className="w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center text-white font-bold text-lg" style={{ backgroundColor: team.color }}>
-                      {team.name.trim() ? team.name.trim()[0].toUpperCase() : '?'}
-                    </div>
-                  )}
-                  <input
-                    value={team.name}
-                    onChange={e => updateTeam(idx, 'name', e.target.value)}
-                    placeholder={`Equipo ${idx + 1}`}
-                    className="flex-1 bg-transparent border-none focus:outline-none text-white placeholder-slate-600 text-base font-medium"
-                  />
-                  {teams.length > 2 && (
-                    <button onClick={() => removeTeam(idx)} className="w-9 h-9 rounded-lg hover:bg-red-500/20 text-slate-500 hover:text-red-400 flex items-center justify-center transition-colors flex-shrink-0">
-                      <i className="fas fa-trash text-sm"></i>
-                    </button>
-                  )}
-                </div>
-                <div className="flex items-center justify-between gap-3 flex-wrap">
-                  <div className="flex gap-1.5 flex-wrap">
-                    {colors.slice(0, 8).map(c => (
-                      <button
-                        key={c}
-                        onClick={() => updateTeam(idx, 'color', c)}
-                        className={`w-7 h-7 rounded-full border-2 transition-all ${team.color === c ? 'border-white scale-110' : 'border-transparent hover:scale-105'}`}
-                        style={{ backgroundColor: c }}
+            {/* Lista */}
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+              {teams.map((team, idx) => (
+                <Box
+                  key={idx}
+                  sx={{
+                    p: 2,
+                    borderRadius: '18px',
+                    bgcolor: 'white',
+                    border: '1.5px solid rgba(17,17,17,0.08)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 1.5,
+                  }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                    {team.logo ? (
+                      <Box
+                        component="img"
+                        src={team.logo}
+                        alt=""
+                        sx={{
+                          width: 48, height: 48,
+                          borderRadius: '14px',
+                          objectFit: 'cover',
+                          border: '1px solid rgba(17,17,17,0.06)',
+                          flexShrink: 0,
+                        }}
                       />
-                    ))}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      id={`logo-${idx}`}
-                      onChange={(e) => { if (e.target.files?.[0]) handleLogoChange(idx, e.target.files[0]); }}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => document.getElementById(`logo-${idx}`)?.click()}
-                      className="text-xs text-slate-400 hover:text-white flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-white/5"
-                    >
-                      <i className="fas fa-image"></i>
-                      {team.logo ? 'Cambiar' : 'Escudo'}
-                    </button>
-                    {team.logo && (
-                      <button
-                        type="button"
-                        onClick={() => updateTeam(idx, 'logo', '')}
-                        className="text-xs text-slate-500 hover:text-red-400"
-                        title="Quitar escudo"
+                    ) : (
+                      <Box
+                        sx={{
+                          width: 48, height: 48,
+                          borderRadius: '14px',
+                          bgcolor: team.color,
+                          display: 'grid', placeItems: 'center',
+                          color: 'white', fontWeight: 800, fontSize: 20,
+                          fontFamily: '"Instrument Sans", system-ui, sans-serif',
+                          flexShrink: 0,
+                        }}
                       >
-                        <i className="fas fa-times"></i>
-                      </button>
+                        {team.name.trim() ? team.name.trim()[0].toUpperCase() : '?'}
+                      </Box>
                     )}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
-      {/* Paso 3: Resumen */}
-      {step === 3 && (
-        <div className="glass p-5 md:p-8 rounded-2xl animate-fade-in space-y-6">
-          <h3 className="text-xl font-bold">Resumen</h3>
+                    <TextField
+                      value={team.name}
+                      onChange={e => updateTeam(idx, 'name', e.target.value)}
+                      placeholder={`Equipo ${idx + 1}`}
+                      fullWidth
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: '12px', bgcolor: 'transparent',
+                          '& fieldset': { borderColor: 'transparent' },
+                          '&:hover fieldset': { borderColor: 'transparent' },
+                          '&.Mui-focused fieldset': { borderColor: 'rgba(17,17,17,0.15)' },
+                        },
+                        '& input': { fontSize: 15, fontWeight: 600, color: BLACK, px: 1, py: 0.5 },
+                      }}
+                    />
 
-          <div className="space-y-3">
-            <div className="flex items-center justify-between py-3 border-b border-slate-800">
-              <span className="text-sm text-slate-400">Nombre</span>
-              <span className="font-semibold text-right">{data.name}</span>
-            </div>
-            <div className="flex items-center justify-between py-3 border-b border-slate-800">
-              <span className="text-sm text-slate-400">Formato</span>
-              <span className="font-semibold">{formats.find(f => f.id === data.format)?.name}{data.format === 'liga' && data.doubleRound ? ' · Ida y vuelta' : ''}</span>
-            </div>
-            {data.startDate && (
-              <div className="flex items-center justify-between py-3 border-b border-slate-800">
-                <span className="text-sm text-slate-400">Inicio</span>
-                <span className="font-semibold">{new Date(data.startDate).toLocaleDateString('es-ES')}</span>
-              </div>
-            )}
-            {data.location && (
-              <div className="flex items-center justify-between py-3 border-b border-slate-800">
-                <span className="text-sm text-slate-400">Ubicación</span>
-                <span className="font-semibold">{data.location}</span>
-              </div>
-            )}
-            <div className="flex items-center justify-between py-3 border-b border-slate-800">
-              <span className="text-sm text-slate-400">Visibilidad</span>
-              <span className={`font-semibold ${data.isPublic ? 'text-accent-400' : 'text-slate-400'}`}>{data.isPublic ? 'Público' : 'Privado'}</span>
-            </div>
-          </div>
+                    {teams.length > 2 && (
+                      <IconButton
+                        onClick={() => removeTeam(idx)}
+                        size="small"
+                        sx={{
+                          color: 'rgba(17,17,17,0.35)',
+                          '&:hover': { color: '#DC2626', bgcolor: '#FEF2F2' },
+                        }}
+                      >
+                        <DeleteOutlinedIcon sx={{ fontSize: 18 }} />
+                      </IconButton>
+                    )}
+                  </Box>
 
-          <div>
-            <div className="text-sm text-slate-400 mb-3">Equipos ({validTeamsCount})</div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {teams.filter(t => t.name.trim()).map((team, i) => (
-                <div key={i} className="flex items-center gap-2 p-2 rounded-lg bg-slate-800/40 border border-slate-800 min-w-0">
-                  {team.logo ? (
-                    <img src={team.logo} alt="" className="w-7 h-7 rounded-full object-cover flex-shrink-0" />
-                  ) : (
-                    <div className="w-7 h-7 rounded-full flex-shrink-0" style={{ backgroundColor: team.color }} />
-                  )}
-                  <span className="text-sm font-medium truncate">{team.name}</span>
-                </div>
+                  {/* Colores + Escudo */}
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap' }}>
+                    <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
+                      {colors.slice(0, 8).map(c => (
+                        <Box
+                          key={c}
+                          onClick={() => updateTeam(idx, 'color', c)}
+                          sx={{
+                            width: 24, height: 24, borderRadius: '50%',
+                            bgcolor: c, cursor: 'pointer',
+                            border: team.color === c ? '2px solid white' : '2px solid transparent',
+                            boxShadow: team.color === c ? `0 0 0 2px ${BLACK}` : 'none',
+                            transition: `all 0.15s ${SMOOTH}`,
+                            '&:hover': { transform: 'scale(1.1)' },
+                          }}
+                        />
+                      ))}
+                    </Box>
+
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        id={`logo-${idx}`}
+                        hidden
+                        onChange={e => { if (e.target.files?.[0]) handleLogoChange(idx, e.target.files[0]); }}
+                      />
+                      <Box
+                        component="label"
+                        htmlFor={`logo-${idx}`}
+                        sx={{
+                          display: 'flex', alignItems: 'center', gap: 0.75,
+                          px: 1.5, py: 0.75, borderRadius: '999px',
+                          cursor: 'pointer',
+                          fontSize: 12.5, fontWeight: 600,
+                          color: 'rgba(17,17,17,0.6)',
+                          transition: `all 0.2s ${SMOOTH}`,
+                          '&:hover': { bgcolor: 'rgba(17,17,17,0.04)', color: BLACK },
+                        }}
+                      >
+                        <ImageOutlinedIcon sx={{ fontSize: 16 }} />
+                        {team.logo ? 'Cambiar escudo' : 'Añadir escudo'}
+                      </Box>
+                      {team.logo && (
+                        <IconButton
+                          onClick={() => updateTeam(idx, 'logo', null)}
+                          size="small"
+                          sx={{ color: 'rgba(17,17,17,0.35)' }}
+                        >
+                          <DeleteOutlinedIcon sx={{ fontSize: 14 }} />
+                        </IconButton>
+                      )}
+                    </Box>
+                  </Box>
+                </Box>
               ))}
-            </div>
-          </div>
-        </div>
-      )}
+            </Box>
 
-      {/* Navegación fija abajo */}
-      <div className="fixed bottom-0 left-0 right-0 md:sticky md:bottom-auto bg-dark-950/95 md:bg-transparent backdrop-blur-lg md:backdrop-blur-none border-t border-slate-800 md:border-0 p-4 md:p-0 md:mt-6 z-30">
-        <div className="max-w-3xl mx-auto flex justify-between gap-3">
-          {step > 1 ? (
-            <button onClick={() => setStep(step - 1)} className="btn-secondary">
-              <i className="fas fa-arrow-left"></i> Atrás
-            </button>
-          ) : (
-            <div />
-          )}
-          {step < 3 ? (
-            <button
-              onClick={() => setStep(step + 1)}
-              disabled={(step === 1 && !canContinueStep1) || (step === 2 && !canContinueStep2)}
-              className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            <Button
+              onClick={addTeam}
+              startIcon={<AddIcon />}
+              sx={{
+                height: 48,
+                borderRadius: '999px',
+                fontWeight: 700,
+                fontSize: 14,
+                color: BLACK,
+                bgcolor: 'white',
+                border: '1.5px dashed rgba(17,17,17,0.15)',
+                '&:hover': { borderColor: 'rgba(17,17,17,0.35)', bgcolor: 'white' },
+              }}
             >
-              Continuar <i className="fas fa-arrow-right"></i>
-            </button>
-          ) : (
-            <button onClick={handleCreate} disabled={loading} className="btn-accent">
-              {loading ? <i className="fas fa-circle-notch fa-spin"></i> : <><i className="fas fa-check"></i> Crear torneo</>}
-            </button>
-          )}
-        </div>
-      </div>
+              Añadir equipo
+            </Button>
+          </Box>
+        )}
 
-      {/* Modal plantillas */}
-      {showTemplatesModal && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4" onClick={() => setShowTemplatesModal(false)}>
-          <div className="bg-dark-900 p-5 rounded-t-2xl sm:rounded-2xl w-full max-w-lg max-h-[80vh] overflow-y-auto animate-slide-up" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold">Tus plantillas</h3>
-              <button onClick={() => setShowTemplatesModal(false)} className="w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center">
-                <i className="fas fa-times"></i>
-              </button>
-            </div>
-            {userTemplates.length === 0 ? (
-              <p className="text-slate-400 text-sm text-center py-8">No tienes plantillas guardadas.</p>
-            ) : (
-              <div className="space-y-2">
-                {userTemplates.map(template => (
-                  <button
-                    key={template.id}
-                    className="w-full flex items-center justify-between p-3 hover:bg-slate-800 rounded-xl transition-colors text-left"
-                    onClick={() => {
-                      const newIndex = teams.length;
-                      setTeams([...teams, { name: template.name, color: template.color || colors[newIndex % colors.length], logo: template.logo || null }]);
-                      setImportTemplates(prev => ({ ...prev, [newIndex]: template.id }));
-                      setShowTemplatesModal(false);
+        {/* ═══════ PASO 3: Resumen ═══════ */}
+        {step === 3 && (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, animation: `${fadeInUp} 0.5s ${SMOOTH} both` }}>
+            <Box
+              sx={{
+                p: 3,
+                borderRadius: '20px',
+                bgcolor: 'white',
+                border: '1.5px solid rgba(17,17,17,0.08)',
+              }}
+            >
+              {[
+                ['Nombre', data.name],
+                ['Formato', `${formats.find(f => f.id === data.format)?.name}${data.format === 'liga' && data.doubleRound ? ' · Ida y vuelta' : ''}`],
+                ...(data.startDate ? [['Inicio', new Date(data.startDate).toLocaleDateString('es-ES')]] : []),
+                ...(data.location ? [['Ubicación', data.location]] : []),
+                ['Visibilidad', data.isPublic ? 'Público' : 'Privado'],
+              ].map(([label, value], i, arr) => (
+                <Box
+                  key={label}
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    gap: 2,
+                    py: 1.75,
+                    borderBottom: i < arr.length - 1 ? '1px solid rgba(17,17,17,0.06)' : 'none',
+                  }}
+                >
+                  <Typography sx={{ fontSize: 13, fontWeight: 600, color: 'rgba(17,17,17,0.45)' }}>
+                    {label}
+                  </Typography>
+                  <Typography
+                    sx={{
+                      fontSize: 14,
+                      fontWeight: 700,
+                      color: BLACK,
+                      textAlign: 'right',
+                      maxWidth: '60%',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
                     }}
                   >
-                    <div className="flex items-center gap-3 min-w-0">
-                      {template.logo ? (
-                        <img src={template.logo} className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
-                      ) : (
-                        <div className="w-9 h-9 rounded-full flex-shrink-0" style={{ backgroundColor: template.color || '#3b82f6' }} />
-                      )}
-                      <div className="min-w-0">
-                        <div className="font-medium truncate">{template.name}</div>
-                        <div className="text-xs text-slate-500">{template.players?.length || 0} jugadores</div>
-                      </div>
-                    </div>
-                    <i className="fas fa-plus text-primary-400"></i>
-                  </button>
+                    {value}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
+
+            <Box>
+              <Typography sx={{ ...labelSx, ml: 0 }}>
+                Equipos ({validTeamsCount})
+              </Typography>
+              <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 1 }}>
+                {teams.filter(t => t.name.trim()).map((team, i) => (
+                  <Box
+                    key={i}
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1.25,
+                      p: 1.25,
+                      borderRadius: '12px',
+                      bgcolor: 'white',
+                      border: '1px solid rgba(17,17,17,0.06)',
+                      minWidth: 0,
+                    }}
+                  >
+                    {team.logo ? (
+                      <Box
+                        component="img"
+                        src={team.logo}
+                        sx={{ width: 28, height: 28, borderRadius: '8px', objectFit: 'cover', flexShrink: 0 }}
+                      />
+                    ) : (
+                      <Box
+                        sx={{
+                          width: 28, height: 28, borderRadius: '8px',
+                          bgcolor: team.color, flexShrink: 0,
+                        }}
+                      />
+                    )}
+                    <Typography
+                      sx={{
+                        fontSize: 13, fontWeight: 600, color: BLACK,
+                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {team.name}
+                    </Typography>
+                  </Box>
                 ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
+              </Box>
+            </Box>
+          </Box>
+        )}
+
+        {/* ── Navegación inferior ── */}
+        <Box
+          sx={{
+            position: { xs: 'fixed', md: 'sticky' },
+            bottom: { xs: 'calc(16px + env(safe-area-inset-bottom, 0px))', md: 'auto' },
+            left: { xs: 0, md: 'auto' },
+            right: { xs: 0, md: 'auto' },
+            px: { xs: 3, md: 0 },
+            mt: { md: 5 },
+            maxWidth: { xs: 720, md: '100%' },
+            mx: { xs: 'auto', md: 0 },
+            zIndex: 2,
+            display: 'flex',
+            justifyContent: 'space-between',
+            gap: 2,
+          }}
+        >
+          {step > 1 ? (
+            <Button
+              onClick={() => setStep(step - 1)}
+              sx={{
+                height: 52,
+                borderRadius: '999px',
+                px: 3,
+                fontWeight: 700,
+                fontSize: 14.5,
+                color: BLACK,
+                bgcolor: 'white',
+                border: '1.5px solid rgba(17,17,17,0.1)',
+                '&:hover': { borderColor: 'rgba(17,17,17,0.3)', bgcolor: 'white' },
+              }}
+            >
+              Atrás
+            </Button>
+          ) : (
+            <Box />
+          )}
+
+          {step < 3 ? (
+            <Button
+              onClick={() => setStep(step + 1)}
+              disabled={(step === 1 && !canContinueStep1) || (step === 2 && !canContinueStep2)}
+              sx={{
+                height: 52,
+                borderRadius: '999px',
+                px: 3.5,
+                fontWeight: 700,
+                fontSize: 14.5,
+                bgcolor: BLACK,
+                color: 'white',
+                boxShadow: '0 8px 24px rgba(17,17,17,0.15)',
+                '&:disabled': {
+                  bgcolor: 'rgba(17,17,17,0.06)',
+                  color: 'rgba(17,17,17,0.3)',
+                  boxShadow: 'none',
+                },
+                '&:hover': { bgcolor: '#1a1a1a', transform: 'translateY(-1px)' },
+                '&:active': { transform: 'scale(0.98)' },
+              }}
+            >
+              Continuar
+            </Button>
+          ) : (
+            <Button
+              onClick={handleCreate}
+              disabled={loading}
+              sx={{
+                height: 52,
+                borderRadius: '999px',
+                px: 3.5,
+                fontWeight: 700,
+                fontSize: 14.5,
+                bgcolor: BLACK,
+                color: 'white',
+                boxShadow: '0 8px 24px rgba(17,17,17,0.15)',
+                '&:disabled': { bgcolor: 'rgba(17,17,17,0.06)', color: 'rgba(17,17,17,0.3)' },
+                '&:hover': { bgcolor: '#1a1a1a', transform: 'translateY(-1px)' },
+                '&:active': { transform: 'scale(0.98)' },
+              }}
+            >
+              {loading ? 'Creando…' : 'Crear torneo'}
+            </Button>
+          )}
+        </Box>
+      </Box>
+
+      {/* ═══════ Drawer de plantillas ═══════ */}
+      <Drawer
+        anchor={isDesktop ? 'right' : 'bottom'}
+        open={templatesDrawer}
+        onClose={() => setTemplatesDrawer(false)}
+        slotProps={{
+          backdrop: { sx: { bgcolor: 'rgba(10,10,10,0.5)', backdropFilter: 'blur(6px)' } },
+          paper: {
+            sx: {
+              bgcolor: '#FAFAF8',
+              backgroundImage: 'none',
+              width: { md: 420 },
+              maxHeight: { xs: '85dvh', md: '100dvh' },
+              borderTopLeftRadius: { xs: '28px', md: 0 },
+              borderTopRightRadius: { xs: '28px', md: 0 },
+              boxShadow: '0 -20px 60px rgba(0,0,0,0.18)',
+            },
+          },
+        }}
+      >
+        <Box sx={{ p: 3, pt: 3, pb: 'calc(28px + env(safe-area-inset-bottom, 0px))' }}>
+          {!isDesktop && (
+            <Box sx={{ width: 40, height: 4, borderRadius: 2, bgcolor: 'rgba(17,17,17,0.14)', mx: 'auto', mb: 3 }} />
+          )}
+          <Typography
+            sx={{
+              fontSize: 11, fontWeight: 700, letterSpacing: 1.4,
+              textTransform: 'uppercase', color: 'rgba(17,17,17,0.4)', mb: 1.5,
+            }}
+          >
+            Tus plantillas
+          </Typography>
+          <Typography
+            sx={{
+              fontSize: 22, fontWeight: 800, letterSpacing: -0.6,
+              lineHeight: 1.15, color: BLACK,
+              fontFamily: '"Instrument Sans", system-ui, sans-serif', mb: 3,
+            }}
+          >
+            Elige un equipo
+          </Typography>
+
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            {userTemplates.map(template => (
+              <Box
+                key={template.id}
+                onClick={() => {
+                  const newIndex = teams.length;
+                  setTeams([...teams, {
+                    name: template.name,
+                    color: template.color || colors[newIndex % colors.length],
+                    logo: template.logo || null,
+                  }]);
+                  setImportTemplates(prev => ({ ...prev, [newIndex]: template.id }));
+                  setTemplatesDrawer(false);
+                }}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2,
+                  p: 2,
+                  borderRadius: '14px',
+                  bgcolor: 'white',
+                  border: '1.5px solid rgba(17,17,17,0.06)',
+                  cursor: 'pointer',
+                  transition: `all 0.2s ${SMOOTH}`,
+                  '&:hover': {
+                    borderColor: 'rgba(17,17,17,0.2)',
+                    transform: 'translateX(2px)',
+                  },
+                }}
+              >
+                {template.logo ? (
+                  <Box
+                    component="img"
+                    src={template.logo}
+                    sx={{ width: 44, height: 44, borderRadius: '12px', objectFit: 'cover', flexShrink: 0 }}
+                  />
+                ) : (
+                  <Box
+                    sx={{
+                      width: 44, height: 44, borderRadius: '12px',
+                      bgcolor: template.color || BLACK,
+                      display: 'grid', placeItems: 'center',
+                      color: 'white', fontWeight: 800, fontSize: 18,
+                      fontFamily: '"Instrument Sans", system-ui, sans-serif',
+                      flexShrink: 0,
+                    }}
+                  >
+                    {template.name?.[0]?.toUpperCase()}
+                  </Box>
+                )}
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Typography
+                    sx={{
+                      fontSize: 15, fontWeight: 700, color: BLACK,
+                      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {template.name}
+                  </Typography>
+                  <Typography sx={{ fontSize: 12.5, color: 'rgba(17,17,17,0.5)', mt: 0.25 }}>
+                    {template.players?.length || 0} jugadores
+                  </Typography>
+                </Box>
+                <AddIcon sx={{ fontSize: 20, color: 'rgba(17,17,17,0.4)' }} />
+              </Box>
+            ))}
+          </Box>
+        </Box>
+      </Drawer>
+    </Box>
   );
 }
