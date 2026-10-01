@@ -1,10 +1,6 @@
 import { Box, keyframes } from '@mui/material';
 
-// ═══════════════════════════════════════════════════════════════
-// Animaciones de los blobs (lava lamp)
-// Cada blob tiene su propio recorrido y ritmo para que no se sincronicen
-// ═══════════════════════════════════════════════════════════════
-
+// ── Movimientos tipo lámpara de lava ──
 const blob1 = keyframes`
   0%   { transform: translate(0, 0) scale(1); }
   25%  { transform: translate(18vw, -14vh) scale(1.12); }
@@ -42,30 +38,17 @@ const blob5 = keyframes`
   100% { transform: translate(0, 0) scale(1); }
 `;
 
-// ═══════════════════════════════════════════════════════════════
-// Props (mantengo la interfaz anterior para no romper llamadas)
-// - opacity: controla la intensidad global
-// - duration: escala la velocidad de todos los blobs
-// - color: color base (por defecto naranja); se generan variantes
-// - angle y gap: aceptadas por compatibilidad, ya no se usan
-// ═══════════════════════════════════════════════════════════════
-
 interface Props {
+  /** Opacidad global. Default 1 */
   opacity?: number;
+  /** Color principal. Default '#f97316' */
   color?: string;
-  duration?: number;
-  angle?: number;
-  gap?: number;
 }
 
 export const OrangeLinesBackground = ({
-  opacity = 0.5,
+  opacity = 1,
   color = '#f97316',
-  duration = 40,
 }: Props) => {
-  // Escala: si duration=40 es la base, valores menores aceleran
-  const speedFactor = duration / 40;
-
   return (
     <Box
       sx={{
@@ -77,7 +60,7 @@ export const OrangeLinesBackground = ({
         opacity,
       }}
     >
-      {/* Blob 1 · naranja principal */}
+      {/* Blob 1 · principal */}
       <Box
         sx={{
           position: 'absolute',
@@ -92,7 +75,7 @@ export const OrangeLinesBackground = ({
           filter: 'blur(90px)',
           opacity: 0.55,
           mixBlendMode: 'multiply',
-          animation: `${blob1} ${38 * speedFactor}s ease-in-out infinite`,
+          animation: `${blob1} 38s ease-in-out infinite`,
         }}
       />
 
@@ -111,7 +94,7 @@ export const OrangeLinesBackground = ({
           filter: 'blur(100px)',
           opacity: 0.5,
           mixBlendMode: 'multiply',
-          animation: `${blob2} ${45 * speedFactor}s ease-in-out infinite`,
+          animation: `${blob2} 45s ease-in-out infinite`,
         }}
       />
 
@@ -130,7 +113,7 @@ export const OrangeLinesBackground = ({
           filter: 'blur(110px)',
           opacity: 0.45,
           mixBlendMode: 'multiply',
-          animation: `${blob3} ${52 * speedFactor}s ease-in-out infinite`,
+          animation: `${blob3} 52s ease-in-out infinite`,
         }}
       />
 
@@ -149,11 +132,11 @@ export const OrangeLinesBackground = ({
           filter: 'blur(80px)',
           opacity: 0.4,
           mixBlendMode: 'multiply',
-          animation: `${blob4} ${40 * speedFactor}s ease-in-out infinite`,
+          animation: `${blob4} 40s ease-in-out infinite`,
         }}
       />
 
-      {/* Blob 5 · rosado cálido */}
+      {/* Blob 5 · toque rosado */}
       <Box
         sx={{
           position: 'absolute',
@@ -168,11 +151,11 @@ export const OrangeLinesBackground = ({
           filter: 'blur(120px)',
           opacity: 0.3,
           mixBlendMode: 'multiply',
-          animation: `${blob5} ${48 * speedFactor}s ease-in-out infinite`,
+          animation: `${blob5} 48s ease-in-out infinite`,
         }}
       />
 
-      {/* Capa de suavizado en los bordes */}
+      {/* Suavizado de bordes */}
       <Box
         sx={{
           position: 'absolute',
