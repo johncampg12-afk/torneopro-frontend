@@ -915,11 +915,13 @@ export default function Home() {
                       width: 40,
                       height: 40,
                       borderRadius: '50%',
-                      bgcolor: BLACK,
+                      bgcolor: '#f97316',
                       display: 'grid',
                       placeItems: 'center',
                       color: 'white',
                       flexShrink: 0,
+                      transition: `all 0.3s ${SMOOTH}`,
+                      '&:hover': { bgcolor: '#ea580c' },
                     }}
                   >
                     <ArrowForwardIcon
