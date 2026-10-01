@@ -436,48 +436,54 @@ export default function TournamentDetail() {
     ml: 0.5,
   };
 
-  const TeamBadge = ({ team, size = 'md' }: { team: any; size?: 'sm' | 'md' | 'lg' }) => {
+  const TeamBadge = ({ team, size = 'md', reverse = false }: { team: any; size?: 'sm' | 'md' | 'lg'; reverse?: boolean }) => {
     const dim = size === 'sm' ? 20 : size === 'md' ? 32 : 48;
     const fs = size === 'sm' ? 9 : size === 'md' ? 13 : 20;
+
+    const crest = team.logo ? (
+      <Box
+        component="img"
+        src={team.logo}
+        alt={team.name}
+        sx={{ width: dim, height: dim, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
+      />
+    ) : (
+      <Box
+        sx={{
+          width: dim, height: dim,
+          borderRadius: '50%',
+          bgcolor: team.color || '#666',
+          display: 'grid', placeItems: 'center',
+          color: 'white',
+          fontWeight: 800,
+          fontSize: fs,
+          fontFamily: '"Instrument Sans", system-ui, sans-serif',
+          flexShrink: 0,
+        }}
+      >
+        {team.name?.[0]?.toUpperCase() || '?'}
+      </Box>
+    );
+
+    const name = (
+      <Typography
+        sx={{
+          fontSize: size === 'sm' ? 13 : size === 'md' ? 14.5 : 16,
+          fontWeight: 600,
+          color: BLACK,
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+          minWidth: 0,
+        }}
+      >
+        {team.name}
+      </Typography>
+    );
+
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
-        {team.logo ? (
-          <Box
-            component="img"
-            src={team.logo}
-            alt={team.name}
-            sx={{ width: dim, height: dim, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
-          />
-        ) : (
-          <Box
-            sx={{
-              width: dim, height: dim,
-              borderRadius: '50%',
-              bgcolor: team.color || '#666',
-              display: 'grid', placeItems: 'center',
-              color: 'white',
-              fontWeight: 800,
-              fontSize: fs,
-              fontFamily: '"Instrument Sans", system-ui, sans-serif',
-              flexShrink: 0,
-            }}
-          >
-            {team.name?.[0]?.toUpperCase() || '?'}
-          </Box>
-        )}
-        <Typography
-          sx={{
-            fontSize: size === 'sm' ? 13 : size === 'md' ? 14.5 : 16,
-            fontWeight: 600,
-            color: BLACK,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-            minWidth: 0,
-          }}
-        >
-          {team.name}
-        </Typography>
+        {reverse ? <>{name}{crest}</> : <>{crest}{name}</>}
       </Box>
     );
   };
@@ -650,22 +656,23 @@ export default function TournamentDetail() {
             <Button
               key={t.id}
               onClick={() => setTab(t.id)}
-              startIcon={<t.Icon sx={{ fontSize: 18 }} />}
               sx={{
                 flex: 1,
-                minWidth: 100,
-                height: 40,
+                minWidth: 0,
+                height: 34,
                 borderRadius: '999px',
-                px: 2,
+                px: { xs: 1, sm: 2 },
+                gap: 0.75,
                 fontWeight: 700,
-                fontSize: 13.5,
+                fontSize: 13,
                 color: tab === t.id ? 'white' : 'rgba(17,17,17,0.6)',
                 bgcolor: tab === t.id ? BLACK : 'transparent',
                 transition: `all 0.25s ${SMOOTH}`,
                 '&:hover': { bgcolor: tab === t.id ? BLACK : 'rgba(17,17,17,0.04)' },
-                '& .MuiButton-startIcon': { mr: 0.75 },
+                '& .MuiButton-startIcon': { display: 'none' },
               }}
             >
+              <t.Icon sx={{ fontSize: 18, flexShrink: 0 }} />
               <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>{t.label}</Box>
             </Button>
           ))}
@@ -747,7 +754,7 @@ export default function TournamentDetail() {
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           {/* Local */}
                           <Box sx={{ flex: 1, minWidth: 0, display: 'flex', justifyContent: 'flex-end' }}>
-                            <TeamBadge team={home} size="sm" />
+                            <TeamBadge team={home} size="sm" reverse />
                           </Box>
 
                           {/* Marcador */}
