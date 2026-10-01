@@ -851,7 +851,7 @@ export default function Home() {
                     textDecoration: 'none',
                     color: 'inherit',
                     py: { xs: 1.75, md: 2 },
-                    px: { xs: 3, md: 3.5 },
+                    px: { xs: 3.5, md: 4 },
                     borderRadius: '24px',
                     bgcolor: 'white',
                     border: '1px solid rgba(17,17,17,0.06)',
