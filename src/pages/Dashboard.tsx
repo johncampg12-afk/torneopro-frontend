@@ -10,7 +10,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
 import LinkIcon from '@mui/icons-material/Link';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import SportsSoccerIcon from '@mui/icons-material/SportsSoccer';
 import { api } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
@@ -504,7 +504,7 @@ export default function Dashboard() {
             '&:hover': { bgcolor: '#FEF2F2' },
           }}
         >
-          <DeleteOutlineIcon sx={{ fontSize: 18 }} />
+          <DeleteOutlinedIcon sx={{ fontSize: 18 }} />
           Eliminar torneo
         </MenuItem>
       </Menu>

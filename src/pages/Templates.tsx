@@ -5,7 +5,7 @@ import {
 } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import GroupsIcon from '@mui/icons-material/Groups';
 import { api } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
@@ -222,7 +222,7 @@ export default function Templates() {
                     '&:hover': { color: '#DC2626', bgcolor: '#FEF2F2' },
                   }}
                 >
-                  <DeleteOutlineIcon sx={{ fontSize: 20 }} />
+                  <DeleteOutlinedIcon sx={{ fontSize: 20 }} />
                 </IconButton>
               </Box>
 
