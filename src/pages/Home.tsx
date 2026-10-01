@@ -62,7 +62,7 @@ const sponsors = [
 const formatName = (f: string) =>
   ({ liga: 'Liga', eliminatoria: 'Eliminación Directa', grupos: 'Grupos + Eliminatoria' }[f] || f);
 
-// ── Tile publicitario: imagen full-bleed + título subrayado + hover con detalle ──
+// ── Tile publicitario: contenedor 4:3, imagen full-bleed, título subrayado y hover con detalle ──
 function AdTile({
   image, title, description, cta, tier, link,
 }: {
@@ -82,6 +82,7 @@ function AdTile({
         aspectRatio: '4/3',
         bgcolor: 'white',
         border: '1px solid rgba(17,17,17,0.06)',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.04)',
         textDecoration: 'none',
         transition: `all 0.3s ${SMOOTH}`,
         '&:hover': {
@@ -92,7 +93,6 @@ function AdTile({
         },
       }}
     >
-      {/* Imagen full-bleed */}
       <Box
         className="ad-image"
         component="img"
@@ -108,7 +108,7 @@ function AdTile({
         }}
       />
 
-      {/* Degradado inferior para legibilidad */}
+      {/* Degradado inferior */}
       <Box
         sx={{
           position: 'absolute',
@@ -121,7 +121,7 @@ function AdTile({
         }}
       />
 
-      {/* Título esquina inferior izquierda */}
+      {/* Título esquina inferior izquierda, con subrayado y difuminado */}
       <Box
         sx={{
           position: 'absolute',
@@ -149,7 +149,7 @@ function AdTile({
         </Typography>
       </Box>
 
-      {/* Overlay hover con detalle */}
+      {/* Hover overlay con detalle */}
       <Box
         className="ad-overlay"
         sx={{
@@ -215,7 +215,6 @@ function AdTile({
             color: BLACK,
             fontSize: 13,
             fontWeight: 700,
-            transition: `transform 0.2s ${SMOOTH}`,
           }}
         >
           {cta}
@@ -226,7 +225,7 @@ function AdTile({
   );
 }
 
-// ── Bottom banner horizontal ──
+// ── Banner horizontal inferior ──
 function BottomBanner({
   image, title, description, cta, tier, link,
 }: {
@@ -304,7 +303,6 @@ function BottomBanner({
         </Typography>
       </Box>
 
-      {/* Hover con detalles */}
       <Box
         className="banner-overlay"
         sx={{
@@ -522,6 +520,7 @@ export default function Home() {
         {/* ═══════════ MARQUEE DE EQUIPOS ═══════════ */}
         {allTeams.length > 0 && (
           <Box sx={{ animation: `${fadeInUp} 0.5s ${SMOOTH} both 0.05s` }}>
+            {/* Estilo original: mayúsculas, pequeño, gris */}
             <Typography
               sx={{
                 fontSize: 11,
@@ -639,19 +638,20 @@ export default function Home() {
         >
           {/* Columna torneos */}
           <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Box sx={{ width: 48, height: 1, bgcolor: 'rgba(17,17,17,0.14)' }} />
-              <Typography
-                sx={{
-                  fontSize: 11,
-                  fontWeight: 700,
-                  letterSpacing: 1,
-                  color: 'rgba(17,17,17,0.35)',
-                }}
-              >
-                TORNEOS PÚBLICOS
-              </Typography>
-            </Box>
+            {/* Estilo original del título "Torneos públicos" */}
+            <Typography
+              sx={{
+                fontSize: { xs: 24, sm: 28, md: 34 },
+                fontWeight: 800,
+                letterSpacing: -1,
+                color: BLACK,
+                fontFamily: '"Instrument Sans", system-ui, sans-serif',
+                lineHeight: 1.1,
+                mb: 1,
+              }}
+            >
+              Torneos públicos
+            </Typography>
 
             {loading ? (
               <>
@@ -830,14 +830,15 @@ export default function Home() {
             >
               <Typography
                 sx={{
-                  fontSize: 10,
+                  fontSize: 11,
                   fontWeight: 700,
-                  letterSpacing: 1,
-                  color: 'rgba(17,17,17,0.35)',
+                  letterSpacing: 1.4,
+                  textTransform: 'uppercase',
+                  color: 'rgba(17,17,17,0.4)',
                   mb: 2,
                 }}
               >
-                RESUMEN
+                Resumen
               </Typography>
               <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 1.5 }}>
                 {stats.map(s => (
@@ -891,14 +892,15 @@ export default function Home() {
             >
               <Typography
                 sx={{
-                  fontSize: 10,
+                  fontSize: 11,
                   fontWeight: 700,
-                  letterSpacing: 1,
-                  color: 'rgba(17,17,17,0.35)',
+                  letterSpacing: 1.4,
+                  textTransform: 'uppercase',
+                  color: 'rgba(17,17,17,0.4)',
                   mb: 1.5,
                 }}
               >
-                PATROCINADORES OFICIALES
+                Patrocinadores oficiales
               </Typography>
               <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', alignItems: 'center' }}>
                 {sponsors.map(s => (
@@ -955,7 +957,6 @@ export default function Home() {
             overflow: 'hidden',
           }}
         >
-          {/* Imagen */}
           <Box
             sx={{
               width: 42,
@@ -975,7 +976,6 @@ export default function Home() {
             />
           </Box>
 
-          {/* Título con subrayado + difuminado */}
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography
               sx={{
@@ -1008,7 +1008,6 @@ export default function Home() {
             </Typography>
           </Box>
 
-          {/* CTA + cerrar */}
           <Box sx={{ display: 'flex', gap: 0.5, flexShrink: 0 }}>
             <Box
               sx={{
