@@ -1001,40 +1001,6 @@ export default function Home() {
                 />
               </Box>
             </Box>
-
-            {/* Patrocinadores oficiales */}
-            <Box
-              sx={{
-                p: 2.5,
-                borderRadius: '20px',
-                bgcolor: 'white',
-                border: '1px solid rgba(17,17,17,0.06)',
-              }}
-            >
-              <Typography
-                sx={{
-                  fontSize: 11,
-                  fontWeight: 700,
-                  letterSpacing: 1.4,
-                  textTransform: 'uppercase',
-                  color: 'rgba(17,17,17,0.4)',
-                  mb: 1.5,
-                }}
-              >
-                Patrocinadores oficiales
-              </Typography>
-              <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', alignItems: 'center' }}>
-                {sponsors.map(s => (
-                  <Box
-                    key={s.id}
-                    component="img"
-                    src={s.image}
-                    alt={s.name}
-                    sx={{ height: 26, objectFit: 'contain', opacity: 0.6, transition: `opacity 0.2s ${SMOOTH}`, '&:hover': { opacity: 1 } }}
-                  />
-                ))}
-              </Box>
-            </Box>
           </Box>
         </Box>
 
