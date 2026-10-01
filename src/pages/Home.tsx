@@ -79,7 +79,7 @@ function AdTile({
         display: 'block',
         overflow: 'hidden',
         borderRadius: '20px',
-        aspectRatio: '16/10',
+        aspectRatio: '2/1',
         bgcolor: 'white',
         border: '1px solid rgba(17,17,17,0.06)',
         boxShadow: '0 8px 32px rgba(0,0,0,0.04)',
