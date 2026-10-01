@@ -850,7 +850,8 @@ export default function Home() {
                   sx={{
                     textDecoration: 'none',
                     color: 'inherit',
-                    p: { xs: 1.75, md: 2 },
+                    py: { xs: 1.75, md: 2 },
+                    px: { xs: 2.5, md: 3 },
                     borderRadius: '24px',
                     bgcolor: 'white',
                     border: '1px solid rgba(17,17,17,0.06)',
