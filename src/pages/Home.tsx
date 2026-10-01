@@ -62,7 +62,7 @@ const sponsors = [
 const formatName = (f: string) =>
   ({ liga: 'Liga', eliminatoria: 'Eliminación Directa', grupos: 'Grupos + Eliminatoria' }[f] || f);
 
-// ── Tile publicitario: contenedor 4:3, imagen full-bleed, título subrayado y hover con detalle ──
+// ── Tile publicitario compacto ──
 function AdTile({
   image, title, description, cta, tier, link,
 }: {
@@ -78,8 +78,8 @@ function AdTile({
         position: 'relative',
         display: 'block',
         overflow: 'hidden',
-        borderRadius: '24px',
-        aspectRatio: '4/3',
+        borderRadius: '20px',
+        aspectRatio: '16/10',
         bgcolor: 'white',
         border: '1px solid rgba(17,17,17,0.06)',
         boxShadow: '0 8px 32px rgba(0,0,0,0.04)',
@@ -108,7 +108,6 @@ function AdTile({
         }}
       />
 
-      {/* Degradado inferior */}
       <Box
         sx={{
           position: 'absolute',
@@ -121,19 +120,10 @@ function AdTile({
         }}
       />
 
-      {/* Título esquina inferior izquierda, con subrayado y difuminado */}
-      <Box
-        sx={{
-          position: 'absolute',
-          left: 22,
-          right: 22,
-          bottom: 20,
-          zIndex: 2,
-        }}
-      >
+      <Box sx={{ position: 'absolute', left: 18, right: 18, bottom: 16, zIndex: 2 }}>
         <Typography
           sx={{
-            fontSize: { xs: 18, md: 20 },
+            fontSize: { xs: 16, md: 18 },
             fontWeight: 800,
             color: 'white',
             fontFamily: '"Instrument Sans", system-ui, sans-serif',
@@ -149,7 +139,6 @@ function AdTile({
         </Typography>
       </Box>
 
-      {/* Hover overlay con detalle */}
       <Box
         className="ad-overlay"
         sx={{
@@ -158,7 +147,7 @@ function AdTile({
           bgcolor: 'rgba(10,10,10,0.88)',
           backdropFilter: 'blur(6px)',
           WebkitBackdropFilter: 'blur(6px)',
-          p: { xs: 2.5, md: 3 },
+          p: { xs: 2, md: 2.5 },
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
@@ -169,35 +158,39 @@ function AdTile({
       >
         <Typography
           sx={{
-            fontSize: 10.5,
+            fontSize: 10,
             fontWeight: 700,
             letterSpacing: 1.2,
             textTransform: 'uppercase',
             color: 'rgba(255,255,255,0.5)',
-            mb: 1,
+            mb: 0.75,
           }}
         >
           {tier}
         </Typography>
         <Typography
           sx={{
-            fontSize: { xs: 20, md: 22 },
+            fontSize: { xs: 17, md: 19 },
             fontWeight: 800,
             color: 'white',
             fontFamily: '"Instrument Sans", system-ui, sans-serif',
             lineHeight: 1.1,
             letterSpacing: -0.5,
-            mb: 1.5,
+            mb: 1,
           }}
         >
           {title}
         </Typography>
         <Typography
           sx={{
-            fontSize: 13.5,
+            fontSize: 12.5,
             color: 'rgba(255,255,255,0.7)',
-            lineHeight: 1.5,
-            mb: 2.5,
+            lineHeight: 1.45,
+            mb: 1.75,
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
           }}
         >
           {description}
@@ -206,20 +199,141 @@ function AdTile({
           sx={{
             display: 'inline-flex',
             alignItems: 'center',
-            gap: 1,
+            gap: 0.75,
             alignSelf: 'flex-start',
-            px: 2,
-            height: 36,
+            px: 1.75,
+            height: 32,
             borderRadius: '999px',
             bgcolor: 'white',
             color: BLACK,
-            fontSize: 13,
+            fontSize: 12.5,
             fontWeight: 700,
           }}
         >
           {cta}
-          <ArrowForwardIcon sx={{ fontSize: 16 }} />
+          <ArrowForwardIcon sx={{ fontSize: 14 }} />
         </Box>
+      </Box>
+    </Box>
+  );
+}
+
+// ── Mini tile cuadrado para spotlight (2x2) ──
+function MiniAdTile({
+  image, title, cta, link,
+}: {
+  image: string; title: string; cta: string; link: string;
+}) {
+  return (
+    <Box
+      component="a"
+      href={link}
+      target="_blank"
+      rel="noopener noreferrer"
+      sx={{
+        position: 'relative',
+        display: 'block',
+        overflow: 'hidden',
+        borderRadius: '14px',
+        aspectRatio: '1/1',
+        bgcolor: 'white',
+        border: '1px solid rgba(17,17,17,0.06)',
+        textDecoration: 'none',
+        transition: `all 0.25s ${SMOOTH}`,
+        '&:hover': {
+          transform: 'translateY(-2px)',
+          boxShadow: '0 12px 24px -8px rgba(0,0,0,0.15)',
+          '& .mini-image': { transform: 'scale(1.06)' },
+          '& .mini-overlay': { opacity: 1 },
+        },
+      }}
+    >
+      <Box
+        className="mini-image"
+        component="img"
+        src={image}
+        alt={title}
+        sx={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          transition: `transform 0.5s ${SMOOTH}`,
+        }}
+      />
+
+      <Box
+        sx={{
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          bottom: 0,
+          height: '65%',
+          background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)',
+          pointerEvents: 'none',
+        }}
+      />
+
+      <Typography
+        sx={{
+          position: 'absolute',
+          left: 10,
+          right: 10,
+          bottom: 10,
+          zIndex: 2,
+          fontSize: 11,
+          fontWeight: 800,
+          color: 'white',
+          fontFamily: '"Instrument Sans", system-ui, sans-serif',
+          textDecoration: 'underline',
+          textDecorationColor: 'rgba(255,255,255,0.45)',
+          textUnderlineOffset: '4px',
+          textShadow: '0 2px 10px rgba(0,0,0,0.75)',
+          letterSpacing: -0.3,
+          lineHeight: 1.15,
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+        }}
+      >
+        {title}
+      </Typography>
+
+      <Box
+        className="mini-overlay"
+        sx={{
+          position: 'absolute',
+          inset: 0,
+          bgcolor: 'rgba(10,10,10,0.85)',
+          backdropFilter: 'blur(4px)',
+          WebkitBackdropFilter: 'blur(4px)',
+          p: 1.25,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'flex-start',
+          gap: 0.5,
+          opacity: 0,
+          transition: `opacity 0.25s ${SMOOTH}`,
+          zIndex: 3,
+        }}
+      >
+        <Typography
+          sx={{
+            fontSize: 11,
+            fontWeight: 800,
+            color: 'white',
+            fontFamily: '"Instrument Sans", system-ui, sans-serif',
+            lineHeight: 1.15,
+            letterSpacing: -0.3,
+          }}
+        >
+          {title}
+        </Typography>
+        <Typography sx={{ fontSize: 9.5, color: 'rgba(255,255,255,0.65)', fontWeight: 600 }}>
+          {cta}
+        </Typography>
       </Box>
     </Box>
   );
@@ -404,12 +518,6 @@ export default function Home() {
       .finally(() => setLoading(false));
   }, []);
 
-  const stats = [
-    { label: 'Torneos', value: publicTournaments.length },
-    { label: 'Equipos', value: publicTournaments.reduce((a, t) => a + (t._count?.teams || 0), 0) },
-    { label: 'En curso', value: publicTournaments.filter(t => t.status === 'active').length },
-  ];
-
   return (
     <Box
       sx={{
@@ -447,23 +555,29 @@ export default function Home() {
             animation: `${fadeInUp} 0.5s ${SMOOTH} both`,
           }}
         >
+          {/* Imagen cubriendo todo el panel */}
           <Box
             sx={{
               flex: 1.2,
               minWidth: 0,
-              display: 'grid',
-              placeItems: 'center',
-              bgcolor: '#FAFAF8',
+              position: 'relative',
+              overflow: 'hidden',
               borderRadius: '20px',
-              p: 3,
               aspectRatio: { xs: '16/9', md: '16/7' },
+              bgcolor: '#FAFAF8',
             }}
           >
             <Box
               component="img"
               src={sponsors[0].image}
               alt={sponsors[0].name}
-              sx={{ maxWidth: '100%', maxHeight: 140, objectFit: 'contain' }}
+              sx={{
+                position: 'absolute',
+                inset: 0,
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+              }}
             />
           </Box>
 
@@ -520,7 +634,6 @@ export default function Home() {
         {/* ═══════════ MARQUEE DE EQUIPOS ═══════════ */}
         {allTeams.length > 0 && (
           <Box sx={{ animation: `${fadeInUp} 0.5s ${SMOOTH} both 0.05s` }}>
-            {/* Estilo original: mayúsculas, pequeño, gris */}
             <Typography
               sx={{
                 fontSize: 11,
@@ -638,7 +751,6 @@ export default function Home() {
         >
           {/* Columna torneos */}
           <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
-            {/* Estilo original del título "Torneos públicos" */}
             <Typography
               sx={{
                 fontSize: { xs: 24, sm: 28, md: 34 },
@@ -819,10 +931,10 @@ export default function Home() {
               gap: 2,
             }}
           >
-            {/* Stats */}
+            {/* Spotlight del mes (2x2) */}
             <Box
               sx={{
-                p: 2.5,
+                p: 2,
                 borderRadius: '20px',
                 bgcolor: 'white',
                 border: '1px solid rgba(17,17,17,0.06)',
@@ -835,51 +947,44 @@ export default function Home() {
                   letterSpacing: 1.4,
                   textTransform: 'uppercase',
                   color: 'rgba(17,17,17,0.4)',
-                  mb: 2,
+                  mb: 1.5,
                 }}
               >
-                Resumen
+                Spotlight del mes
               </Typography>
-              <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 1.5 }}>
-                {stats.map(s => (
-                  <Box key={s.label} sx={{ textAlign: 'center' }}>
-                    <Typography
-                      sx={{
-                        fontSize: 24,
-                        fontWeight: 900,
-                        color: BLACK,
-                        fontFamily: '"Instrument Sans", system-ui, sans-serif',
-                        lineHeight: 1,
-                      }}
-                    >
-                      {s.value}
-                    </Typography>
-                    <Typography
-                      sx={{
-                        fontSize: 9.5,
-                        fontWeight: 700,
-                        letterSpacing: 0.5,
-                        textTransform: 'uppercase',
-                        color: 'rgba(17,17,17,0.4)',
-                        mt: 0.5,
-                      }}
-                    >
-                      {s.label}
-                    </Typography>
-                  </Box>
-                ))}
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: 1,
+                }}
+              >
+                <MiniAdTile
+                  image={sponsors[0].image}
+                  title="Dental Fresh"
+                  cta="Pedir cita →"
+                  link={sponsors[0].link}
+                />
+                <MiniAdTile
+                  image={sponsors[1].image}
+                  title="Trend Sport"
+                  cta="Ver colección →"
+                  link={sponsors[1].link}
+                />
+                <MiniAdTile
+                  image={sponsors[2].image}
+                  title="Emprende"
+                  cta="Apuntarme →"
+                  link={sponsors[2].link}
+                />
+                <MiniAdTile
+                  image={sponsors[0].image}
+                  title="Tu marca"
+                  cta="Contactar →"
+                  link="#"
+                />
               </Box>
             </Box>
-
-            {/* Spotlight del mes */}
-            <AdTile
-              image={sponsors[0].image}
-              title="Dental Fresh Plus"
-              description="Clínica oficial del torneo. 200+ jugadores ya han pasado por aquí."
-              cta="Pedir cita"
-              tier="Spotlight del mes"
-              link={sponsors[0].link}
-            />
 
             {/* Patrocinadores oficiales */}
             <Box
