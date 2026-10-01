@@ -63,8 +63,36 @@ export const WelcomePage = () => {
             pb: { xs: 'calc(24px + env(safe-area-inset-bottom, 0px))', md: 6 },
           }}
         >
-          {/* Espaciador superior (antes logo) */}
-          <Box sx={{ height: { xs: 88, md: 60 } }} />
+          {/* Logo — solo desktop */}
+          <Box
+            sx={{
+              display: { xs: 'none', md: 'flex' },
+              justifyContent: { xs: 'center', md: 'flex-start' },
+              animation: `${fadeInUp} 0.6s ${SMOOTH} both`,
+            }}
+          >
+            <Box
+              sx={{
+                width: 60,
+                height: 60,
+                borderRadius: '18px',
+                bgcolor: 'white',
+                p: 0.5,
+                boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+              }}
+            >
+              <Box
+                component="img"
+                src="/torneo-trend-sport.png"
+                sx={{
+                  width: '100%',
+                  height: '100%',
+                  borderRadius: '14px',
+                  objectFit: 'cover',
+                }}
+              />
+            </Box>
+          </Box>
 
           {/* ── Hero centrado verticalmente ── */}
           <Box
@@ -306,7 +334,7 @@ export const WelcomePage = () => {
               }}
             />
 
-            {/* Contenido central: tag superior */}
+            {/* Contenido central: logo gigante */}
             <Box
               sx={{
                 position: 'relative',
@@ -320,6 +348,23 @@ export const WelcomePage = () => {
                 gap: 3,
               }}
             >
+              <Box
+                sx={{
+                  width: 150,
+                  height: 150,
+                  borderRadius: '38px',
+                  bgcolor: 'white',
+                  p: 1,
+                  boxShadow: '0 20px 60px rgba(0,0,0,0.4)',
+                }}
+              >
+                <Box
+                  component="img"
+                  src="/torneo-trend-sport.png"
+                  sx={{ width: '100%', height: '100%', borderRadius: '30px', objectFit: 'cover' }}
+                />
+              </Box>
+
               <Typography
                 sx={{
                   textAlign: 'center',
