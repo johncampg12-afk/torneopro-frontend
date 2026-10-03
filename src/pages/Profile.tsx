@@ -608,53 +608,92 @@ export default function Profile() {
           <Box>
             <Typography sx={labelSx}>Teléfono (para canjear premios)</Typography>
 
-            <TextField
-              fullWidth
-              value={phoneDigits}
-              onChange={(e) => {
-                const digits = e.target.value.replace(/\D/g, '').slice(0, PHONE_DIGITS);
-                setEditPhone(digits);
-                setPhoneTouched(true);
+            <Box
+              onClick={() => {
+                // Al hacer clic en cualquier parte del contenedor, enfocamos el input
+                document.getElementById('phone-input')?.focus();
               }}
-              placeholder="991234567"
-              error={phoneError}
               sx={{
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: '14px',
-                  bgcolor: 'white',
-                  minHeight: 50,
-                  '& fieldset': {
-                    borderColor: phoneError ? '#DC2626' : 'rgba(17,17,17,0.08)',
-                    borderWidth: '1.5px',
-                  },
-                  '&:hover fieldset': {
-                    borderColor: phoneError ? '#DC2626' : 'rgba(17,17,17,0.2)',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: phoneError ? '#DC2626' : BLACK,
-                    borderWidth: '1.5px',
-                  },
+                display: 'flex',
+                alignItems: 'center',
+                minHeight: 50,
+                px: 1.75,
+                borderRadius: '14px',
+                bgcolor: 'white',
+                border: '1.5px solid',
+                borderColor: phoneError ? '#DC2626' : 'rgba(17,17,17,0.08)',
+                transition: `border-color 0.25s ${SMOOTH}`,
+                cursor: 'text',
+                '&:hover': {
+                  borderColor: phoneError ? '#DC2626' : 'rgba(17,17,17,0.2)',
                 },
-                '& input': { fontSize: 15, fontWeight: 500, color: BLACK, letterSpacing: 0.5 },
-                '& input::placeholder': { color: 'rgba(17,17,17,0.3)', opacity: 1 },
+                '&:focus-within': {
+                  borderColor: phoneError ? '#DC2626' : BLACK,
+                },
               }}
-              InputProps={{
-                startAdornment: (
-                  <Box
-                    component="span"
-                    sx={{
-                      color: phoneError ? '#DC2626' : 'rgba(17,17,17,0.7)',
-                      fontWeight: 700,
-                      fontSize: 15,
-                      mr: 0.5,
-                      userSelect: 'none',
-                    }}
-                  >
-                    {PHONE_PREFIX}
-                  </Box>
-                ),
-              }}
-            />
+            >
+              {/* Prefijo fijo */}
+              <Box
+                component="span"
+                sx={{
+                  color: phoneError ? '#DC2626' : BLACK,
+                  fontWeight: 700,
+                  fontSize: 15,
+                  letterSpacing: 0.5,
+                  userSelect: 'none',
+                  flexShrink: 0,
+                }}
+              >
+                {PHONE_PREFIX}
+              </Box>
+
+              {/* Separador */}
+              <Box
+                component="span"
+                sx={{
+                  mx: 1.25,
+                  color: 'rgba(17,17,17,0.2)',
+                  fontSize: 16,
+                  fontWeight: 400,
+                  userSelect: 'none',
+                  flexShrink: 0,
+                }}
+              >
+                |
+              </Box>
+
+              {/* Número editable */}
+              <Box
+                component="input"
+                id="phone-input"
+                type="tel"
+                inputMode="numeric"
+                value={phoneDigits}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  const digits = e.target.value.replace(/\D/g, '').slice(0, PHONE_DIGITS);
+                  setEditPhone(digits);
+                  setPhoneTouched(true);
+                }}
+                placeholder="991234567"
+                sx={{
+                  flex: 1,
+                  minWidth: 0,
+                  border: 'none',
+                  outline: 'none',
+                  bgcolor: 'transparent',
+                  fontSize: 15,
+                  fontWeight: 500,
+                  color: BLACK,
+                  letterSpacing: 0.5,
+                  fontFamily: 'inherit',
+                  p: 0,
+                  '&::placeholder': {
+                    color: 'rgba(17,17,17,0.3)',
+                    fontWeight: 500,
+                  },
+                }}
+              />
+            </Box>
 
             {/* Helper text */}
             {phoneError ? (
