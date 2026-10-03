@@ -10,8 +10,10 @@ import TournamentDetail from './pages/TournamentDetail';
 import PublicTournament from './pages/PublicTournament';
 import Templates from './pages/Templates';
 import MyBets from './pages/MyBets';
+import MyRewards from './pages/MyRewards';
 import Profile from './pages/Profile';
 import Rewards from './pages/Rewards';
+import OrganizerRedemptions from './pages/OrganizerRedemptions';
 import AvisoLegal from './pages/AvisoLegal';
 import PoliticaPrivacidad from './pages/PoliticaPrivacidad';
 import TerminosCondiciones from './pages/TerminosCondiciones';
@@ -91,6 +93,14 @@ function App() {
                 </OrganizerRoute>
               }
             />
+            <Route
+              path="organizer/redemptions"
+              element={
+                <OrganizerRoute>
+                  <OrganizerRedemptions />
+                </OrganizerRoute>
+              }
+            />
 
             {/* Solo usuarios normales */}
             <Route
@@ -113,7 +123,7 @@ function App() {
               path="my-rewards"
               element={
                 <UserRoute>
-                  <MyBets />
+                  <MyRewards />
                 </UserRoute>
               }
             />
