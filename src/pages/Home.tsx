@@ -805,7 +805,7 @@ export default function Home() {
               <Typography
                 sx={{
                   mt: 0.5,
-                  fontSize: { xs: 11.5, md: 11.5 },
+                  fontSize: { xs: 10, md: 10.5 },
                   color: 'rgba(17,17,17,0.5)',
                   fontWeight: 500,
                   lineHeight: 1.4,
