@@ -9,6 +9,7 @@ import TournamentCreate from './pages/TournamentCreate';
 import TournamentDetail from './pages/TournamentDetail';
 import PublicTournament from './pages/PublicTournament';
 import Templates from './pages/Templates';
+import MyBets from './pages/MyBets';
 import AvisoLegal from './pages/AvisoLegal';
 import PoliticaPrivacidad from './pages/PoliticaPrivacidad';
 import TerminosCondiciones from './pages/TerminosCondiciones';
@@ -80,7 +81,16 @@ function App() {
               }
             />
 
-            {/* Solo propietario (verificación backend) */}
+            {/* Cualquier usuario logueado */}
+            <Route
+              path="my-bets"
+              element={
+                <AuthedRoute>
+                  <MyBets />
+                </AuthedRoute>
+              }
+            />
+
             <Route
               path="tournaments/:id"
               element={

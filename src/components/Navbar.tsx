@@ -7,6 +7,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 import { useAuth } from '../contexts/AuthContext';
+import { CoinsChip } from './CoinsChip';
+import { AdultBanner } from './AdultBanner';
 import { SMOOTH, BLACK } from '../theme';
 
 const MAX_WIDTH = 1280;
@@ -149,9 +151,14 @@ export default function Navbar() {
                   </>
                 )}
 
+                {/* Chip de coins */}
+                <Box sx={{ ml: 1.5 }}>
+                  <CoinsChip />
+                </Box>
+
                 <IconButton
                   onClick={(e) => setUserMenu(e.currentTarget)}
-                  sx={{ ml: 1.5, p: 0.5 }}
+                  sx={{ ml: 1, p: 0.5 }}
                 >
                   <Avatar
                     sx={{
@@ -264,6 +271,16 @@ export default function Navbar() {
         </Box>
         <Divider sx={{ my: 0.5 }} />
 
+        {/* Mis apuestas (todos los usuarios) */}
+        <MenuItem
+          component={Link}
+          to="/my-bets"
+          onClick={() => setUserMenu(null)}
+          sx={{ borderRadius: '10px', fontSize: 14, fontWeight: 500, py: 1 }}
+        >
+          Mis apuestas
+        </MenuItem>
+
         {isOrganizer && (
           <>
             <MenuItem
@@ -370,7 +387,7 @@ export default function Navbar() {
               <Avatar sx={{ width: 40, height: 40, bgcolor: BLACK, color: 'white', fontSize: 15, fontWeight: 700 }}>
                 {user.name?.charAt(0).toUpperCase() || '?'}
               </Avatar>
-              <Box sx={{ minWidth: 0 }}>
+              <Box sx={{ minWidth: 0, flex: 1 }}>
                 <Typography sx={{ fontSize: 14, fontWeight: 700, color: BLACK }}>
                   {user.name}
                 </Typography>
@@ -400,6 +417,13 @@ export default function Navbar() {
             </Box>
           )}
 
+          {/* Chip de coins en móvil */}
+          {user && (
+            <Box sx={{ mb: 3 }}>
+              <CoinsChip />
+            </Box>
+          )}
+
           <List disablePadding sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
             <ListItemButton
               component={Link}
@@ -412,6 +436,20 @@ export default function Navbar() {
                 primaryTypographyProps={{ fontSize: 15, fontWeight: 600, color: BLACK }}
               />
             </ListItemButton>
+
+            {user && (
+              <ListItemButton
+                component={Link}
+                to="/my-bets"
+                onClick={() => setMobileOpen(false)}
+                sx={{ borderRadius: '12px', py: 1.25 }}
+              >
+                <ListItemText
+                  primary="Mis apuestas"
+                  primaryTypographyProps={{ fontSize: 15, fontWeight: 600, color: BLACK }}
+                />
+              </ListItemButton>
+            )}
 
             {isOrganizer && (
               <>
@@ -548,6 +586,9 @@ export default function Navbar() {
           </Box>
         </Box>
       </Drawer>
+
+      {/* Banner +18 */}
+      <AdultBanner />
     </>
   );
 }

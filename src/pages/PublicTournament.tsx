@@ -12,7 +12,9 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ViewListIcon from '@mui/icons-material/ViewList';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import { api } from '../lib/api';
+import { useAuth } from '../contexts/AuthContext';
 import { BracketView } from '../components/BracketView';
+import { BetModal } from '../components/BetModal';
 import { BLACK, SMOOTH } from '../theme';
 
 const fadeInUp = keyframes`
@@ -77,6 +79,7 @@ const TeamBadge = ({ team, size = 'md', reverse = false }: { team: any; size?: '
 
 export default function PublicTournament() {
   const { shareCode } = useParams();
+  const { user } = useAuth();
   const [tournament, setTournament] = useState<any>(null);
   const [tab, setTab] = useState('fixture');
   const [loading, setLoading] = useState(true);
@@ -85,6 +88,11 @@ export default function PublicTournament() {
   const [view, setView] = useState<'list' | 'bracket'>('list');
   const [openRounds, setOpenRounds] = useState<Record<string, boolean>>({});
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({ liga: true, eliminatorias: true });
+
+  // ── Apuestas ──
+  const [betMatch, setBetMatch] = useState<any>(null);
+  const [myBets, setMyBets] = useState<Record<string, any>>({});
+  const [matchStats, setMatchStats] = useState<Record<string, any>>({});
 
   // ── Standings ──
   const standings = useMemo(() => {
@@ -130,6 +138,41 @@ export default function PublicTournament() {
         .catch(() => {});
     }
   }, [tournament]);
+
+  // Cargar mis apuestas + estadísticas de partidos
+  const loadBetsData = () => {
+    if (!user || !tournament) return;
+
+    api.get('/bets/my')
+      .then(res => {
+        const map: Record<string, any> = {};
+        res.data.forEach((b: any) => { map[b.matchId] = b; });
+        setMyBets(map);
+      })
+      .catch(() => {});
+
+    // Cargar stats de cada partido no jugado
+    const pendingMatches = tournament.rounds
+      .flatMap((r: any) => r.matches)
+      .filter((m: any) => !m.played && m.homeTeamId && m.awayTeamId);
+
+    Promise.all(
+      pendingMatches.map((m: any) =>
+        api.get(`/bets/match/${m.id}/stats`)
+          .then(res => ({ id: m.id, stats: res.data }))
+          .catch(() => ({ id: m.id, stats: null }))
+      )
+    ).then(results => {
+      const map: Record<string, any> = {};
+      results.forEach(r => { if (r.stats) map[r.id] = r.stats; });
+      setMatchStats(map);
+    });
+  };
+
+  useEffect(() => {
+    loadBetsData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, tournament]);
 
   if (loading) return (
     <Box sx={{ minHeight: '100dvh', bgcolor: '#FAFAF8', display: 'grid', placeItems: 'center' }}>
@@ -208,6 +251,10 @@ export default function PublicTournament() {
   const renderMatch = (match: any) => {
     const home = getTeam(match.homeTeamId);
     const away = getTeam(match.awayTeamId);
+    const myBet = myBets[match.id];
+    const stats = matchStats[match.id];
+    const canBet = !match.played && user && match.homeTeamId && match.awayTeamId;
+
     return (
       <Box
         key={match.id}
@@ -257,6 +304,60 @@ export default function PublicTournament() {
             <TeamBadge team={away} size="sm" />
           </Box>
         </Box>
+
+        {/* Barra de distribución de apuestas */}
+        {canBet && stats && stats.total > 0 && (
+          <Box sx={{ mt: 1.5 }}>
+            <Box sx={{ display: 'flex', height: 6, borderRadius: 3, overflow: 'hidden', bgcolor: 'rgba(17,17,17,0.06)' }}>
+              <Box sx={{ width: `${stats.homePct}%`, bgcolor: BLACK }} />
+              <Box sx={{ width: `${stats.awayPct}%`, bgcolor: 'rgba(17,17,17,0.35)' }} />
+            </Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.5 }}>
+              <Typography sx={{ fontSize: 10, color: 'rgba(17,17,17,0.5)', fontWeight: 600 }}>
+                {stats.homePct}%
+              </Typography>
+              <Typography sx={{ fontSize: 10, color: 'rgba(17,17,17,0.5)', fontWeight: 600 }}>
+                {stats.awayPct}%
+              </Typography>
+            </Box>
+          </Box>
+        )}
+
+        {/* Botón de apuesta o chip de mi apuesta */}
+        {!match.played && user && (
+          <Box sx={{ mt: 1.5, display: 'flex', justifyContent: 'center' }}>
+            {myBet && !myBet.resolved ? (
+              <Chip
+                label={`🪙 Apostaste ${myBet.amount} a ${myBet.prediction === 'home' ? home.name : away.name}`}
+                size="small"
+                sx={{
+                  height: 26,
+                  fontSize: 11,
+                  fontWeight: 700,
+                  bgcolor: 'rgba(251,191,36,0.15)',
+                  color: '#92400E',
+                  maxWidth: '100%',
+                }}
+              />
+            ) : (
+              <Button
+                onClick={(e) => { e.stopPropagation(); setBetMatch(match); }}
+                sx={{
+                  height: 32,
+                  borderRadius: '999px',
+                  px: 2,
+                  fontWeight: 700,
+                  fontSize: 12,
+                  color: BLACK,
+                  bgcolor: 'rgba(17,17,17,0.04)',
+                  '&:hover': { bgcolor: 'rgba(17,17,17,0.08)' },
+                }}
+              >
+                🪙 Apostar
+              </Button>
+            )}
+          </Box>
+        )}
 
         {(match.date || match.time || match.location) && (
           <Box sx={{ display: 'flex', gap: 2, mt: 1.25, justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -692,7 +793,6 @@ export default function PublicTournament() {
                 <BracketView rounds={eliminationRounds} getTeam={getTeam} />
               </Box>
             ) : tournament.format === 'grupos' ? (
-              /* ── Grupos + Eliminatorias: dos secciones ── */
               <>
                 {(() => {
                   const leagueRounds = tournament.rounds.filter((r: any) => r.phase === 'league');
@@ -724,7 +824,6 @@ export default function PublicTournament() {
                 })()}
               </>
             ) : (
-              /* ── Liga pura o Eliminatoria pura: cada ronda un collapsible ── */
               <>
                 {tournament.rounds.map((round: any) => renderCollapsibleRound(round))}
               </>
@@ -1132,6 +1231,15 @@ export default function PublicTournament() {
           </Button>
         </Box>
       </Box>
+
+      {/* ═══════ MODAL DE APUESTA ═══════ */}
+      <BetModal
+        open={Boolean(betMatch)}
+        onClose={() => setBetMatch(null)}
+        match={betMatch}
+        getTeam={getTeam}
+        onPlaced={() => loadBetsData()}
+      />
     </Box>
   );
 }
