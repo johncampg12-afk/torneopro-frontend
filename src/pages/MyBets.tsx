@@ -15,7 +15,7 @@ const fadeInUp = keyframes`
 const MAX_WIDTH = 800;
 
 export default function MyBets() {
-  const { user, refreshUser } = useAuth();
+  const { user, refreshUser, clearUnseenBets } = useAuth();
   const navigate = useNavigate();
   const [bets, setBets] = useState<any[]>([]);
   const [stats, setStats] = useState<any>(null);
@@ -23,6 +23,10 @@ export default function MyBets() {
 
   useEffect(() => {
     if (!user) { navigate('/welcome'); return; }
+
+    // Marcar apuestas resueltas como vistas (limpia el badge del navbar)
+    api.post('/bets/mark-seen').catch(() => {});
+    clearUnseenBets();
 
     Promise.all([
       api.get('/bets/my'),
@@ -35,20 +39,8 @@ export default function MyBets() {
       .catch(() => {})
       .finally(() => setLoading(false));
 
-    // Bono diario al entrar
-    api.post('/users/me/daily-bonus')
-      .then(res => {
-        if (res.data.granted) {
-          refreshUser();
-          const el = document.createElement('div');
-          el.textContent = `🎁 +${res.data.bonus} TrendCoins`;
-          el.style.cssText = `position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#0A0A0A;color:white;padding:10px 20px;border-radius:999px;font-size:13px;font-weight:600;z-index:9999;font-family:inherit;box-shadow:0 8px 24px rgba(0,0,0,0.2);`;
-          document.body.appendChild(el);
-          setTimeout(() => el.remove(), 2500);
-        }
-      })
-      .catch(() => {});
-  }, [user, navigate, refreshUser]);
+    refreshUser();
+  }, [user, navigate, refreshUser, clearUnseenBets]);
 
   if (loading) return (
     <Box sx={{ maxWidth: MAX_WIDTH, mx: 'auto', px: { xs: 2, sm: 3, md: 4 }, py: 5 }}>
