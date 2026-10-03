@@ -751,7 +751,7 @@ export default function Home() {
           />
         </Box>
 
-        {/* ═══════════ BANNER PREMIOS (solo usuarios normales logueados) ═══════════ */}
+        {/* ═══════ BANNER PREMIOS (solo usuarios normales logueados) ═══════ */}
         {user && !isOrganizer && (
           <Box
             component={Link}
@@ -759,107 +759,59 @@ export default function Home() {
             sx={{
               display: 'flex',
               alignItems: 'center',
-              gap: { xs: 2, md: 3 },
-              p: { xs: 2.5, md: 3 },
-              borderRadius: '24px',
-              bgcolor: 'white',
-              border: '2px solid #f97316',
+              gap: { xs: 1.5, md: 2 },
+              px: { xs: 2, md: 2.5 },
+              py: { xs: 1.5, md: 1.75 },
+              borderRadius: '16px',
+              bgcolor: BLACK,
+              mb: { xs: 4, md: 5 },
               textDecoration: 'none',
-              color: 'inherit',
-              position: 'relative',
-              overflow: 'hidden',
+              color: 'white',
               transition: `all 0.3s ${SMOOTH}`,
-              animation: `${fadeInUp} 0.5s ${SMOOTH} both 0.15s`,
+              animation: `${fadeInUp} 0.5s ${SMOOTH} both 0.1s`,
               '&:hover': {
-                transform: 'translateY(-3px)',
-                boxShadow: '0 20px 40px -12px rgba(249,115,22,0.25)',
+                transform: 'translateY(-1px)',
+                boxShadow: '0 12px 32px -8px rgba(0,0,0,0.25)',
               },
               '&:active': { transform: 'scale(0.99)' },
             }}
           >
-            <Box
-              sx={{
-                fontSize: { xs: 40, md: 56 },
-                flexShrink: 0,
-                lineHeight: 1,
-              }}
-            >
+            <Typography sx={{ fontSize: { xs: 20, md: 24 }, flexShrink: 0, lineHeight: 1 }}>
               🎁
-            </Box>
+            </Typography>
 
-            <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Box sx={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'baseline', gap: 1, flexWrap: 'wrap' }}>
               <Typography
                 sx={{
-                  fontSize: 10.5,
-                  fontWeight: 700,
-                  letterSpacing: 1.2,
-                  textTransform: 'uppercase',
-                  color: '#f97316',
-                  mb: 0.5,
-                }}
-              >
-                TrendCoins
-              </Typography>
-              <Typography
-                sx={{
-                  fontSize: { xs: 18, md: 22 },
+                  fontSize: { xs: 13.5, md: 14.5 },
                   fontWeight: 800,
-                  letterSpacing: -0.6,
-                  color: BLACK,
+                  letterSpacing: -0.3,
+                  color: 'white',
                   fontFamily: '"Instrument Sans", system-ui, sans-serif',
-                  lineHeight: 1.15,
+                  lineHeight: 1.2,
                 }}
               >
-                Canjea tus coins por premios reales
+                Canjea tus TrendCoins
               </Typography>
               <Typography
                 sx={{
-                  mt: 0.75,
-                  fontSize: { xs: 12.5, md: 13.5 },
-                  color: 'rgba(17,17,17,0.5)',
+                  fontSize: { xs: 11.5, md: 12.5 },
+                  color: 'rgba(255,255,255,0.55)',
                   fontWeight: 500,
-                  lineHeight: 1.4,
+                  lineHeight: 1.2,
                 }}
               >
-                Cafés, cenas, descuentos y más en negocios locales
+                · Cafés, cenas y descuentos
               </Typography>
             </Box>
 
-            <Box
+            <ArrowForwardIcon
               sx={{
-                display: { xs: 'none', sm: 'flex' },
-                alignItems: 'center',
-                gap: 1,
-                px: 2.5,
-                height: 40,
-                borderRadius: '999px',
-                bgcolor: '#f97316',
-                color: 'white',
-                fontSize: 13,
-                fontWeight: 700,
-                flexShrink: 0,
-                boxShadow: '0 8px 24px rgba(249,115,22,0.25)',
-                transition: `all 0.3s ${SMOOTH}`,
-              }}
-            >
-              Ver premios
-              <ArrowForwardIcon sx={{ fontSize: 16 }} />
-            </Box>
-
-            <Box
-              sx={{
-                display: { xs: 'grid', sm: 'none' },
-                placeItems: 'center',
-                width: 40,
-                height: 40,
-                borderRadius: '50%',
-                bgcolor: '#f97316',
-                color: 'white',
+                fontSize: 18,
+                color: 'rgba(255,255,255,0.5)',
                 flexShrink: 0,
               }}
-            >
-              <ArrowForwardIcon sx={{ fontSize: 18 }} />
-            </Box>
+            />
           </Box>
         )}
 
