@@ -760,7 +760,7 @@ export default function Home() {
               display: 'flex',
               alignItems: 'center',
               gap: { xs: 2, md: 3 },
-              p: { xs: 2.5, md: 3 },
+              p: { xs: 1.75, md: 2 },
               borderRadius: '24px',
               bgcolor: 'white',
               border: '2px solid #f97316',
@@ -779,7 +779,7 @@ export default function Home() {
           >
             <Box
               sx={{
-                fontSize: { xs: 40, md: 56 },
+                fontSize: { xs: 16, md: 18 },
                 flexShrink: 0,
                 lineHeight: 1,
               }}
@@ -790,12 +790,12 @@ export default function Home() {
             <Box sx={{ flex: 1, minWidth: 0 }}>
               <Typography
                 sx={{
-                  fontSize: 10.5,
+                  fontSize: 10,
                   fontWeight: 700,
                   letterSpacing: 1.2,
                   textTransform: 'uppercase',
                   color: '#f97316',
-                  mb: 0.5,
+                  mb: 0.25,
                 }}
               >
                 TrendCoins
@@ -814,8 +814,8 @@ export default function Home() {
               </Typography>
               <Typography
                 sx={{
-                  mt: 0.75,
-                  fontSize: { xs: 12.5, md: 13.5 },
+                  mt: 0.5,
+                  fontSize: { xs: 12, md: 12.5 },
                   color: 'rgba(17,17,17,0.5)',
                   fontWeight: 500,
                   lineHeight: 1.4,
