@@ -11,6 +11,7 @@ import { api } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
 import { OrangeLinesBackground } from '../components/OrangeLinesBackground';
 import { SMOOTH, BLACK } from '../theme';
+import RedeemOutlinedIcon from '@mui/icons-material/RedeemOutlined';
 
 const fadeInUp = keyframes`
   from { opacity: 0; transform: translateY(20px); }
@@ -751,114 +752,74 @@ export default function Home() {
           />
         </Box>
 
-        {/* ═══════════ BANNER PREMIOS (solo usuarios normales logueados) ═══════════ */}
+        {/* ═══════ BANNER PREMIOS (solo usuarios normales logueados) ═══════ */}
         {user && !isOrganizer && (
           <Box
             component={Link}
             to="/rewards"
             sx={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: { xs: 2, md: 3 },
-              p: { xs: 2.5, md: 3 },
-              borderRadius: '24px',
-              bgcolor: 'white',
-              border: '2px solid #f97316',
+              display: 'block',
+              p: 1.75,
+              borderRadius: '16px',
+              bgcolor: BLACK,
+              mb: { xs: 3, md: 4 },
               textDecoration: 'none',
-              color: 'inherit',
+              color: 'white',
+              transition: `all 0.3s ${SMOOTH}`,
               position: 'relative',
               overflow: 'hidden',
-              transition: `all 0.3s ${SMOOTH}`,
-              animation: `${fadeInUp} 0.5s ${SMOOTH} both 0.15s`,
+              animation: `${fadeInUp} 0.5s ${SMOOTH} both 0.1s`,
               '&:hover': {
-                transform: 'translateY(-3px)',
-                boxShadow: '0 20px 40px -12px rgba(249,115,22,0.25)',
+                transform: 'translateY(-2px)',
+                boxShadow: '0 20px 40px -12px rgba(0,0,0,0.25)',
               },
               '&:active': { transform: 'scale(0.99)' },
             }}
           >
             <Box
               sx={{
-                fontSize: { xs: 40, md: 56 },
-                flexShrink: 0,
-                lineHeight: 1,
-              }}
-            >
-              🎁
-            </Box>
-
-            <Box sx={{ flex: 1, minWidth: 0 }}>
-              <Typography
-                sx={{
-                  fontSize: 10.5,
-                  fontWeight: 700,
-                  letterSpacing: 1.2,
-                  textTransform: 'uppercase',
-                  color: '#f97316',
-                  mb: 0.5,
-                }}
-              >
-                TrendCoins
-              </Typography>
-              <Typography
-                sx={{
-                  fontSize: { xs: 18, md: 22 },
-                  fontWeight: 800,
-                  letterSpacing: -0.6,
-                  color: BLACK,
-                  fontFamily: '"Instrument Sans", system-ui, sans-serif',
-                  lineHeight: 1.15,
-                }}
-              >
-                Canjea tus coins por premios reales
-              </Typography>
-              <Typography
-                sx={{
-                  mt: 0.75,
-                  fontSize: { xs: 12.5, md: 13.5 },
-                  color: 'rgba(17,17,17,0.5)',
-                  fontWeight: 500,
-                  lineHeight: 1.4,
-                }}
-              >
-                Cafés, cenas, descuentos y más en negocios locales
-              </Typography>
-            </Box>
-
-            <Box
-              sx={{
-                display: { xs: 'none', sm: 'flex' },
+                display: 'flex',
                 alignItems: 'center',
-                gap: 1,
-                px: 2.5,
-                height: 40,
-                borderRadius: '999px',
-                bgcolor: '#f97316',
-                color: 'white',
-                fontSize: 13,
-                fontWeight: 700,
-                flexShrink: 0,
-                boxShadow: '0 8px 24px rgba(249,115,22,0.25)',
-                transition: `all 0.3s ${SMOOTH}`,
+                justifyContent: 'space-between',
+                gap: 1.5,
+                position: 'relative',
+                zIndex: 1,
               }}
             >
-              Ver premios
-              <ArrowForwardIcon sx={{ fontSize: 16 }} />
-            </Box>
-
-            <Box
-              sx={{
-                display: { xs: 'grid', sm: 'none' },
-                placeItems: 'center',
-                width: 40,
-                height: 40,
-                borderRadius: '50%',
-                bgcolor: '#f97316',
-                color: 'white',
-                flexShrink: 0,
-              }}
-            >
-              <ArrowForwardIcon sx={{ fontSize: 18 }} />
+              <Box sx={{ minWidth: 0 }}>
+                <Typography
+                  sx={{
+                    fontSize: 9.5,
+                    fontWeight: 700,
+                    letterSpacing: 1.2,
+                    textTransform: 'uppercase',
+                    color: 'rgba(255,255,255,0.5)',
+                    mb: 0.25,
+                    fontFamily: '"Fragment Mono", monospace',
+                  }}
+                >
+                  TrendCoins
+                </Typography>
+                <Typography
+                  sx={{
+                    fontSize: { xs: 15, md: 16 },
+                    fontWeight: 800,
+                    letterSpacing: -0.4,
+                    color: 'white',
+                    fontFamily: '"Instrument Sans", system-ui, sans-serif',
+                    lineHeight: 1.2,
+                  }}
+                >
+                  Canjea tus coins por premios reales
+                </Typography>
+              </Box>
+              <RedeemOutlinedIcon
+                sx={{
+                  fontSize: { xs: 26, md: 30 },
+                  color: '#F97316',
+                  flexShrink: 0,
+                }}
+              />
             </Box>
           </Box>
         )}
