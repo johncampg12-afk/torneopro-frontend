@@ -87,6 +87,8 @@ export default function OrganizerRedemptions() {
     return redemptions.filter(r => r.status === filter);
   }, [redemptions, filter]);
 
+  const pendingCount = redemptions.filter(r => r.status === 'pending').length;
+
   if (loading) return (
     <Box sx={{ maxWidth: MAX_WIDTH, mx: 'auto', px: { xs: 2, sm: 3, md: 4 }, py: 5 }}>
       <Skeleton variant="rounded" height={180} sx={{ borderRadius: '24px', mb: 3 }} />
@@ -97,10 +99,9 @@ export default function OrganizerRedemptions() {
   return (
     <Box sx={{ maxWidth: MAX_WIDTH, mx: 'auto', width: '100%', px: { xs: 2, sm: 3, md: 4 }, py: { xs: 3, md: 5 } }}>
 
-      {/* Header */}
+      {/* ── Header ── */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
         <Button
-          component="a"
           onClick={() => navigate('/dashboard')}
           sx={{
             minWidth: 40, width: 40, height: 40, borderRadius: '50%',
@@ -108,7 +109,9 @@ export default function OrganizerRedemptions() {
             border: '1px solid rgba(17,17,17,0.06)',
             color: 'rgba(17,17,17,0.7)',
             display: 'grid', placeItems: 'center', p: 0,
+            transition: `all 0.2s ${SMOOTH}`,
             '&:hover': { bgcolor: 'white', borderColor: 'rgba(17,17,17,0.2)' },
+            '&:active': { transform: 'scale(0.94)' },
           }}
         >
           <ArrowBackIcon sx={{ fontSize: 18 }} />
@@ -132,7 +135,7 @@ export default function OrganizerRedemptions() {
         </Box>
       </Box>
 
-      {/* Stats */}
+      {/* ── Stats ── */}
       {stats && (
         <Box
           sx={{
@@ -150,14 +153,18 @@ export default function OrganizerRedemptions() {
             { label: 'Coins gastadas', value: stats.totalCoinsSpent.toLocaleString('es-ES'), color: BLACK },
           ].map(s => (
             <Box
-                key={s.label}
-                sx={{
-                    p: { xs: 2, md: 2.5 },
-                    borderRadius: '18px',
-                    border: '1px solid',
-                    borderColor: s.accent ? 'rgba(251,191,36,0.4)' : 'rgba(17,17,17,0.06)',
-                    bgcolor: s.accent ? 'rgba(251,191,36,0.05)' : 'white',
-                }}
+              key={s.label}
+              sx={{
+                p: { xs: 2, md: 2.5 },
+                borderRadius: '18px',
+                border: '1px solid',
+                borderColor: s.accent ? 'rgba(251,191,36,0.4)' : 'rgba(17,17,17,0.06)',
+                bgcolor: s.accent ? 'rgba(251,191,36,0.05)' : 'white',
+                transition: `all 0.25s ${SMOOTH}`,
+                '&:hover': {
+                  borderColor: s.accent ? 'rgba(251,191,36,0.6)' : 'rgba(17,17,17,0.15)',
+                },
+              }}
             >
               <Typography
                 sx={{
@@ -188,45 +195,66 @@ export default function OrganizerRedemptions() {
         </Box>
       )}
 
-      {/* Filtros */}
-      <Box sx={{ mb: 3 }}>
-        <ToggleButtonGroup
-          value={filter}
-          exclusive
-          onChange={(_, v) => v && setFilter(v)}
+      {/* ── Filtros (segmented control) ── */}
+      <Box
+        sx={{
+          mb: 3,
+          animation: `${fadeInUp} 0.5s ${SMOOTH} both 0.05s`,
+        }}
+      >
+        <Box
           sx={{
-            '& .MuiToggleButton-root': {
-              border: '1px solid rgba(17,17,17,0.08)',
-              borderRadius: '999px !important',
-              px: 2.5,
-              py: 0.9,
-              mx: { xs: 0, md: 0.5 },
-              my: { xs: 0.25, md: 0 },
-              fontSize: 13.5,
-              fontWeight: 600,
-              color: 'rgba(17,17,17,0.6)',
-              textTransform: 'none',
-              transition: `all 0.2s ${SMOOTH}`,
-              '&.Mui-selected': {
-                bgcolor: BLACK,
-                color: 'white',
-                borderColor: BLACK,
-                '&:hover': { bgcolor: '#1a1a1a' },
-              },
-              '&:hover': { borderColor: 'rgba(17,17,17,0.2)' },
-            },
+            display: 'inline-flex',
+            p: 0.5,
+            borderRadius: '999px',
+            bgcolor: 'white',
+            border: '1px solid rgba(17,17,17,0.06)',
+            overflowX: 'auto',
+            maxWidth: '100%',
+            '&::-webkit-scrollbar': { display: 'none' },
           }}
         >
-          <ToggleButton value="pending">
-            Pendientes ({redemptions.filter(r => r.status === 'pending').length})
-          </ToggleButton>
-          <ToggleButton value="completed">Entregados</ToggleButton>
-          <ToggleButton value="cancelled">Cancelados</ToggleButton>
-          <ToggleButton value="all">Todos</ToggleButton>
-        </ToggleButtonGroup>
+          <ToggleButtonGroup
+            value={filter}
+            exclusive
+            onChange={(_, v) => v && setFilter(v)}
+            sx={{
+              '& .MuiToggleButton-root': {
+                border: 'none',
+                borderRadius: '999px !important',
+                px: { xs: 1.75, md: 2.25 },
+                py: 0.75,
+                mx: 0,
+                minWidth: 'auto',
+                fontSize: 13,
+                fontWeight: 700,
+                color: 'rgba(17,17,17,0.55)',
+                textTransform: 'none',
+                whiteSpace: 'nowrap',
+                transition: `all 0.25s ${SMOOTH}`,
+                '&:hover': {
+                  bgcolor: 'rgba(17,17,17,0.04)',
+                  color: BLACK,
+                },
+                '&.Mui-selected': {
+                  bgcolor: BLACK,
+                  color: 'white',
+                  '&:hover': { bgcolor: '#1a1a1a' },
+                },
+              },
+            }}
+          >
+            <ToggleButton value="pending">
+              Pendientes{pendingCount > 0 ? ` (${pendingCount})` : ''}
+            </ToggleButton>
+            <ToggleButton value="completed">Entregados</ToggleButton>
+            <ToggleButton value="cancelled">Cancelados</ToggleButton>
+            <ToggleButton value="all">Todos</ToggleButton>
+          </ToggleButtonGroup>
+        </Box>
       </Box>
 
-      {/* Lista */}
+      {/* ── Lista ── */}
       {filtered.length === 0 ? (
         <Box
           sx={{
@@ -242,7 +270,7 @@ export default function OrganizerRedemptions() {
           </Typography>
         </Box>
       ) : (
-        <Stack spacing={2} sx={{ animation: `${fadeInUp} 0.5s ${SMOOTH} both` }}>
+        <Stack spacing={2} sx={{ animation: `${fadeInUp} 0.5s ${SMOOTH} both 0.1s` }}>
           {filtered.map(r => {
             const isPending = r.status === 'pending';
             return (
@@ -253,6 +281,8 @@ export default function OrganizerRedemptions() {
                   borderRadius: '18px',
                   bgcolor: 'white',
                   border: '1px solid rgba(17,17,17,0.06)',
+                  transition: `all 0.25s ${SMOOTH}`,
+                  '&:hover': { borderColor: 'rgba(17,17,17,0.12)' },
                 }}
               >
                 {/* Cabecera del canje */}
@@ -302,16 +332,25 @@ export default function OrganizerRedemptions() {
                       <Button
                         onClick={() => handleComplete(r.id)}
                         disabled={actioning === r.id}
-                        startIcon={<CheckCircleOutlinedIcon sx={{ fontSize: 16 }} />}
+                        startIcon={<CheckCircleOutlinedIcon sx={{ fontSize: 15 }} />}
                         sx={{
-                          height: 36,
+                          height: 34,
                           borderRadius: '999px',
-                          px: 2,
+                          px: 1.75,
                           fontWeight: 700,
                           fontSize: 12.5,
                           bgcolor: '#16A34A',
                           color: 'white',
-                          '&:hover': { bgcolor: '#15803D' },
+                          boxShadow: '0 4px 12px rgba(22,163,74,0.2)',
+                          transition: `all 0.25s ${SMOOTH}`,
+                          '& .MuiButton-startIcon': { mr: 0.5 },
+                          '&:hover': {
+                            bgcolor: '#15803D',
+                            boxShadow: '0 6px 16px rgba(22,163,74,0.3)',
+                            transform: 'translateY(-1px)',
+                          },
+                          '&:active': { transform: 'scale(0.98)' },
+                          '&:disabled': { opacity: 0.5 },
                         }}
                       >
                         Entregado
@@ -319,21 +358,43 @@ export default function OrganizerRedemptions() {
                       <Button
                         onClick={() => handleCancel(r.id)}
                         disabled={actioning === r.id}
-                        startIcon={<CancelOutlinedIcon sx={{ fontSize: 16 }} />}
+                        startIcon={<CancelOutlinedIcon sx={{ fontSize: 15 }} />}
                         sx={{
-                          height: 36,
+                          height: 34,
                           borderRadius: '999px',
-                          px: 2,
+                          px: 1.75,
                           fontWeight: 700,
                           fontSize: 12.5,
                           color: '#DC2626',
                           bgcolor: 'rgba(220,38,38,0.06)',
-                          '&:hover': { bgcolor: 'rgba(220,38,38,0.12)' },
+                          transition: `all 0.25s ${SMOOTH}`,
+                          '& .MuiButton-startIcon': { mr: 0.5 },
+                          '&:hover': {
+                            bgcolor: 'rgba(220,38,38,0.12)',
+                            transform: 'translateY(-1px)',
+                          },
+                          '&:active': { transform: 'scale(0.98)' },
+                          '&:disabled': { opacity: 0.5 },
                         }}
                       >
                         Cancelar
                       </Button>
                     </Stack>
+                  )}
+
+                  {!isPending && (
+                    <Chip
+                      label={r.status === 'completed' ? 'Entregado' : 'Cancelado'}
+                      size="small"
+                      sx={{
+                        height: 24,
+                        fontSize: 10.5,
+                        fontWeight: 800,
+                        letterSpacing: 0.3,
+                        bgcolor: r.status === 'completed' ? 'rgba(34,197,94,0.12)' : 'rgba(220,38,38,0.1)',
+                        color: r.status === 'completed' ? '#16A34A' : '#DC2626',
+                      }}
+                    />
                   )}
                 </Box>
 
@@ -358,7 +419,15 @@ export default function OrganizerRedemptions() {
                       <Typography sx={{ fontSize: 13.5, fontWeight: 600, color: BLACK, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {r.contactName}
                       </Typography>
-                      <IconButton size="small" onClick={() => handleCopy(r.contactName)} sx={{ color: 'rgba(17,17,17,0.3)' }}>
+                      <IconButton
+                        size="small"
+                        onClick={() => handleCopy(r.contactName)}
+                        sx={{
+                          width: 26, height: 26,
+                          color: 'rgba(17,17,17,0.35)',
+                          '&:hover': { color: BLACK, bgcolor: 'rgba(17,17,17,0.04)' },
+                        }}
+                      >
                         <ContentCopyIcon sx={{ fontSize: 13 }} />
                       </IconButton>
                     </Box>
@@ -373,7 +442,15 @@ export default function OrganizerRedemptions() {
                       <Typography sx={{ fontSize: 13.5, fontWeight: 600, color: BLACK, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {r.contactEmail}
                       </Typography>
-                      <IconButton size="small" onClick={() => handleCopy(r.contactEmail)} sx={{ color: 'rgba(17,17,17,0.3)' }}>
+                      <IconButton
+                        size="small"
+                        onClick={() => handleCopy(r.contactEmail)}
+                        sx={{
+                          width: 26, height: 26,
+                          color: 'rgba(17,17,17,0.35)',
+                          '&:hover': { color: BLACK, bgcolor: 'rgba(17,17,17,0.04)' },
+                        }}
+                      >
                         <ContentCopyIcon sx={{ fontSize: 13 }} />
                       </IconButton>
                     </Box>
@@ -388,7 +465,15 @@ export default function OrganizerRedemptions() {
                       <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: BLACK, flex: 1, minWidth: 0 }}>
                         {r.contactPhone}
                       </Typography>
-                      <IconButton size="small" onClick={() => handleCopy(r.contactPhone)} sx={{ color: 'rgba(17,17,17,0.3)' }}>
+                      <IconButton
+                        size="small"
+                        onClick={() => handleCopy(r.contactPhone)}
+                        sx={{
+                          width: 26, height: 26,
+                          color: 'rgba(17,17,17,0.35)',
+                          '&:hover': { color: BLACK, bgcolor: 'rgba(17,17,17,0.04)' },
+                        }}
+                      >
                         <ContentCopyIcon sx={{ fontSize: 13 }} />
                       </IconButton>
                       <IconButton
@@ -399,7 +484,15 @@ export default function OrganizerRedemptions() {
                         )}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        sx={{ color: '#25D366' }}
+                        sx={{
+                          width: 26, height: 26,
+                          color: '#25D366',
+                          transition: `all 0.2s ${SMOOTH}`,
+                          '&:hover': {
+                            bgcolor: 'rgba(37,211,102,0.1)',
+                            transform: 'scale(1.1)',
+                          },
+                        }}
                       >
                         <WhatsAppIcon sx={{ fontSize: 16 }} />
                       </IconButton>
