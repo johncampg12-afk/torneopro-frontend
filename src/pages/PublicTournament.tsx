@@ -82,6 +82,37 @@ const TeamBadge = ({ team, size = 'md', reverse = false }: { team: any; size?: '
   );
 };
 
+// ── Cálculo de clasificación reutilizable ──
+const computeStandings = (teams: any[], rounds: any[]) => {
+  const map: Record<string, any> = {};
+  teams.forEach((team: any) => {
+    map[team.id] = { ...team, played: 0, wins: 0, draws: 0, losses: 0, gf: 0, ga: 0, gd: 0, points: 0 };
+  });
+  rounds.forEach((round: any) => {
+    round.matches.forEach((match: any) => {
+      if (!match.played) return;
+      const home = map[match.homeTeamId];
+      const away = map[match.awayTeamId];
+      if (!home || !away) return;
+      home.played++; away.played++;
+      home.gf += match.homeScore; home.ga += match.awayScore;
+      away.gf += match.awayScore; away.ga += match.homeScore;
+      home.gd = home.gf - home.ga;
+      away.gd = away.gf - away.ga;
+      if (match.homeScore > match.awayScore) {
+        home.wins++; away.losses++; home.points += 3;
+      } else if (match.homeScore < match.awayScore) {
+        away.wins++; home.losses++; away.points += 3;
+      } else {
+        home.draws++; away.draws++; home.points += 1; away.points += 1;
+      }
+    });
+  });
+  return Object.values(map).sort((a: any, b: any) =>
+    b.points - a.points || b.gd - a.gd || b.gf - a.gf
+  );
+};
+
 export default function PublicTournament() {
   const { shareCode } = useParams();
   const { user } = useAuth();
@@ -104,34 +135,36 @@ export default function PublicTournament() {
   const [myBets, setMyBets] = useState<Record<string, any>>({});
   const [matchStats, setMatchStats] = useState<Record<string, any>>({});
 
-  // ── Standings ──
+  // ── Standings generales ──
   const standings = useMemo(() => {
     if (!tournament) return [];
-    const map: Record<string, any> = {};
-    tournament.teams.forEach((team: any) => {
-      map[team.id] = { ...team, played: 0, wins: 0, draws: 0, losses: 0, gf: 0, ga: 0, gd: 0, points: 0 };
-    });
-    tournament.rounds.forEach((round: any) => {
-      round.matches.forEach((match: any) => {
-        if (!match.played) return;
-        const home = map[match.homeTeamId];
-        const away = map[match.awayTeamId];
-        if (!home || !away) return;
-        home.played++; away.played++;
-        home.gf += match.homeScore; home.ga += match.awayScore;
-        away.gf += match.awayScore; away.ga += match.homeScore;
-        home.gd = home.gf - home.ga;
-        away.gd = away.gf - away.ga;
-        if (match.homeScore > match.awayScore) {
-          home.wins++; away.losses++; home.points += 3;
-        } else if (match.homeScore < match.awayScore) {
-          away.wins++; home.losses++; away.points += 3;
-        } else {
-          home.draws++; away.draws++; home.points += 1; away.points += 1;
-        }
-      });
-    });
-    return Object.values(map).sort((a: any, b: any) => b.points - a.points || b.gd - a.gd || b.gf - a.gf);
+    return computeStandings(tournament.teams, tournament.rounds);
+  }, [tournament]);
+
+  // ── Standings Liga A (para dos-ligas) ──
+  const standingsA = useMemo(() => {
+    if (!tournament || tournament.format !== 'dos-ligas') return [];
+    const rounds = tournament.rounds.filter((r: any) => r.groupName === 'Liga A');
+    const teamIds = new Set<string>();
+    rounds.forEach((r: any) => r.matches.forEach((m: any) => {
+      if (m.homeTeamId) teamIds.add(m.homeTeamId);
+      if (m.awayTeamId) teamIds.add(m.awayTeamId);
+    }));
+    const teams = tournament.teams.filter((t: any) => teamIds.has(t.id));
+    return computeStandings(teams, rounds);
+  }, [tournament]);
+
+  // ── Standings Liga B (para dos-ligas) ──
+  const standingsB = useMemo(() => {
+    if (!tournament || tournament.format !== 'dos-ligas') return [];
+    const rounds = tournament.rounds.filter((r: any) => r.groupName === 'Liga B');
+    const teamIds = new Set<string>();
+    rounds.forEach((r: any) => r.matches.forEach((m: any) => {
+      if (m.homeTeamId) teamIds.add(m.homeTeamId);
+      if (m.awayTeamId) teamIds.add(m.awayTeamId);
+    }));
+    const teams = tournament.teams.filter((t: any) => teamIds.has(t.id));
+    return computeStandings(teams, rounds);
   }, [tournament]);
 
   useEffect(() => {
@@ -254,6 +287,143 @@ export default function PublicTournament() {
 
   const toggleSection = (key: string) =>
     setOpenSections(prev => ({ ...prev, [key]: prev[key] === false ? true : false }));
+
+  // ── Render tabla de posiciones ──
+  const renderStandingsTable = (data: any[], title?: string) => (
+    <Box
+      sx={{
+        borderRadius: '20px',
+        bgcolor: 'white',
+        border: '1px solid rgba(17,17,17,0.06)',
+        overflow: 'hidden',
+        flex: 1,
+        minWidth: 0,
+      }}
+    >
+      {title && (
+        <Box sx={{ px: { xs: 2, md: 2.5 }, pt: 2.5, pb: 1 }}>
+          <Typography
+            sx={{
+              fontSize: 15,
+              fontWeight: 800,
+              letterSpacing: -0.3,
+              color: BLACK,
+              fontFamily: '"Instrument Sans", system-ui, sans-serif',
+            }}
+          >
+            {title}
+          </Typography>
+        </Box>
+      )}
+      <Box sx={{ overflowX: 'auto' }}>
+        <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse', minWidth: 480 }}>
+          <Box component="thead">
+            <Box component="tr" sx={{ bgcolor: 'rgba(17,17,17,0.02)' }}>
+              {['#', 'Equipo', 'PJ', 'G', 'E', 'P', 'DG', 'Pts'].map((h, i) => (
+                <Box
+                  component="th"
+                  key={h}
+                  sx={{
+                    px: { xs: 1, md: 1.5 },
+                    py: 1.5,
+                    fontSize: 10.5,
+                    fontWeight: 700,
+                    letterSpacing: 0.6,
+                    textTransform: 'uppercase',
+                    color: 'rgba(17,17,17,0.45)',
+                    textAlign: i === 1 ? 'left' : 'center',
+                    borderBottom: '1px solid rgba(17,17,17,0.06)',
+                  }}
+                >
+                  {h}
+                </Box>
+              ))}
+            </Box>
+          </Box>
+          <Box component="tbody">
+            {data.map((team: any, idx: number) => (
+              <Box
+                component="tr"
+                key={team.id}
+                sx={{
+                  borderBottom: '1px solid rgba(17,17,17,0.04)',
+                  bgcolor: idx < 2 ? 'rgba(34,197,94,0.04)' : 'transparent',
+                }}
+              >
+                <Box component="td" sx={{ px: { xs: 1, md: 1.5 }, py: 1.5, textAlign: 'center' }}>
+                  <Box
+                    sx={{
+                      width: 22, height: 22,
+                      borderRadius: '6px',
+                      display: 'inline-grid',
+                      placeItems: 'center',
+                      fontWeight: 800,
+                      fontSize: 11,
+                      bgcolor: idx === 0 ? 'rgba(251,191,36,0.15)'
+                        : idx === 1 ? 'rgba(148,163,184,0.15)'
+                        : 'transparent',
+                      color: idx === 0 ? '#D97706'
+                        : idx === 1 ? '#64748B'
+                        : 'rgba(17,17,17,0.5)',
+                    }}
+                  >
+                    {idx + 1}
+                  </Box>
+                </Box>
+                <Box component="td" sx={{ px: { xs: 1, md: 1.5 }, py: 1.5 }}>
+                  <TeamBadge team={team} size="sm" />
+                </Box>
+                {['played', 'wins', 'draws', 'losses'].map(field => (
+                  <Box
+                    component="td"
+                    key={field}
+                    sx={{
+                      px: { xs: 1, md: 1.5 },
+                      py: 1.5,
+                      textAlign: 'center',
+                      fontSize: 13,
+                      fontWeight: field === 'wins' ? 700 : 500,
+                      color: field === 'wins' ? '#16A34A'
+                        : field === 'draws' ? '#D97706'
+                        : field === 'losses' ? '#DC2626'
+                        : BLACK,
+                    }}
+                  >
+                    {team[field]}
+                  </Box>
+                ))}
+                <Box
+                  component="td"
+                  sx={{
+                    px: { xs: 1, md: 1.5 },
+                    py: 1.5,
+                    textAlign: 'center',
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: BLACK,
+                  }}
+                >
+                  {team.gd > 0 ? '+' : ''}{team.gd}
+                </Box>
+                <Box component="td" sx={{ px: { xs: 1, md: 1.5 }, py: 1.5, textAlign: 'center' }}>
+                  <Typography
+                    sx={{
+                      fontSize: 15,
+                      fontWeight: 900,
+                      color: BLACK,
+                      fontFamily: '"Instrument Sans", system-ui, sans-serif',
+                    }}
+                  >
+                    {team.points}
+                  </Typography>
+                </Box>
+              </Box>
+            ))}
+          </Box>
+        </Box>
+      </Box>
+    </Box>
+  );
 
   // ── Render partido ──
   const renderMatch = (match: any) => {
@@ -422,9 +592,9 @@ export default function PublicTournament() {
                 fontFamily: '"Instrument Sans", system-ui, sans-serif',
               }}
             >
-              {tournament.format === 'eliminatoria' || round.phase === 'elimination'
+              {round.name || (tournament.format === 'eliminatoria' || round.phase === 'elimination'
                 ? round.name
-                : (round.name || `Jornada ${round.number}`)}
+                : `Jornada ${round.number}`)}
             </Typography>
             <Typography sx={{ fontSize: 12, color: 'rgba(17,17,17,0.5)', mt: 0.25 }}>
               {round.matches.filter((m: any) => m.played).length}/{round.matches.length} jugados
@@ -800,7 +970,68 @@ export default function PublicTournament() {
               >
                 <BracketView rounds={eliminationRounds} getTeam={getTeam} />
               </Box>
-            ) : ['grupos', 'dos-ligas'].includes(tournament.format) ? (
+            ) : tournament.format === 'dos-ligas' ? (
+              /* ═══════ 2 LIGAS: paralelo en desktop, apilado en móvil ═══════ */
+              <>
+                {(() => {
+                  const ligaARounds = tournament.rounds.filter((r: any) => r.groupName === 'Liga A');
+                  const ligaBRounds = tournament.rounds.filter((r: any) => r.groupName === 'Liga B');
+                  const elimRounds = tournament.rounds.filter((r: any) => r.phase === 'elimination');
+
+                  const aPlayed = ligaARounds.reduce((a: number, r: any) => a + r.matches.filter((m: any) => m.played).length, 0);
+                  const aTotal = ligaARounds.reduce((a: number, r: any) => a + r.matches.length, 0);
+                  const bPlayed = ligaBRounds.reduce((a: number, r: any) => a + r.matches.filter((m: any) => m.played).length, 0);
+                  const bTotal = ligaBRounds.reduce((a: number, r: any) => a + r.matches.length, 0);
+                  const ePlayed = elimRounds.reduce((a: number, r: any) => a + r.matches.filter((m: any) => m.played).length, 0);
+                  const eTotal = elimRounds.reduce((a: number, r: any) => a + r.matches.length, 0);
+
+                  return (
+                    <>
+                      {/* Dos ligas en paralelo */}
+                      <Box
+                        sx={{
+                          display: 'grid',
+                          gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
+                          gap: 2,
+                          alignItems: 'flex-start',
+                        }}
+                      >
+                        {ligaARounds.length > 0 && (
+                          <Box>
+                            {renderSection(
+                              'liga-a',
+                              'Liga A',
+                              `${aPlayed}/${aTotal} partidos jugados`,
+                              ligaARounds.map((r: any) => renderCollapsibleRound(r, 'liga-a-'))
+                            )}
+                          </Box>
+                        )}
+                        {ligaBRounds.length > 0 && (
+                          <Box>
+                            {renderSection(
+                              'liga-b',
+                              'Liga B',
+                              `${bPlayed}/${bTotal} partidos jugados`,
+                              ligaBRounds.map((r: any) => renderCollapsibleRound(r, 'liga-b-'))
+                            )}
+                          </Box>
+                        )}
+                      </Box>
+
+                      {/* Eliminatorias a ancho completo */}
+                      {elimRounds.length > 0 &&
+                        renderSection(
+                          'eliminatorias',
+                          'Eliminatorias',
+                          `${ePlayed}/${eTotal} partidos jugados`,
+                          elimRounds.map((r: any) => renderCollapsibleRound(r, 'elim-'))
+                        )}
+                    </>
+                  );
+                })()}
+              </>
+            ) : ['grupos'].includes(tournament.format) ? (
+              /* ═══════ GRUPOS (una sola liga) ═══════ */
               <>
                 {(() => {
                   const leagueRounds = tournament.rounds.filter((r: any) => r.phase === 'league');
@@ -810,45 +1041,6 @@ export default function PublicTournament() {
                   const elimPlayed = elimRounds.reduce((a: number, r: any) => a + r.matches.filter((m: any) => m.played).length, 0);
                   const elimTotal = elimRounds.reduce((a: number, r: any) => a + r.matches.length, 0);
 
-                  // ─── 2 Ligas: 3 secciones separadas ───
-                  if (tournament.format === 'dos-ligas') {
-                    const ligaA = leagueRounds.filter((r: any) => r.groupName === 'Liga A');
-                    const ligaB = leagueRounds.filter((r: any) => r.groupName === 'Liga B');
-                    const aPlayed = ligaA.reduce((a: number, r: any) => a + r.matches.filter((m: any) => m.played).length, 0);
-                    const aTotal = ligaA.reduce((a: number, r: any) => a + r.matches.length, 0);
-                    const bPlayed = ligaB.reduce((a: number, r: any) => a + r.matches.filter((m: any) => m.played).length, 0);
-                    const bTotal = ligaB.reduce((a: number, r: any) => a + r.matches.length, 0);
-
-                    return (
-                      <>
-                        {ligaA.length > 0 &&
-                          renderSection(
-                            'liga-a',
-                            'Liga A',
-                            `${aPlayed}/${aTotal} partidos jugados`,
-                            ligaA.map((r: any) => renderCollapsibleRound(r, 'liga-a-'))
-                          )}
-
-                        {ligaB.length > 0 &&
-                          renderSection(
-                            'liga-b',
-                            'Liga B',
-                            `${bPlayed}/${bTotal} partidos jugados`,
-                            ligaB.map((r: any) => renderCollapsibleRound(r, 'liga-b-'))
-                          )}
-
-                        {elimRounds.length > 0 &&
-                          renderSection(
-                            'eliminatorias',
-                            'Eliminatorias',
-                            `${elimPlayed}/${elimTotal} partidos jugados`,
-                            elimRounds.map((r: any) => renderCollapsibleRound(r, 'elim-'))
-                          )}
-                      </>
-                    );
-                  }
-
-                  // ─── Grupos: comportamiento actual ───
                   return (
                     <>
                       {leagueRounds.length > 0 &&
@@ -880,114 +1072,25 @@ export default function PublicTournament() {
 
         {/* ═══════ STANDINGS ═══════ */}
         {tab === 'standings' && (
-          <Box
-            sx={{
-              borderRadius: '20px',
-              bgcolor: 'white',
-              border: '1px solid rgba(17,17,17,0.06)',
-              overflow: 'hidden',
-              animation: `${fadeInUp} 0.4s ${SMOOTH} both`,
-            }}
-          >
-            <Box sx={{ overflowX: 'auto' }}>
-              <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse', minWidth: 520 }}>
-                <Box component="thead">
-                  <Box component="tr" sx={{ bgcolor: 'rgba(17,17,17,0.02)' }}>
-                    {['#', 'Equipo', 'PJ', 'G', 'E', 'P', 'GF', 'GC', 'DG', 'Pts'].map((h, i) => (
-                      <Box
-                        component="th"
-                        key={h}
-                        sx={{
-                          px: { xs: 1, md: 2 },
-                          py: 1.75,
-                          fontSize: 11,
-                          fontWeight: 700,
-                          letterSpacing: 0.6,
-                          textTransform: 'uppercase',
-                          color: 'rgba(17,17,17,0.45)',
-                          textAlign: i === 1 ? 'left' : 'center',
-                          display: { xs: (h === 'GF' || h === 'GC') ? 'none' : 'table-cell', sm: 'table-cell' },
-                          borderBottom: '1px solid rgba(17,17,17,0.06)',
-                        }}
-                      >
-                        {h}
-                      </Box>
-                    ))}
-                  </Box>
-                </Box>
-                <Box component="tbody">
-                  {standings.map((team: any, idx: number) => (
-                    <Box
-                      component="tr"
-                      key={team.id}
-                      sx={{
-                        borderBottom: '1px solid rgba(17,17,17,0.04)',
-                        bgcolor: idx < 3 ? 'rgba(255,215,0,0.03)' : 'transparent',
-                      }}
-                    >
-                      <Box component="td" sx={{ px: { xs: 1, md: 2 }, py: 1.5, textAlign: 'center' }}>
-                        <Box
-                          sx={{
-                            width: 26, height: 26,
-                            borderRadius: '8px',
-                            display: 'inline-grid',
-                            placeItems: 'center',
-                            fontWeight: 800,
-                            fontSize: 12,
-                            bgcolor: idx === 0 ? 'rgba(251,191,36,0.15)'
-                              : idx === 1 ? 'rgba(148,163,184,0.15)'
-                              : idx === 2 ? 'rgba(234,88,12,0.15)'
-                              : 'transparent',
-                            color: idx === 0 ? '#D97706'
-                              : idx === 1 ? '#64748B'
-                              : idx === 2 ? '#EA580C'
-                              : 'rgba(17,17,17,0.5)',
-                          }}
-                        >
-                          {idx + 1}
-                        </Box>
-                      </Box>
-                      <Box component="td" sx={{ px: { xs: 1, md: 2 }, py: 1.5 }}>
-                        <TeamBadge team={team} size="sm" />
-                      </Box>
-                      {['played', 'wins', 'draws', 'losses', 'gf', 'ga', 'gd'].map((field) => (
-                        <Box
-                          component="td"
-                          key={field}
-                          sx={{
-                            px: { xs: 1, md: 2 },
-                            py: 1.5,
-                            textAlign: 'center',
-                            fontSize: 13.5,
-                            fontWeight: field === 'wins' ? 700 : 500,
-                            color: field === 'wins' ? '#16A34A'
-                              : field === 'draws' ? '#D97706'
-                              : field === 'losses' ? '#DC2626'
-                              : BLACK,
-                            display: { xs: (field === 'gf' || field === 'ga') ? 'none' : 'table-cell', sm: 'table-cell' },
-                          }}
-                        >
-                          {field === 'gd' ? (team.gd > 0 ? '+' : '') + team.gd : team[field]}
-                        </Box>
-                      ))}
-                      <Box component="td" sx={{ px: { xs: 1, md: 2 }, py: 1.5, textAlign: 'center' }}>
-                        <Typography
-                          sx={{
-                            fontSize: 16,
-                            fontWeight: 900,
-                            color: BLACK,
-                            fontFamily: '"Instrument Sans", system-ui, sans-serif',
-                          }}
-                        >
-                          {team.points}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  ))}
-                </Box>
-              </Box>
+          tournament.format === 'dos-ligas' ? (
+            /* ═══════ 2 TABLAS EN PARALELO ═══════ */
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
+                gap: 2,
+                animation: `${fadeInUp} 0.4s ${SMOOTH} both`,
+              }}
+            >
+              {renderStandingsTable(standingsA, 'Liga A')}
+              {renderStandingsTable(standingsB, 'Liga B')}
             </Box>
-          </Box>
+          ) : (
+            /* ═══════ TABLA ÚNICA ═══════ */
+            <Box sx={{ animation: `${fadeInUp} 0.4s ${SMOOTH} both` }}>
+              {renderStandingsTable(standings)}
+            </Box>
+          )
         )}
 
         {/* ═══════ TEAMS ═══════ */}
