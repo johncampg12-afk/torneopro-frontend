@@ -13,6 +13,7 @@ import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import ListAltIcon from '@mui/icons-material/ListAlt';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import LayersIcon from '@mui/icons-material/Layers';
+import CallSplitIcon from '@mui/icons-material/CallSplit';
 import { api } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
 import { EditorialBackground } from '../components/EditorialBackground';
@@ -27,6 +28,7 @@ const formats = [
   { id: 'liga', name: 'Liga', desc: 'Todos contra todos. Tabla automática.', Icon: ListAltIcon },
   { id: 'eliminatoria', name: 'Eliminación', desc: 'Bracket. El que pierde queda fuera.', Icon: AccountTreeIcon },
   { id: 'grupos', name: 'Grupos + Elim.', desc: 'Fase de grupos y luego cruces.', Icon: LayersIcon },
+  { id: 'dos-ligas', name: '2 Ligas + Elim.', desc: 'Dos ligas separadas y eliminatoria cruzada.', Icon: CallSplitIcon },
 ];
 
 const colors = ['#3b82f6', '#ef4444', '#22c55e', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316', '#84cc16', '#6366f1'];
@@ -288,7 +290,7 @@ export default function TournamentCreate() {
 
             <Box>
               <Typography sx={labelSx}>Formato</Typography>
-              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' }, gap: 1.5 }}>
+              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, gap: 1.5 }}>
                 {formats.map(f => {
                   const selected = data.format === f.id;
                   const Icon = f.Icon;
@@ -331,7 +333,7 @@ export default function TournamentCreate() {
               </Box>
             </Box>
 
-            {data.format === 'liga' && (
+            {(data.format === 'liga' || data.format === 'dos-ligas') && (
               <Box
                 onClick={() => setData({ ...data, doubleRound: !data.doubleRound })}
                 sx={{
@@ -357,7 +359,9 @@ export default function TournamentCreate() {
                     Ida y vuelta
                   </Typography>
                   <Typography sx={{ fontSize: 12, color: 'rgba(17,17,17,0.5)' }}>
-                    Cada equipo juega contra todos dos veces
+                    {data.format === 'dos-ligas'
+                      ? 'Cada liga juega todos contra todos dos veces'
+                      : 'Cada equipo juega contra todos dos veces'}
                   </Typography>
                 </Box>
               </Box>
@@ -635,7 +639,7 @@ export default function TournamentCreate() {
             >
               {[
                 ['Nombre', data.name],
-                ['Formato', `${formats.find(f => f.id === data.format)?.name}${data.format === 'liga' && data.doubleRound ? ' · Ida y vuelta' : ''}`],
+                ['Formato', `${formats.find(f => f.id === data.format)?.name}${(data.format === 'liga' || data.format === 'dos-ligas') && data.doubleRound ? ' · Ida y vuelta' : ''}`],
                 ...(data.startDate ? [['Inicio', new Date(data.startDate).toLocaleDateString('es-ES')]] : []),
                 ...(data.location ? [['Ubicación', data.location]] : []),
                 ['Visibilidad', data.isPublic ? 'Público' : 'Privado'],

@@ -53,7 +53,12 @@ const confettiPieces = Array.from({ length: 60 }).map((_, i) => ({
 }));
 
 const formatName = (f: string) =>
-  ({ liga: 'Liga', eliminatoria: 'Eliminación Directa', grupos: 'Grupos + Eliminatoria' }[f] || f);
+  ({
+    liga: 'Liga',
+    eliminatoria: 'Eliminación Directa',
+    grupos: 'Grupos + Eliminatoria',
+    'dos-ligas': '2 Ligas + Eliminatoria',
+  }[f] || f);
 
 export default function TournamentDetail() {
   const { id } = useParams();
@@ -103,7 +108,12 @@ export default function TournamentDetail() {
 
   // Estado de desplegables
   const [openRounds, setOpenRounds] = useState<Record<string, boolean>>({});
-  const [openSections, setOpenSections] = useState<Record<string, boolean>>({ liga: true, eliminatorias: true });
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({
+    liga: true,
+    'liga-a': true,
+    'liga-b': true,
+    eliminatorias: true,
+  });
 
   // Estado de apuestas
   const [betsStatus, setBetsStatus] = useState<Record<string, { hasPending: boolean; count: number }>>({});
@@ -291,7 +301,6 @@ export default function TournamentDetail() {
         }
       }
 
-      // Refrescar el estado de apuestas del partido
       try {
         const betsRes = await api.get(`/matches/${editMatch.id}/bets-status`);
         setBetsStatus(prev => {
@@ -659,7 +668,6 @@ export default function TournamentDetail() {
           </IconButton>
         </Box>
 
-        {/* Indicador de apuestas pendientes */}
         {pendingBets?.hasPending && (
           <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1.25 }}>
             <Box
@@ -739,7 +747,7 @@ export default function TournamentDetail() {
             >
               {tournament.format === 'eliminatoria' || round.phase === 'elimination'
                 ? round.name
-                : `Jornada ${round.number}`}
+                : (round.name || `Jornada ${round.number}`)}
             </Typography>
             <Typography sx={{ fontSize: 12, color: 'rgba(17,17,17,0.5)', mt: 0.25 }}>
               {round.matches.filter((m: any) => m.played).length}/{round.matches.length} jugados
@@ -1096,7 +1104,7 @@ export default function TournamentDetail() {
               >
                 <BracketView rounds={eliminationRounds} getTeam={getTeam} />
               </Box>
-            ) : tournament.format === 'grupos' ? (
+            ) : ['grupos', 'dos-ligas'].includes(tournament.format) ? (
               (() => {
                 const leagueRounds = tournament.rounds.filter((r: any) => r.phase === 'league');
                 const elimRounds = tournament.rounds.filter((r: any) => r.phase === 'elimination');
@@ -1105,6 +1113,45 @@ export default function TournamentDetail() {
                 const elimPlayed = elimRounds.reduce((a: number, r: any) => a + r.matches.filter((m: any) => m.played).length, 0);
                 const elimTotal = elimRounds.reduce((a: number, r: any) => a + r.matches.length, 0);
 
+                // ─── 2 Ligas: 3 secciones separadas ───
+                if (tournament.format === 'dos-ligas') {
+                  const ligaA = leagueRounds.filter((r: any) => r.groupName === 'Liga A');
+                  const ligaB = leagueRounds.filter((r: any) => r.groupName === 'Liga B');
+                  const aPlayed = ligaA.reduce((a: number, r: any) => a + r.matches.filter((m: any) => m.played).length, 0);
+                  const aTotal = ligaA.reduce((a: number, r: any) => a + r.matches.length, 0);
+                  const bPlayed = ligaB.reduce((a: number, r: any) => a + r.matches.filter((m: any) => m.played).length, 0);
+                  const bTotal = ligaB.reduce((a: number, r: any) => a + r.matches.length, 0);
+
+                  return (
+                    <>
+                      {ligaA.length > 0 &&
+                        renderSection(
+                          'liga-a',
+                          'Liga A',
+                          `${aPlayed}/${aTotal} partidos jugados`,
+                          ligaA.map((r: any) => renderCollapsibleRound(r, 'liga-a-'))
+                        )}
+
+                      {ligaB.length > 0 &&
+                        renderSection(
+                          'liga-b',
+                          'Liga B',
+                          `${bPlayed}/${bTotal} partidos jugados`,
+                          ligaB.map((r: any) => renderCollapsibleRound(r, 'liga-b-'))
+                        )}
+
+                      {elimRounds.length > 0 &&
+                        renderSection(
+                          'eliminatorias',
+                          'Eliminatorias',
+                          `${elimPlayed}/${elimTotal} partidos jugados`,
+                          elimRounds.map((r: any) => renderCollapsibleRound(r, 'elim-'))
+                        )}
+                    </>
+                  );
+                }
+
+                // ─── Grupos: comportamiento actual ───
                 return (
                   <>
                     {leagueRounds.length > 0 &&
@@ -1997,7 +2044,6 @@ export default function TournamentDetail() {
               </Box>
             </Box>
 
-            {/* ── Apuestas pendientes ── */}
             {editMatch.played && betsStatus[editMatch.id]?.hasPending && (
               <Box
                 sx={{
