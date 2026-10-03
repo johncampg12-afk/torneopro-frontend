@@ -10,6 +10,7 @@ import TournamentDetail from './pages/TournamentDetail';
 import PublicTournament from './pages/PublicTournament';
 import Templates from './pages/Templates';
 import MyBets from './pages/MyBets';
+import Profile from './pages/Profile';
 import AvisoLegal from './pages/AvisoLegal';
 import PoliticaPrivacidad from './pages/PoliticaPrivacidad';
 import TerminosCondiciones from './pages/TerminosCondiciones';
@@ -23,6 +24,15 @@ const OrganizerRoute = ({ children }: { children: ReactNode }) => {
   if (isLoading) return null;
   if (!user) return <Navigate to="/welcome" replace />;
   if (user.role !== 'organizer') return <Navigate to="/" replace />;
+  return <>{children}</>;
+};
+
+// Rutas que solo ven usuarios normales (no organizadores)
+const UserRoute = ({ children }: { children: ReactNode }) => {
+  const { user, isLoading } = useAuth();
+  if (isLoading) return null;
+  if (!user) return <Navigate to="/welcome" replace />;
+  if (user.role === 'organizer') return <Navigate to="/" replace />;
   return <>{children}</>;
 };
 
@@ -81,16 +91,25 @@ function App() {
               }
             />
 
-            {/* Cualquier usuario logueado */}
+            {/* Solo usuarios normales */}
+            <Route
+              path="profile"
+              element={
+                <UserRoute>
+                  <Profile />
+                </UserRoute>
+              }
+            />
             <Route
               path="my-bets"
               element={
-                <AuthedRoute>
+                <UserRoute>
                   <MyBets />
-                </AuthedRoute>
+                </UserRoute>
               }
             />
 
+            {/* Cualquier usuario logueado */}
             <Route
               path="tournaments/:id"
               element={

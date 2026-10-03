@@ -20,6 +20,7 @@ export default function Navbar() {
   const [userMenu, setUserMenu] = useState<null | HTMLElement>(null);
 
   const isOrganizer = user?.role === 'organizer';
+  const isRegularUser = user?.role === 'user';
 
   const handleLogout = () => {
     setUserMenu(null);
@@ -271,7 +272,19 @@ export default function Navbar() {
         </Box>
         <Divider sx={{ my: 0.5 }} />
 
-        {/* Mis apuestas (todos los usuarios) */}
+        {/* Mi perfil — solo usuarios normales */}
+        {isRegularUser && (
+          <MenuItem
+            component={Link}
+            to="/profile"
+            onClick={() => setUserMenu(null)}
+            sx={{ borderRadius: '10px', fontSize: 14, fontWeight: 500, py: 1 }}
+          >
+            Mi perfil
+          </MenuItem>
+        )}
+
+        {/* Mis apuestas — todos los usuarios */}
         <MenuItem
           component={Link}
           to="/my-bets"
@@ -437,6 +450,22 @@ export default function Navbar() {
               />
             </ListItemButton>
 
+            {/* Mi perfil — solo usuarios normales */}
+            {isRegularUser && (
+              <ListItemButton
+                component={Link}
+                to="/profile"
+                onClick={() => setMobileOpen(false)}
+                sx={{ borderRadius: '12px', py: 1.25 }}
+              >
+                <ListItemText
+                  primary="Mi perfil"
+                  primaryTypographyProps={{ fontSize: 15, fontWeight: 600, color: BLACK }}
+                />
+              </ListItemButton>
+            )}
+
+            {/* Mis apuestas — todos los usuarios */}
             {user && (
               <ListItemButton
                 component={Link}
