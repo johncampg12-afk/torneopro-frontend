@@ -11,6 +11,7 @@ import PublicTournament from './pages/PublicTournament';
 import Templates from './pages/Templates';
 import MyBets from './pages/MyBets';
 import Profile from './pages/Profile';
+import Rewards from './pages/Rewards';
 import AvisoLegal from './pages/AvisoLegal';
 import PoliticaPrivacidad from './pages/PoliticaPrivacidad';
 import TerminosCondiciones from './pages/TerminosCondiciones';
@@ -108,6 +109,14 @@ function App() {
                 </UserRoute>
               }
             />
+            <Route
+              path="my-rewards"
+              element={
+                <UserRoute>
+                  <MyBets />
+                </UserRoute>
+              }
+            />
 
             {/* Cualquier usuario logueado */}
             <Route
@@ -119,12 +128,14 @@ function App() {
               }
             />
 
+            {/* Público (dentro del Layout) */}
+            <Route path="rewards" element={<Rewards />} />
             <Route path="aviso-legal" element={<AvisoLegal />} />
             <Route path="politica-privacidad" element={<PoliticaPrivacidad />} />
             <Route path="terminos-condiciones" element={<TerminosCondiciones />} />
           </Route>
 
-          {/* Vista pública */}
+          {/* Vista pública (sin Layout) */}
           <Route path="/t/:shareCode" element={<PublicTournament />} />
 
           <Route path="*" element={<Navigate to="/" replace />} />

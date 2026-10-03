@@ -114,6 +114,9 @@ export default function Navbar() {
             <Button component={Link} to="/" sx={linkSx}>
               Inicio
             </Button>
+            <Button component={Link} to="/rewards" sx={linkSx}>
+              Premios
+            </Button>
 
             {user ? (
               <>
@@ -294,6 +297,18 @@ export default function Navbar() {
           Mis apuestas
         </MenuItem>
 
+        {/* Mis premios — solo usuarios normales */}
+        {isRegularUser && (
+          <MenuItem
+            component={Link}
+            to="/my-rewards"
+            onClick={() => setUserMenu(null)}
+            sx={{ borderRadius: '10px', fontSize: 14, fontWeight: 500, py: 1 }}
+          >
+            Mis premios
+          </MenuItem>
+        )}
+
         {isOrganizer && (
           <>
             <MenuItem
@@ -313,8 +328,18 @@ export default function Navbar() {
               Mis plantillas
             </MenuItem>
             <Divider sx={{ my: 0.5 }} />
+            <MenuItem
+              component={Link}
+              to="/organizer/redemptions"
+              onClick={() => setUserMenu(null)}
+              sx={{ borderRadius: '10px', fontSize: 14, fontWeight: 500, py: 1 }}
+            >
+              🎁 Canjes de premios
+            </MenuItem>
           </>
         )}
+
+        <Divider sx={{ my: 0.5 }} />
 
         <MenuItem
           onClick={handleLogout}
@@ -450,6 +475,18 @@ export default function Navbar() {
               />
             </ListItemButton>
 
+            <ListItemButton
+              component={Link}
+              to="/rewards"
+              onClick={() => setMobileOpen(false)}
+              sx={{ borderRadius: '12px', py: 1.25 }}
+            >
+              <ListItemText
+                primary="🎁 Premios"
+                primaryTypographyProps={{ fontSize: 15, fontWeight: 600, color: BLACK }}
+              />
+            </ListItemButton>
+
             {/* Mi perfil — solo usuarios normales */}
             {isRegularUser && (
               <ListItemButton
@@ -480,6 +517,21 @@ export default function Navbar() {
               </ListItemButton>
             )}
 
+            {/* Mis premios — solo usuarios normales */}
+            {isRegularUser && (
+              <ListItemButton
+                component={Link}
+                to="/my-rewards"
+                onClick={() => setMobileOpen(false)}
+                sx={{ borderRadius: '12px', py: 1.25 }}
+              >
+                <ListItemText
+                  primary="Mis premios"
+                  primaryTypographyProps={{ fontSize: 15, fontWeight: 600, color: BLACK }}
+                />
+              </ListItemButton>
+            )}
+
             {isOrganizer && (
               <>
                 <ListItemButton
@@ -501,6 +553,17 @@ export default function Navbar() {
                 >
                   <ListItemText
                     primary="Mis plantillas"
+                    primaryTypographyProps={{ fontSize: 15, fontWeight: 600, color: BLACK }}
+                  />
+                </ListItemButton>
+                <ListItemButton
+                  component={Link}
+                  to="/organizer/redemptions"
+                  onClick={() => setMobileOpen(false)}
+                  sx={{ borderRadius: '12px', py: 1.25 }}
+                >
+                  <ListItemText
+                    primary="🎁 Canjes de premios"
                     primaryTypographyProps={{ fontSize: 15, fontWeight: 600, color: BLACK }}
                   />
                 </ListItemButton>
