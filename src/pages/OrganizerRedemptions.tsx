@@ -6,7 +6,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
 import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import { api } from '../lib/api';
@@ -150,15 +150,14 @@ export default function OrganizerRedemptions() {
             { label: 'Coins gastadas', value: stats.totalCoinsSpent.toLocaleString('es-ES'), color: BLACK },
           ].map(s => (
             <Box
-              key={s.label}
-              sx={{
-                p: { xs: 2, md: 2.5 },
-                borderRadius: '18px',
-                bgcolor: 'white',
-                border: '1px solid',
-                borderColor: s.accent ? 'rgba(251,191,36,0.4)' : 'rgba(17,17,17,0.06)',
-                bgcolor: s.accent ? 'rgba(251,191,36,0.05)' : 'white',
-              }}
+                key={s.label}
+                sx={{
+                    p: { xs: 2, md: 2.5 },
+                    borderRadius: '18px',
+                    border: '1px solid',
+                    borderColor: s.accent ? 'rgba(251,191,36,0.4)' : 'rgba(17,17,17,0.06)',
+                    bgcolor: s.accent ? 'rgba(251,191,36,0.05)' : 'white',
+                }}
             >
               <Typography
                 sx={{
@@ -303,7 +302,7 @@ export default function OrganizerRedemptions() {
                       <Button
                         onClick={() => handleComplete(r.id)}
                         disabled={actioning === r.id}
-                        startIcon={<CheckCircleOutlineIcon sx={{ fontSize: 16 }} />}
+                        startIcon={<CheckCircleOutlinedIcon sx={{ fontSize: 16 }} />}
                         sx={{
                           height: 36,
                           borderRadius: '999px',
