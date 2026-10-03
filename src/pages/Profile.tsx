@@ -10,7 +10,7 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import LogoutIcon from '@mui/icons-material/Logout';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined';
 import GavelOutlinedIcon from '@mui/icons-material/GavelOutlined';
@@ -521,7 +521,7 @@ export default function Profile() {
         }}
       >
         <RowItem
-          icon={<DeleteOutlineIcon sx={{ fontSize: 20 }} />}
+          icon={<DeleteOutlinedIcon sx={{ fontSize: 20 }} />}
           title="Eliminar mi cuenta"
           subtitle="Borra permanentemente tu cuenta y todos tus datos"
           onClick={() => { setError(''); setDeletePass(''); setDeleteOpen(true); }}
@@ -762,7 +762,7 @@ export default function Profile() {
             mx: 'auto', mb: 2.5,
           }}
         >
-          <DeleteOutlineIcon sx={{ fontSize: 26, color: '#DC2626' }} />
+          <DeleteOutlinedIcon sx={{ fontSize: 26, color: '#DC2626' }} />
         </Box>
 
         <Typography
