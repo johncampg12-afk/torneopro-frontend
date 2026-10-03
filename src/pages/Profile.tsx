@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import {
   Box, Typography, Button, Stack, Chip, IconButton, TextField,
-  Dialog, DialogTitle, DialogContent, DialogActions, keyframes, Skeleton,
+  Dialog, keyframes, Skeleton,
 } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import LogoutIcon from '@mui/icons-material/Logout';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -39,27 +38,16 @@ export default function Profile() {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  // Modales
   const [editOpen, setEditOpen] = useState(false);
-  const [passwordOpen, setPasswordOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
-  // Edit form
   const [editName, setEditName] = useState('');
   const [editAge, setEditAge] = useState('');
   const [editPhone, setEditPhone] = useState('');
   const [editAvatar, setEditAvatar] = useState<string | null>(null);
   const [savingEdit, setSavingEdit] = useState(false);
 
-  // Password form
-  const [currentPass, setCurrentPass] = useState('');
-  const [newPass, setNewPass] = useState('');
-  const [savingPass, setSavingPass] = useState(false);
-
-  // Delete form
-  const [deletePass, setDeletePass] = useState('');
   const [deleting, setDeleting] = useState(false);
-
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -72,7 +60,6 @@ export default function Profile() {
     ])
       .then(([meRes, statsRes]) => {
         setStats(statsRes.data);
-        // Sincronizar el contexto con datos frescos
         const fresh = meRes.data;
         setEditName(fresh.name || '');
         setEditAge(fresh.age ? String(fresh.age) : '');
@@ -112,30 +99,11 @@ export default function Profile() {
     }
   };
 
-  const savePassword = async () => {
-    setSavingPass(true);
-    setError('');
-    try {
-      await api.patch('/users/me/password', {
-        currentPassword: currentPass,
-        newPassword: newPass,
-      });
-      setPasswordOpen(false);
-      setCurrentPass('');
-      setNewPass('');
-    } catch (e: any) {
-      setError(e.response?.data?.message || 'Error al cambiar la contraseña');
-    } finally {
-      setSavingPass(false);
-    }
-  };
-
   const confirmDelete = async () => {
-    if (!deletePass) return;
     setDeleting(true);
     setError('');
     try {
-      await api.post('/users/me/delete', { password: deletePass });
+      await api.post('/users/me/delete');
       logout();
       navigate('/welcome');
     } catch (e: any) {
@@ -244,7 +212,6 @@ export default function Profile() {
   return (
     <Box sx={{ maxWidth: MAX_WIDTH, mx: 'auto', width: '100%', px: { xs: 2, sm: 3, md: 4 }, py: { xs: 3, md: 5 } }}>
 
-      {/* Header */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
         <Button
           component={Link}
@@ -279,7 +246,7 @@ export default function Profile() {
         </Box>
       </Box>
 
-      {/* Card principal: avatar + datos */}
+      {/* Card principal */}
       <Box
         sx={{
           p: 3,
@@ -374,7 +341,6 @@ export default function Profile() {
           </Box>
         </Box>
 
-        {/* Mini stats */}
         {stats && (
           <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1.5, mt: 3 }}>
             {[
@@ -441,7 +407,7 @@ export default function Profile() {
         🎁 Ver catálogo de premios
       </Button>
 
-      {/* Sección: Cuenta */}
+      {/* Cuenta */}
       <Typography sx={{ ...labelSx, ml: 0, mb: 1.5 }}>Cuenta</Typography>
       <Box
         sx={{
@@ -460,13 +426,6 @@ export default function Profile() {
         />
         <Box sx={{ height: 1, bgcolor: 'rgba(17,17,17,0.06)' }} />
         <RowItem
-          icon={<LockOutlinedIcon sx={{ fontSize: 20 }} />}
-          title="Cambiar contraseña"
-          subtitle="Actualiza tu contraseña de acceso"
-          onClick={() => { setError(''); setPasswordOpen(true); }}
-        />
-        <Box sx={{ height: 1, bgcolor: 'rgba(17,17,17,0.06)' }} />
-        <RowItem
           icon={<LogoutIcon sx={{ fontSize: 20 }} />}
           title="Cerrar sesión"
           subtitle="Salir de tu cuenta en este dispositivo"
@@ -474,7 +433,7 @@ export default function Profile() {
         />
       </Box>
 
-      {/* Sección: Legal */}
+      {/* Legal */}
       <Typography sx={{ ...labelSx, ml: 0, mb: 1.5 }}>Legal</Typography>
       <Box
         sx={{
@@ -507,7 +466,7 @@ export default function Profile() {
         />
       </Box>
 
-      {/* Sección: Zona peligrosa */}
+      {/* Zona peligrosa */}
       <Typography sx={{ ...labelSx, ml: 0, mb: 1.5, color: 'rgba(220,38,38,0.7)' }}>
         Zona peligrosa
       </Typography>
@@ -524,12 +483,12 @@ export default function Profile() {
           icon={<DeleteOutlinedIcon sx={{ fontSize: 20 }} />}
           title="Eliminar mi cuenta"
           subtitle="Borra permanentemente tu cuenta y todos tus datos"
-          onClick={() => { setError(''); setDeletePass(''); setDeleteOpen(true); }}
+          onClick={() => { setError(''); setDeleteOpen(true); }}
           danger
         />
       </Box>
 
-      {/* ══════════ MODAL EDITAR PERFIL ══════════ */}
+      {/* Modal editar */}
       <Dialog
         open={editOpen}
         onClose={() => setEditOpen(false)}
@@ -557,7 +516,6 @@ export default function Profile() {
           </IconButton>
         </Box>
 
-        {/* Avatar */}
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 3 }}>
           <Box
             onClick={() => fileRef.current?.click()}
@@ -659,82 +617,7 @@ export default function Profile() {
         </Button>
       </Dialog>
 
-      {/* ══════════ MODAL CAMBIAR CONTRASEÑA ══════════ */}
-      <Dialog
-        open={passwordOpen}
-        onClose={() => setPasswordOpen(false)}
-        maxWidth="xs"
-        fullWidth
-        slotProps={{
-          backdrop: { sx: { bgcolor: 'rgba(10,10,10,0.6)', backdropFilter: 'blur(8px)' } },
-          paper: {
-            sx: {
-              borderRadius: '24px',
-              bgcolor: '#FAFAF8',
-              p: 3,
-              backgroundImage: 'none',
-              animation: `${scaleIn} 0.4s ${SPRING} both`,
-            },
-          },
-        }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
-          <Typography sx={{ fontSize: 20, fontWeight: 800, letterSpacing: -0.5, color: BLACK, fontFamily: '"Instrument Sans", system-ui, sans-serif' }}>
-            Cambiar contraseña
-          </Typography>
-          <IconButton onClick={() => setPasswordOpen(false)} size="small" sx={{ color: 'rgba(17,17,17,0.5)' }}>
-            <CloseIcon sx={{ fontSize: 20 }} />
-          </IconButton>
-        </Box>
-
-        <Stack spacing={2}>
-          <Box>
-            <Typography sx={labelSx}>Contraseña actual</Typography>
-            <TextField
-              fullWidth
-              type="password"
-              value={currentPass}
-              onChange={e => setCurrentPass(e.target.value)}
-              placeholder="••••••••"
-              sx={inputSx}
-            />
-          </Box>
-          <Box>
-            <Typography sx={labelSx}>Nueva contraseña</Typography>
-            <TextField
-              fullWidth
-              type="password"
-              value={newPass}
-              onChange={e => setNewPass(e.target.value)}
-              placeholder="Mínimo 8 caracteres"
-              sx={inputSx}
-            />
-          </Box>
-        </Stack>
-
-        {error && (
-          <Typography sx={{ mt: 2, fontSize: 13, color: '#DC2626', fontWeight: 500 }}>
-            {error}
-          </Typography>
-        )}
-
-        <Button
-          fullWidth
-          disabled={savingPass || !currentPass || newPass.length < 8}
-          onClick={savePassword}
-          sx={{
-            mt: 3, height: 52, borderRadius: '999px',
-            fontWeight: 700, fontSize: 15,
-            bgcolor: BLACK, color: 'white',
-            '&:disabled': { bgcolor: 'rgba(17,17,17,0.06)', color: 'rgba(17,17,17,0.3)' },
-            '&:hover': { bgcolor: '#1a1a1a' },
-          }}
-        >
-          {savingPass ? 'Guardando…' : 'Cambiar contraseña'}
-        </Button>
-      </Dialog>
-
-      {/* ══════════ MODAL ELIMINAR CUENTA ══════════ */}
+      {/* Modal eliminar */}
       <Dialog
         open={deleteOpen}
         onClose={() => setDeleteOpen(false)}
@@ -778,30 +661,18 @@ export default function Profile() {
           Esta acción es <strong>permanente e irreversible</strong>. Se borrarán tu perfil, tus apuestas, tus coins y todos tus datos asociados.
         </Typography>
 
-        <Box>
-          <Typography sx={labelSx}>Confirma con tu contraseña</Typography>
-          <TextField
-            fullWidth
-            type="password"
-            value={deletePass}
-            onChange={e => setDeletePass(e.target.value)}
-            placeholder="••••••••"
-            sx={inputSx}
-          />
-        </Box>
-
         {error && (
-          <Typography sx={{ mt: 2, fontSize: 13, color: '#DC2626', fontWeight: 500 }}>
+          <Typography sx={{ mt: 2, fontSize: 13, color: '#DC2626', fontWeight: 500, textAlign: 'center' }}>
             {error}
           </Typography>
         )}
 
         <Button
           fullWidth
-          disabled={deleting || !deletePass}
+          disabled={deleting}
           onClick={confirmDelete}
           sx={{
-            mt: 3, height: 52, borderRadius: '999px',
+            mt: 2, height: 52, borderRadius: '999px',
             fontWeight: 700, fontSize: 15,
             bgcolor: '#DC2626', color: 'white',
             '&:disabled': { bgcolor: 'rgba(220,38,38,0.3)', color: 'white' },
