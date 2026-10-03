@@ -29,6 +29,8 @@ const scaleIn = keyframes`
 `;
 
 const MAX_WIDTH = 640;
+const PHONE_PREFIX = '+593';
+const PHONE_DIGITS = 9;
 
 export default function Profile() {
   const { user, logout, refreshUser } = useAuth();
@@ -47,6 +49,7 @@ export default function Profile() {
   const [editPhone, setEditPhone] = useState('');
   const [editAvatar, setEditAvatar] = useState<string | null>(null);
   const [savingEdit, setSavingEdit] = useState(false);
+  const [phoneTouched, setPhoneTouched] = useState(false);
 
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState('');
@@ -66,7 +69,8 @@ export default function Profile() {
         const fresh = meRes.data;
         setEditName(fresh.name || '');
         setEditAge(fresh.age ? String(fresh.age) : '');
-        setEditPhone(fresh.phone || '');
+        // Guardamos solo los 9 dígitos (sin el +593)
+        setEditPhone((fresh.phone || '').replace(/\D/g, '').replace(/^593/, ''));
         setEditAvatar(fresh.avatar || null);
       })
       .catch(() => {})
@@ -82,14 +86,27 @@ export default function Profile() {
     r.readAsDataURL(f);
   };
 
+  // ── Validación del teléfono ──
+  const phoneDigits = editPhone.replace(/\D/g, '');
+  const isPhoneEmpty = phoneDigits.length === 0;
+  const isPhoneValid =
+    isPhoneEmpty || (phoneDigits.length === PHONE_DIGITS && phoneDigits[0] === '9');
+  const phoneError = (phoneTouched || phoneDigits.length > 0) && !isPhoneValid;
+
   const saveEdit = async () => {
+    if (!isPhoneValid) {
+      setPhoneTouched(true);
+      setError('Revisa el teléfono: debe tener 9 dígitos y empezar por 9');
+      return;
+    }
+
     setSavingEdit(true);
     setError('');
     try {
       await api.patch('/users/me', {
         name: editName,
         age: editAge ? parseInt(editAge) : undefined,
-        phone: editPhone || undefined,
+        phone: isPhoneEmpty ? null : PHONE_PREFIX + phoneDigits,
         avatar: editAvatar,
       });
       await refreshUser();
@@ -424,7 +441,7 @@ export default function Profile() {
           icon={<EditOutlinedIcon sx={{ fontSize: 20 }} />}
           title="Editar perfil"
           subtitle="Nombre, edad, teléfono y foto"
-          onClick={() => { setError(''); setEditOpen(true); }}
+          onClick={() => { setError(''); setPhoneTouched(false); setEditOpen(true); }}
         />
         <Box sx={{ height: 1, bgcolor: 'rgba(17,17,17,0.06)' }} />
         <RowItem
@@ -586,15 +603,75 @@ export default function Profile() {
               sx={inputSx}
             />
           </Box>
+
+          {/* Teléfono */}
           <Box>
             <Typography sx={labelSx}>Teléfono (para canjear premios)</Typography>
+
             <TextField
               fullWidth
-              value={editPhone}
-              onChange={e => setEditPhone(e.target.value)}
-              placeholder="+593 99 123 4567"
-              sx={inputSx}
+              value={phoneDigits}
+              onChange={(e) => {
+                const digits = e.target.value.replace(/\D/g, '').slice(0, PHONE_DIGITS);
+                setEditPhone(digits);
+                setPhoneTouched(true);
+              }}
+              placeholder="991234567"
+              error={phoneError}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: '14px',
+                  bgcolor: 'white',
+                  minHeight: 50,
+                  '& fieldset': {
+                    borderColor: phoneError ? '#DC2626' : 'rgba(17,17,17,0.08)',
+                    borderWidth: '1.5px',
+                  },
+                  '&:hover fieldset': {
+                    borderColor: phoneError ? '#DC2626' : 'rgba(17,17,17,0.2)',
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: phoneError ? '#DC2626' : BLACK,
+                    borderWidth: '1.5px',
+                  },
+                },
+                '& input': { fontSize: 15, fontWeight: 500, color: BLACK, letterSpacing: 0.5 },
+                '& input::placeholder': { color: 'rgba(17,17,17,0.3)', opacity: 1 },
+              }}
+              InputProps={{
+                startAdornment: (
+                  <Box
+                    component="span"
+                    sx={{
+                      color: phoneError ? '#DC2626' : 'rgba(17,17,17,0.7)',
+                      fontWeight: 700,
+                      fontSize: 15,
+                      mr: 0.5,
+                      userSelect: 'none',
+                    }}
+                  >
+                    {PHONE_PREFIX}
+                  </Box>
+                ),
+              }}
             />
+
+            {/* Helper text */}
+            {phoneError ? (
+              <Typography sx={{ mt: 0.75, ml: 0.5, fontSize: 12, color: '#DC2626', fontWeight: 500 }}>
+                {phoneDigits.length === 0
+                  ? 'Introduce tu teléfono'
+                  : phoneDigits.length < PHONE_DIGITS
+                    ? `Faltan ${PHONE_DIGITS - phoneDigits.length} dígitos`
+                    : phoneDigits[0] !== '9'
+                      ? 'Los celulares en Ecuador empiezan por 9'
+                      : 'Teléfono no válido'}
+              </Typography>
+            ) : (
+              <Typography sx={{ mt: 0.75, ml: 0.5, fontSize: 11.5, color: 'rgba(17,17,17,0.4)' }}>
+                Formato: +593 99 123 4567 · Opcional
+              </Typography>
+            )}
           </Box>
         </Stack>
 
@@ -606,12 +683,13 @@ export default function Profile() {
 
         <Button
           fullWidth
-          disabled={savingEdit}
+          disabled={savingEdit || phoneError}
           onClick={saveEdit}
           sx={{
             mt: 3, height: 52, borderRadius: '999px',
             fontWeight: 700, fontSize: 15,
             bgcolor: BLACK, color: 'white',
+            '&:disabled': { bgcolor: 'rgba(17,17,17,0.06)', color: 'rgba(17,17,17,0.3)' },
             '&:hover': { bgcolor: '#1a1a1a' },
           }}
         >
