@@ -802,7 +802,7 @@ export default function Home() {
               </Typography>
               <Typography
                 sx={{
-                  fontSize: { xs: 18, md: 22 },
+                  fontSize: { xs: 16, md: 18 },
                   fontWeight: 800,
                   letterSpacing: -0.6,
                   color: BLACK,
