@@ -777,16 +777,6 @@ export default function Home() {
               '&:active': { transform: 'scale(0.99)' },
             }}
           >
-            <Box
-              sx={{
-                fontSize: { xs: 16, md: 18 },
-                flexShrink: 0,
-                lineHeight: 1,
-              }}
-            >
-              🎁
-            </Box>
-
             <Box sx={{ flex: 1, minWidth: 0 }}>
               <Typography
                 sx={{
