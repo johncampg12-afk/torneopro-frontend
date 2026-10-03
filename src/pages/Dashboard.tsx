@@ -13,6 +13,7 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import SportsSoccerIcon from '@mui/icons-material/SportsSoccer';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { api } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
 import { SMOOTH, BLACK } from '../theme';
@@ -52,7 +53,6 @@ export default function Dashboard() {
     }
   }, [user, isLoading, navigate]);
 
-  // Cargar canjes pendientes (solo organizadores)
   useEffect(() => {
     if (user?.role !== 'organizer') return;
     api.get('/redemptions/stats')
@@ -146,17 +146,19 @@ export default function Dashboard() {
         <Button
           component={Link}
           to="/tournaments/create"
-          startIcon={<AddIcon sx={{ fontSize: 20 }} />}
+          startIcon={<AddIcon sx={{ fontSize: 18 }} />}
           sx={{
-            height: 48,
+            height: 44,
             borderRadius: '999px',
-            px: 3,
+            px: 2.75,
             fontWeight: 700,
-            fontSize: 14.5,
+            fontSize: 14,
+            letterSpacing: -0.01,
             bgcolor: BLACK,
             color: 'white',
             boxShadow: '0 8px 24px rgba(17,17,17,0.15)',
             transition: `all 0.3s ${SMOOTH}`,
+            '& .MuiButton-startIcon': { mr: 0.75 },
             '&:hover': {
               bgcolor: '#1a1a1a',
               transform: 'translateY(-1px)',
@@ -281,38 +283,55 @@ export default function Dashboard() {
           animation: `${fadeInUp} 0.6s ${SMOOTH} both 0.1s`,
         }}
       >
-        <ToggleButtonGroup
-          value={filter}
-          exclusive
-          onChange={(_, v) => v && setFilter(v)}
+        {/* Toggle pill container */}
+        <Box
           sx={{
-            '& .MuiToggleButton-root': {
-              border: '1px solid rgba(17,17,17,0.08)',
-              borderRadius: '999px !important',
-              px: 2.5,
-              py: 0.9,
-              mx: { xs: 0, md: 0.5 },
-              my: { xs: 0.25, md: 0 },
-              fontSize: 13.5,
-              fontWeight: 600,
-              color: 'rgba(17,17,17,0.6)',
-              textTransform: 'none',
-              transition: `all 0.2s ${SMOOTH}`,
-              '&.Mui-selected': {
-                bgcolor: BLACK,
-                color: 'white',
-                borderColor: BLACK,
-                '&:hover': { bgcolor: '#1a1a1a' },
-              },
-              '&:hover': { borderColor: 'rgba(17,17,17,0.2)' },
-            },
+            display: 'inline-flex',
+            p: 0.5,
+            borderRadius: '999px',
+            bgcolor: 'white',
+            border: '1px solid rgba(17,17,17,0.06)',
+            overflowX: 'auto',
+            maxWidth: '100%',
+            '&::-webkit-scrollbar': { display: 'none' },
           }}
         >
-          <ToggleButton value="all">Todos</ToggleButton>
-          <ToggleButton value="active">En curso</ToggleButton>
-          <ToggleButton value="finished">Finalizados</ToggleButton>
-          <ToggleButton value="draft">Borradores</ToggleButton>
-        </ToggleButtonGroup>
+          <ToggleButtonGroup
+            value={filter}
+            exclusive
+            onChange={(_, v) => v && setFilter(v)}
+            sx={{
+              '& .MuiToggleButton-root': {
+                border: 'none',
+                borderRadius: '999px !important',
+                px: { xs: 1.75, md: 2.25 },
+                py: 0.75,
+                mx: 0,
+                minWidth: 'auto',
+                fontSize: 13,
+                fontWeight: 700,
+                color: 'rgba(17,17,17,0.55)',
+                textTransform: 'none',
+                whiteSpace: 'nowrap',
+                transition: `all 0.25s ${SMOOTH}`,
+                '&:hover': {
+                  bgcolor: 'rgba(17,17,17,0.04)',
+                  color: BLACK,
+                },
+                '&.Mui-selected': {
+                  bgcolor: BLACK,
+                  color: 'white',
+                  '&:hover': { bgcolor: '#1a1a1a' },
+                },
+              },
+            }}
+          >
+            <ToggleButton value="all">Todos</ToggleButton>
+            <ToggleButton value="active">En curso</ToggleButton>
+            <ToggleButton value="finished">Finalizados</ToggleButton>
+            <ToggleButton value="draft">Borradores</ToggleButton>
+          </ToggleButtonGroup>
+        </Box>
 
         <Box sx={{ flex: 1 }} />
 
@@ -322,21 +341,21 @@ export default function Dashboard() {
           placeholder="Buscar torneo…"
           size="small"
           sx={{
-            width: { xs: '100%', md: 280 },
+            width: { xs: '100%', md: 260 },
             '& .MuiOutlinedInput-root': {
-              height: 44,
+              height: 40,
               borderRadius: '999px',
               bgcolor: 'white',
               '& fieldset': { borderColor: 'rgba(17,17,17,0.08)' },
               '&:hover fieldset': { borderColor: 'rgba(17,17,17,0.2)' },
               '&.Mui-focused fieldset': { borderColor: BLACK, borderWidth: '1.5px' },
             },
-            '& input': { fontSize: 14, fontWeight: 500, color: BLACK },
+            '& input': { fontSize: 13.5, fontWeight: 500, color: BLACK },
           }}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <SearchIcon sx={{ fontSize: 18, color: 'rgba(17,17,17,0.35)' }} />
+                <SearchIcon sx={{ fontSize: 17, color: 'rgba(17,17,17,0.35)' }} />
               </InputAdornment>
             ),
           }}
@@ -379,16 +398,20 @@ export default function Dashboard() {
             <Button
               component={Link}
               to="/tournaments/create"
-              startIcon={<AddIcon />}
+              startIcon={<AddIcon sx={{ fontSize: 18 }} />}
               sx={{
                 mt: 3,
-                height: 48,
+                height: 44,
                 borderRadius: '999px',
-                px: 3,
+                px: 2.75,
                 fontWeight: 700,
+                fontSize: 14,
                 bgcolor: BLACK,
                 color: 'white',
-                '&:hover': { bgcolor: '#1a1a1a' },
+                boxShadow: '0 8px 24px rgba(17,17,17,0.15)',
+                '& .MuiButton-startIcon': { mr: 0.75 },
+                '&:hover': { bgcolor: '#1a1a1a', transform: 'translateY(-1px)' },
+                '&:active': { transform: 'scale(0.98)' },
               }}
             >
               Crear torneo
@@ -427,7 +450,6 @@ export default function Dashboard() {
                   },
                 }}
               >
-                {/* Cabecera: icono + menu */}
                 <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
                   <Box
                     sx={{
@@ -451,9 +473,7 @@ export default function Dashboard() {
                         letterSpacing: 0.3,
                         bgcolor: t.status === 'active'
                           ? 'rgba(34,197,94,0.12)'
-                          : t.status === 'finished'
-                            ? 'rgba(17,17,17,0.06)'
-                            : 'rgba(17,17,17,0.06)',
+                          : 'rgba(17,17,17,0.06)',
                         color: t.status === 'active' ? '#16A34A' : 'rgba(17,17,17,0.6)',
                       }}
                     />
@@ -467,7 +487,6 @@ export default function Dashboard() {
                   </Box>
                 </Box>
 
-                {/* Título + meta */}
                 <Box
                   component={Link}
                   to={`/tournaments/${t.id}`}
@@ -496,7 +515,6 @@ export default function Dashboard() {
                   </Typography>
                 </Box>
 
-                {/* Progreso */}
                 <Box sx={{ mt: 3 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                     <Typography sx={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: 'uppercase', color: 'rgba(17,17,17,0.4)' }}>
@@ -533,7 +551,7 @@ export default function Dashboard() {
           paper: {
             sx: {
               mt: 1,
-              minWidth: 200,
+              minWidth: 220,
               borderRadius: '16px',
               border: '1px solid rgba(17,17,17,0.06)',
               boxShadow: '0 20px 40px rgba(0,0,0,0.08)',
@@ -545,9 +563,28 @@ export default function Dashboard() {
       >
         <MenuItem
           onClick={() => menuTournament && handleCopyLink(menuTournament.shareCode)}
-          sx={{ borderRadius: '10px', fontSize: 14, fontWeight: 500, py: 1, gap: 1.5 }}
+          sx={{
+            borderRadius: '10px',
+            fontSize: 14,
+            fontWeight: 500,
+            py: 1,
+            gap: 1.5,
+            transition: `all 0.2s ${SMOOTH}`,
+            '&:hover': { bgcolor: 'rgba(17,17,17,0.04)' },
+          }}
         >
-          <LinkIcon sx={{ fontSize: 18, color: 'rgba(17,17,17,0.5)' }} />
+          <Box
+            sx={{
+              width: 28, height: 28,
+              borderRadius: '8px',
+              bgcolor: 'rgba(17,17,17,0.05)',
+              display: 'grid', placeItems: 'center',
+              color: 'rgba(17,17,17,0.6)',
+              flexShrink: 0,
+            }}
+          >
+            <LinkIcon sx={{ fontSize: 15 }} />
+          </Box>
           Copiar enlace público
         </MenuItem>
         <MenuItem
@@ -555,20 +592,55 @@ export default function Dashboard() {
             if (menuTournament) navigate(`/tournaments/${menuTournament.id}`);
             setMenuAnchor(null);
           }}
-          sx={{ borderRadius: '10px', fontSize: 14, fontWeight: 500, py: 1, gap: 1.5 }}
+          sx={{
+            borderRadius: '10px',
+            fontSize: 14,
+            fontWeight: 500,
+            py: 1,
+            gap: 1.5,
+            transition: `all 0.2s ${SMOOTH}`,
+            '&:hover': { bgcolor: 'rgba(17,17,17,0.04)' },
+          }}
         >
-          <SportsSoccerIcon sx={{ fontSize: 18, color: 'rgba(17,17,17,0.5)' }} />
+          <Box
+            sx={{
+              width: 28, height: 28,
+              borderRadius: '8px',
+              bgcolor: 'rgba(17,17,17,0.05)',
+              display: 'grid', placeItems: 'center',
+              color: 'rgba(17,17,17,0.6)',
+              flexShrink: 0,
+            }}
+          >
+            <OpenInNewIcon sx={{ fontSize: 15 }} />
+          </Box>
           Ver torneo
         </MenuItem>
         <MenuItem
           onClick={() => { setDeleteTarget(menuTournament); setMenuAnchor(null); }}
           sx={{
-            borderRadius: '10px', fontSize: 14, fontWeight: 500, py: 1, gap: 1.5,
+            borderRadius: '10px',
+            fontSize: 14,
+            fontWeight: 500,
+            py: 1,
+            gap: 1.5,
             color: '#DC2626',
+            transition: `all 0.2s ${SMOOTH}`,
             '&:hover': { bgcolor: '#FEF2F2' },
           }}
         >
-          <DeleteOutlinedIcon sx={{ fontSize: 18 }} />
+          <Box
+            sx={{
+              width: 28, height: 28,
+              borderRadius: '8px',
+              bgcolor: 'rgba(220,38,38,0.08)',
+              display: 'grid', placeItems: 'center',
+              color: '#DC2626',
+              flexShrink: 0,
+            }}
+          >
+            <DeleteOutlinedIcon sx={{ fontSize: 15 }} />
+          </Box>
           Eliminar torneo
         </MenuItem>
       </Menu>
@@ -580,58 +652,101 @@ export default function Dashboard() {
         maxWidth="xs"
         fullWidth
         slotProps={{
-          backdrop: { sx: { bgcolor: 'rgba(10,10,10,0.5)', backdropFilter: 'blur(6px)' } },
+          backdrop: { sx: { bgcolor: 'rgba(10,10,10,0.6)', backdropFilter: 'blur(8px)' } },
           paper: {
             sx: {
               borderRadius: '24px',
               bgcolor: '#FAFAF8',
-              p: 1,
+              p: 3.5,
               backgroundImage: 'none',
               boxShadow: '0 24px 80px rgba(0,0,0,0.3)',
             },
           },
         }}
       >
-        <DialogTitle sx={{ fontWeight: 800, fontSize: 22, letterSpacing: -0.5, fontFamily: '"Instrument Sans", system-ui, sans-serif', pt: 3 }}>
+        <Box
+          sx={{
+            width: 56, height: 56,
+            borderRadius: '18px',
+            bgcolor: 'rgba(220,38,38,0.1)',
+            display: 'grid', placeItems: 'center',
+            mx: 'auto', mb: 2.5,
+          }}
+        >
+          <DeleteOutlinedIcon sx={{ fontSize: 26, color: '#DC2626' }} />
+        </Box>
+
+        <Typography
+          sx={{
+            fontSize: 20,
+            fontWeight: 800,
+            letterSpacing: -0.5,
+            color: BLACK,
+            fontFamily: '"Instrument Sans", system-ui, sans-serif',
+            textAlign: 'center',
+            mb: 1.5,
+          }}
+        >
           ¿Eliminar torneo?
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText sx={{ fontSize: 14, color: 'rgba(17,17,17,0.6)' }}>
-            Se eliminarán <strong>{deleteTarget?.name}</strong> y todos sus partidos, equipos y jugadores. Esta acción no se puede deshacer.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions sx={{ p: 2, gap: 1 }}>
+        </Typography>
+        <Typography
+          sx={{
+            fontSize: 13.5,
+            color: 'rgba(17,17,17,0.6)',
+            textAlign: 'center',
+            lineHeight: 1.55,
+            mb: 3,
+          }}
+        >
+          Se eliminará <strong>{deleteTarget?.name}</strong> y todos sus partidos, equipos y jugadores. Esta acción no se puede deshacer.
+        </Typography>
+
+        <Box sx={{ display: 'flex', gap: 1.5 }}>
           <Button
             onClick={() => setDeleteTarget(null)}
+            fullWidth
             sx={{
-              flex: 1,
-              height: 46,
+              height: 52,
               borderRadius: '999px',
               fontWeight: 600,
-              fontSize: 14,
+              fontSize: 14.5,
               color: 'rgba(17,17,17,0.7)',
-              border: '1px solid rgba(17,17,17,0.1)',
-              '&:hover': { borderColor: 'rgba(17,17,17,0.25)', bgcolor: 'transparent' },
+              bgcolor: 'transparent',
+              border: '1.5px solid rgba(17,17,17,0.12)',
+              transition: `all 0.25s ${SMOOTH}`,
+              '&:hover': {
+                borderColor: 'rgba(17,17,17,0.3)',
+                bgcolor: 'transparent',
+                color: BLACK,
+              },
+              '&:active': { transform: 'scale(0.98)' },
             }}
           >
             Cancelar
           </Button>
           <Button
             onClick={handleDelete}
+            fullWidth
             sx={{
-              flex: 1,
-              height: 46,
+              height: 52,
               borderRadius: '999px',
               fontWeight: 700,
-              fontSize: 14,
+              fontSize: 14.5,
               bgcolor: '#DC2626',
               color: 'white',
-              '&:hover': { bgcolor: '#B91C1C' },
+              boxShadow: '0 8px 24px rgba(220,38,38,0.25)',
+              transition: `all 0.25s ${SMOOTH}`,
+              '&:hover': {
+                bgcolor: '#B91C1C',
+                transform: 'translateY(-1px)',
+                boxShadow: '0 12px 32px rgba(220,38,38,0.35)',
+              },
+              '&:active': { transform: 'scale(0.98)' },
             }}
           >
             Eliminar
           </Button>
-        </DialogActions>
+        </Box>
       </Dialog>
     </Box>
   );
