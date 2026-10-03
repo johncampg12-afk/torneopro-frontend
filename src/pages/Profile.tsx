@@ -34,6 +34,7 @@ export default function Profile() {
   const { user, logout, refreshUser } = useAuth();
   const navigate = useNavigate();
   const fileRef = useRef<HTMLInputElement>(null);
+  const loadedRef = useRef(false);
 
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -53,6 +54,8 @@ export default function Profile() {
   useEffect(() => {
     if (!user) { navigate('/welcome'); return; }
     if (user.role === 'organizer') { navigate('/'); return; }
+    if (loadedRef.current) return;
+    loadedRef.current = true;
 
     Promise.all([
       api.get('/users/me'),
@@ -65,11 +68,10 @@ export default function Profile() {
         setEditAge(fresh.age ? String(fresh.age) : '');
         setEditPhone(fresh.phone || '');
         setEditAvatar(fresh.avatar || null);
-        refreshUser();
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [user, navigate, refreshUser]);
+  }, [user, navigate]);
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
