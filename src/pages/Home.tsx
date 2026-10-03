@@ -11,6 +11,7 @@ import { api } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
 import { OrangeLinesBackground } from '../components/OrangeLinesBackground';
 import { SMOOTH, BLACK } from '../theme';
+import RedeemOutlinedIcon from '@mui/icons-material/RedeemOutlined';
 
 const fadeInUp = keyframes`
   from { opacity: 0; transform: translateY(20px); }
@@ -757,61 +758,80 @@ export default function Home() {
             component={Link}
             to="/rewards"
             sx={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: { xs: 1.5, md: 2 },
-              px: { xs: 2, md: 2.5 },
-              py: { xs: 1.5, md: 1.75 },
-              borderRadius: '16px',
+              display: 'block',
+              p: { xs: 2, md: 2.5 },
+              borderRadius: '20px',
               bgcolor: BLACK,
-              mb: { xs: 4, md: 5 },
+              mb: { xs: 3.5, md: 4 },
               textDecoration: 'none',
               color: 'white',
               transition: `all 0.3s ${SMOOTH}`,
+              position: 'relative',
+              overflow: 'hidden',
               animation: `${fadeInUp} 0.5s ${SMOOTH} both 0.1s`,
               '&:hover': {
-                transform: 'translateY(-1px)',
-                boxShadow: '0 12px 32px -8px rgba(0,0,0,0.25)',
+                transform: 'translateY(-2px)',
+                boxShadow: '0 20px 40px -12px rgba(0,0,0,0.25)',
               },
               '&:active': { transform: 'scale(0.99)' },
             }}
           >
-            <Typography sx={{ fontSize: { xs: 20, md: 24 }, flexShrink: 0, lineHeight: 1 }}>
-              🎁
-            </Typography>
-
-            <Box sx={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'baseline', gap: 1, flexWrap: 'wrap' }}>
-              <Typography
-                sx={{
-                  fontSize: { xs: 13.5, md: 14.5 },
-                  fontWeight: 800,
-                  letterSpacing: -0.3,
-                  color: 'white',
-                  fontFamily: '"Instrument Sans", system-ui, sans-serif',
-                  lineHeight: 1.2,
-                }}
-              >
-                Canjea tus TrendCoins
-              </Typography>
-              <Typography
-                sx={{
-                  fontSize: { xs: 11.5, md: 12.5 },
-                  color: 'rgba(255,255,255,0.55)',
-                  fontWeight: 500,
-                  lineHeight: 1.2,
-                }}
-              >
-                · Cafés, cenas y descuentos
-              </Typography>
-            </Box>
-
-            <ArrowForwardIcon
+            <Box
               sx={{
-                fontSize: 18,
-                color: 'rgba(255,255,255,0.5)',
-                flexShrink: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 2,
+                position: 'relative',
+                zIndex: 1,
               }}
-            />
+            >
+              <Box sx={{ minWidth: 0 }}>
+                <Typography
+                  sx={{
+                    fontSize: { xs: 9.5, md: 10 },
+                    fontWeight: 700,
+                    letterSpacing: 1.4,
+                    textTransform: 'uppercase',
+                    color: 'rgba(255,255,255,0.5)',
+                    mb: 0.4,
+                    fontFamily: '"Fragment Mono", monospace',
+                  }}
+                >
+                  TrendCoins
+                </Typography>
+                <Typography
+                  sx={{
+                    fontSize: { xs: 16, md: 19 },
+                    fontWeight: 800,
+                    letterSpacing: -0.5,
+                    color: 'white',
+                    fontFamily: '"Instrument Sans", system-ui, sans-serif',
+                    lineHeight: 1.2,
+                  }}
+                >
+                  Canjea tus coins por premios reales
+                </Typography>
+                <Typography
+                  sx={{
+                    mt: 0.6,
+                    fontSize: { xs: 11.5, md: 12.5 },
+                    color: 'rgba(255,255,255,0.55)',
+                    fontWeight: 500,
+                  }}
+                >
+                  Cafés, cenas, descuentos y más en negocios locales
+                </Typography>
+              </Box>
+
+              <RedeemOutlinedIcon
+                sx={{
+                  fontSize: { xs: 40, md: 48 },
+                  color: '#EA580C',
+                  flexShrink: 0,
+                }}
+              />
+            </Box>
           </Box>
         )}
 
