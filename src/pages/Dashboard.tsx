@@ -12,6 +12,7 @@ import LinkIcon from '@mui/icons-material/Link';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import SportsSoccerIcon from '@mui/icons-material/SportsSoccer';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { api } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
 import { SMOOTH, BLACK } from '../theme';
@@ -36,6 +37,7 @@ export default function Dashboard() {
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [menuTournament, setMenuTournament] = useState<any>(null);
   const [deleteTarget, setDeleteTarget] = useState<any>(null);
+  const [pendingRedemptions, setPendingRedemptions] = useState(0);
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -49,6 +51,14 @@ export default function Dashboard() {
         .finally(() => setLoading(false));
     }
   }, [user, isLoading, navigate]);
+
+  // Cargar canjes pendientes (solo organizadores)
+  useEffect(() => {
+    if (user?.role !== 'organizer') return;
+    api.get('/redemptions/stats')
+      .then(res => setPendingRedemptions(res.data.pending))
+      .catch(() => {});
+  }, [user]);
 
   const filtered = tournaments.filter(t => {
     if (filter !== 'all' && t.status !== filter) return false;
@@ -76,7 +86,6 @@ export default function Dashboard() {
     const url = `${window.location.origin}/t/${code}`;
     navigator.clipboard.writeText(url);
     setMenuAnchor(null);
-    // Feedback visual muy discreto
     const el = document.createElement('div');
     el.textContent = 'Enlace copiado';
     el.style.cssText = `
@@ -159,6 +168,61 @@ export default function Dashboard() {
           Nuevo torneo
         </Button>
       </Box>
+
+      {/* ── Banner canjes pendientes ── */}
+      {pendingRedemptions > 0 && (
+        <Box
+          component={Link}
+          to="/organizer/redemptions"
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+            p: 2.5,
+            borderRadius: '20px',
+            bgcolor: 'rgba(251,191,36,0.08)',
+            border: '1.5px solid rgba(251,191,36,0.3)',
+            mb: 3,
+            textDecoration: 'none',
+            color: 'inherit',
+            transition: `all 0.3s ${SMOOTH}`,
+            animation: `${fadeInUp} 0.6s ${SMOOTH} both 0.02s`,
+            '&:hover': {
+              bgcolor: 'rgba(251,191,36,0.12)',
+              transform: 'translateY(-1px)',
+            },
+          }}
+        >
+          <Box
+            sx={{
+              width: 44, height: 44,
+              borderRadius: '14px',
+              bgcolor: 'rgba(217,119,6,0.15)',
+              display: 'grid', placeItems: 'center',
+              fontSize: 22,
+              flexShrink: 0,
+            }}
+          >
+            🔔
+          </Box>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography
+              sx={{
+                fontSize: 14.5,
+                fontWeight: 800,
+                color: '#92400E',
+                fontFamily: '"Instrument Sans", system-ui, sans-serif',
+              }}
+            >
+              {pendingRedemptions} canje{pendingRedemptions === 1 ? '' : 's'} pendiente{pendingRedemptions === 1 ? '' : 's'}
+            </Typography>
+            <Typography sx={{ fontSize: 12.5, color: 'rgba(146,64,14,0.75)', mt: 0.25 }}>
+              Pulsa aquí para gestionarlos
+            </Typography>
+          </Box>
+          <ChevronRightIcon sx={{ fontSize: 20, color: 'rgba(146,64,14,0.5)' }} />
+        </Box>
+      )}
 
       {/* ── Stats ── */}
       <Box

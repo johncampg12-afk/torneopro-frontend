@@ -236,7 +236,7 @@ export default function Navbar() {
           paper: {
             sx: {
               mt: 1,
-              minWidth: 220,
+              minWidth: 240,
               borderRadius: '16px',
               border: '1px solid rgba(17,17,17,0.06)',
               boxShadow: '0 20px 40px rgba(0,0,0,0.08)',
@@ -309,8 +309,19 @@ export default function Navbar() {
           </MenuItem>
         )}
 
+        {/* Ver catálogo de premios — todos los logueados */}
+        <MenuItem
+          component={Link}
+          to="/rewards"
+          onClick={() => setUserMenu(null)}
+          sx={{ borderRadius: '10px', fontSize: 14, fontWeight: 500, py: 1 }}
+        >
+          🎁 Ver catálogo de premios
+        </MenuItem>
+
         {isOrganizer && (
           <>
+            <Divider sx={{ my: 0.5 }} />
             <MenuItem
               component={Link}
               to="/dashboard"
@@ -327,7 +338,6 @@ export default function Navbar() {
             >
               Mis plantillas
             </MenuItem>
-            <Divider sx={{ my: 0.5 }} />
             <MenuItem
               component={Link}
               to="/organizer/redemptions"
