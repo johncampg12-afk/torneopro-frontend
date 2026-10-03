@@ -23,6 +23,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import ViewListIcon from '@mui/icons-material/ViewList';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import PaidIcon from '@mui/icons-material/Paid';
 import { api } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
 import { BracketView } from '../components/BracketView';
@@ -104,6 +105,10 @@ export default function TournamentDetail() {
   const [openRounds, setOpenRounds] = useState<Record<string, boolean>>({});
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({ liga: true, eliminatorias: true });
 
+  // Estado de apuestas
+  const [betsStatus, setBetsStatus] = useState<Record<string, { hasPending: boolean; count: number }>>({});
+  const [resolvingBets, setResolvingBets] = useState(false);
+
   // ── Standings ──
   const standings = useMemo(() => {
     if (!tournament) return [];
@@ -183,6 +188,25 @@ export default function TournamentDetail() {
         .then(res => setTopScorers(res.data))
         .catch(() => {});
     }
+  }, [tournament]);
+
+  // ── Cargar estado de apuestas del torneo ──
+  useEffect(() => {
+    if (!tournament) return;
+    const loadBetsStatus = async () => {
+      const map: Record<string, { hasPending: boolean; count: number }> = {};
+      for (const round of tournament.rounds) {
+        for (const m of round.matches) {
+          if (!m.played) continue;
+          try {
+            const res = await api.get(`/matches/${m.id}/bets-status`);
+            if (res.data.count > 0) map[m.id] = res.data;
+          } catch {}
+        }
+      }
+      setBetsStatus(map);
+    };
+    loadBetsStatus();
   }, [tournament]);
 
   if (loading) return (
@@ -266,11 +290,49 @@ export default function TournamentDetail() {
           setTimeout(() => setShowChampion(false), 10000);
         }
       }
+
+      // Refrescar el estado de apuestas del partido
+      try {
+        const betsRes = await api.get(`/matches/${editMatch.id}/bets-status`);
+        setBetsStatus(prev => {
+          const copy = { ...prev };
+          if (betsRes.data.count > 0) copy[editMatch.id] = betsRes.data;
+          else delete copy[editMatch.id];
+          return copy;
+        });
+      } catch {}
+
       setEditMatch(null);
     } catch {
       // silencioso
     } finally {
       setSavingMatch(false);
+    }
+  };
+
+  const handleResolveBets = async () => {
+    if (!editMatch) return;
+    if (!confirm('¿Repartir los premios de este partido? Esta acción no se puede deshacer.')) return;
+    setResolvingBets(true);
+    try {
+      await api.post(`/matches/${editMatch.id}/resolve-bets`);
+      const el = document.createElement('div');
+      el.textContent = '✅ Premios repartidos';
+      el.style.cssText = `position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#0A0A0A;color:white;padding:10px 20px;border-radius:999px;font-size:13px;font-weight:600;z-index:9999;font-family:inherit;box-shadow:0 8px 24px rgba(0,0,0,0.2);`;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 2200);
+      const res = await api.get(`/matches/${editMatch.id}/bets-status`);
+      setBetsStatus(prev => {
+        const copy = { ...prev };
+        if (res.data.count > 0) copy[editMatch.id] = res.data;
+        else delete copy[editMatch.id];
+        return copy;
+      });
+      setEditMatch(null);
+    } catch (e: any) {
+      alert(e.response?.data?.message || 'Error al repartir premios');
+    } finally {
+      setResolvingBets(false);
     }
   };
 
@@ -517,6 +579,8 @@ export default function TournamentDetail() {
   const renderMatchCard = (match: any, round: any) => {
     const home = getTeam(match.homeTeamId);
     const away = getTeam(match.awayTeamId);
+    const pendingBets = betsStatus[match.id];
+
     return (
       <Box
         key={match.id}
@@ -594,6 +658,30 @@ export default function TournamentDetail() {
             <DeleteOutlinedIcon sx={{ fontSize: 14 }} />
           </IconButton>
         </Box>
+
+        {/* Indicador de apuestas pendientes */}
+        {pendingBets?.hasPending && (
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1.25 }}>
+            <Box
+              sx={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 0.5,
+                px: 1.25,
+                py: 0.5,
+                borderRadius: '999px',
+                bgcolor: 'rgba(220,38,38,0.1)',
+                color: '#DC2626',
+                fontSize: 10.5,
+                fontWeight: 800,
+                letterSpacing: 0.3,
+              }}
+            >
+              <PaidIcon sx={{ fontSize: 12 }} />
+              {pendingBets.count} sin repartir
+            </Box>
+          </Box>
+        )}
 
         {(match.date || match.time || match.location) && (
           <Box sx={{ display: 'flex', gap: 2, mt: 1.25, justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -1009,7 +1097,6 @@ export default function TournamentDetail() {
                 <BracketView rounds={eliminationRounds} getTeam={getTeam} />
               </Box>
             ) : tournament.format === 'grupos' ? (
-              /* Grupos + Eliminatorias: dos secciones con collapsibles dentro */
               (() => {
                 const leagueRounds = tournament.rounds.filter((r: any) => r.phase === 'league');
                 const elimRounds = tournament.rounds.filter((r: any) => r.phase === 'elimination');
@@ -1039,7 +1126,6 @@ export default function TournamentDetail() {
                 );
               })()
             ) : (
-              /* Liga pura o Eliminatoria pura: cada ronda un collapsible */
               <>
                 {tournament.rounds.map((round: any) => renderCollapsibleRound(round))}
               </>
@@ -1910,6 +1996,64 @@ export default function TournamentDetail() {
                 </Stack>
               </Box>
             </Box>
+
+            {/* ── Apuestas pendientes ── */}
+            {editMatch.played && betsStatus[editMatch.id]?.hasPending && (
+              <Box
+                sx={{
+                  mt: 3,
+                  p: 2.5,
+                  borderRadius: '16px',
+                  bgcolor: 'rgba(220,38,38,0.06)',
+                  border: '1.5px solid rgba(220,38,38,0.2)',
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
+                  <Box
+                    sx={{
+                      width: 32, height: 32,
+                      borderRadius: '10px',
+                      bgcolor: 'rgba(220,38,38,0.12)',
+                      display: 'grid', placeItems: 'center',
+                      color: '#DC2626',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <PaidIcon sx={{ fontSize: 18 }} />
+                  </Box>
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography sx={{ fontSize: 14, fontWeight: 800, color: '#DC2626', fontFamily: '"Instrument Sans", system-ui, sans-serif' }}>
+                      Apuestas pendientes
+                    </Typography>
+                    <Typography sx={{ fontSize: 12, color: 'rgba(220,38,38,0.75)', mt: 0.25 }}>
+                      {betsStatus[editMatch.id]?.count} apuesta{betsStatus[editMatch.id]?.count === 1 ? '' : 's'} sin repartir
+                    </Typography>
+                  </Box>
+                </Box>
+                <Button
+                  fullWidth
+                  disabled={resolvingBets}
+                  onClick={handleResolveBets}
+                  startIcon={resolvingBets ? <CircularProgress size={14} sx={{ color: 'white' }} /> : <PaidIcon sx={{ fontSize: 18 }} />}
+                  sx={{
+                    height: 44,
+                    borderRadius: '999px',
+                    fontWeight: 700,
+                    fontSize: 14,
+                    bgcolor: '#DC2626',
+                    color: 'white',
+                    gap: 0.75,
+                    '&:hover': { bgcolor: '#B91C1C' },
+                    '&:disabled': { bgcolor: 'rgba(220,38,38,0.4)', color: 'white' },
+                  }}
+                >
+                  {resolvingBets ? 'Repartiendo…' : 'Repartir premios ahora'}
+                </Button>
+                <Typography sx={{ fontSize: 11, color: 'rgba(220,38,38,0.7)', mt: 1.25, textAlign: 'center', lineHeight: 1.4 }}>
+                  Asegúrate de que el marcador es correcto antes de repartir.
+                </Typography>
+              </Box>
+            )}
 
             <Box sx={{ display: 'flex', gap: 1, mt: 3 }}>
               <Button
