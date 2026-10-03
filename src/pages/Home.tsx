@@ -11,7 +11,7 @@ import { api } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
 import { OrangeLinesBackground } from '../components/OrangeLinesBackground';
 import { SMOOTH, BLACK } from '../theme';
-import RedeemOutlinedIcon from '@mui/icons-material/RedeemOutlined';
+import RedeemIcon from '@mui/icons-material/Redeem';
 
 const fadeInUp = keyframes`
   from { opacity: 0; transform: translateY(20px); }
@@ -759,8 +759,8 @@ export default function Home() {
             to="/rewards"
             sx={{
               display: 'block',
-              p: 1.75,
-              borderRadius: '16px',
+              p: { xs: 2, md: 2.25 },
+              borderRadius: '20px',
               bgcolor: BLACK,
               mb: { xs: 3, md: 4 },
               textDecoration: 'none',
@@ -781,7 +781,7 @@ export default function Home() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                gap: 1.5,
+                gap: 2,
                 position: 'relative',
                 zIndex: 1,
               }}
@@ -789,9 +789,9 @@ export default function Home() {
               <Box sx={{ minWidth: 0 }}>
                 <Typography
                   sx={{
-                    fontSize: 9.5,
+                    fontSize: { xs: 10, md: 10.5 },
                     fontWeight: 700,
-                    letterSpacing: 1.2,
+                    letterSpacing: 1.4,
                     textTransform: 'uppercase',
                     color: 'rgba(255,255,255,0.5)',
                     mb: 0.25,
@@ -802,9 +802,9 @@ export default function Home() {
                 </Typography>
                 <Typography
                   sx={{
-                    fontSize: { xs: 15, md: 16 },
+                    fontSize: { xs: 16, md: 18 },
                     fontWeight: 800,
-                    letterSpacing: -0.4,
+                    letterSpacing: -0.5,
                     color: 'white',
                     fontFamily: '"Instrument Sans", system-ui, sans-serif',
                     lineHeight: 1.2,
@@ -813,11 +813,13 @@ export default function Home() {
                   Canjea tus coins por premios reales
                 </Typography>
               </Box>
-              <RedeemOutlinedIcon
+
+              <RedeemIcon
                 sx={{
-                  fontSize: { xs: 26, md: 30 },
-                  color: '#F97316',
+                  fontSize: { xs: 32, md: 38 },
+                  color: '#FB923C',
                   flexShrink: 0,
+                  filter: 'drop-shadow(0 0 8px rgba(251,146,60,0.4))',
                 }}
               />
             </Box>
