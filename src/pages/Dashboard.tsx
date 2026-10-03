@@ -180,7 +180,7 @@ export default function Dashboard() {
             display: 'flex',
             alignItems: 'center',
             gap: 2,
-            p: 2.5,
+            p: 1.75,
             borderRadius: '20px',
             bgcolor: 'rgba(251,191,36,0.08)',
             border: '1.5px solid rgba(251,191,36,0.3)',
@@ -197,11 +197,11 @@ export default function Dashboard() {
         >
           <Box
             sx={{
-              width: 44, height: 44,
+              width: 36, height: 36,
               borderRadius: '14px',
               bgcolor: 'rgba(217,119,6,0.15)',
               display: 'grid', placeItems: 'center',
-              fontSize: 22,
+              fontSize: 18,
               flexShrink: 0,
             }}
           >
@@ -210,7 +210,7 @@ export default function Dashboard() {
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography
               sx={{
-                fontSize: 14.5,
+                fontSize: 13.5,
                 fontWeight: 800,
                 color: '#92400E',
                 fontFamily: '"Instrument Sans", system-ui, sans-serif',
@@ -218,7 +218,7 @@ export default function Dashboard() {
             >
               {pendingRedemptions} canje{pendingRedemptions === 1 ? '' : 's'} pendiente{pendingRedemptions === 1 ? '' : 's'}
             </Typography>
-            <Typography sx={{ fontSize: 12.5, color: 'rgba(146,64,14,0.75)', mt: 0.25 }}>
+            <Typography sx={{ fontSize: 11.5, color: 'rgba(146,64,14,0.75)', mt: 0.25 }}>
               Pulsa aquí para gestionarlos
             </Typography>
           </Box>
