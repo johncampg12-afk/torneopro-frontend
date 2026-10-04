@@ -1880,38 +1880,84 @@ export default function TournamentDetail() {
         )}
       </Box>
 
-      {/* ═══════════ MODAL EDITAR PARTIDO ═══════════ */}
+      {/* ═══════════ MODAL EDITAR PARTIDO (POPUP) ═══════════ */}
       <Dialog
         open={Boolean(editMatch)}
         onClose={() => setEditMatch(null)}
-        maxWidth="sm"
-        fullWidth
-        fullScreen={!isDesktop}
         slotProps={{
-          backdrop: { sx: { bgcolor: 'rgba(10,10,10,0.6)', backdropFilter: 'blur(6px)' } },
+          backdrop: { sx: { bgcolor: 'rgba(10,10,10,0.6)', backdropFilter: 'blur(8px)' } },
           paper: {
             sx: {
-              borderRadius: { xs: 0, md: '24px' },
+              // Popup flotante con márgenes en TODAS las pantallas
+              m: 2,
+              width: 'calc(100% - 32px)',
+              maxWidth: 560,
+              maxHeight: 'calc(100dvh - 32px)',
+              borderRadius: '24px',
               bgcolor: '#FAFAF8',
               backgroundImage: 'none',
-              p: { xs: 2.5, md: 3.5 },
-              maxHeight: '95dvh',
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden',
+              boxShadow: '0 32px 80px rgba(0,0,0,0.28), 0 0 0 1px rgba(17,17,17,0.04)',
               animation: isDesktop ? `${scaleIn} 0.3s ${SPRING} both` : 'none',
             },
           },
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
-          <Typography sx={{ fontSize: 20, fontWeight: 800, letterSpacing: -0.5, color: BLACK, fontFamily: '"Instrument Sans", system-ui, sans-serif' }}>
-            {editMatch?.played ? 'Editar resultado' : 'Registrar resultado'}
-          </Typography>
-          <IconButton onClick={() => setEditMatch(null)} sx={{ color: 'rgba(17,17,17,0.5)' }}>
-            <CloseIcon />
+        {/* ── HEADER FIJO ── */}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 2,
+            px: { xs: 2.5, md: 3 },
+            pt: { xs: 2.5, md: 2.75 },
+            pb: 2,
+            borderBottom: '1px solid rgba(17,17,17,0.06)',
+            bgcolor: 'white',
+            flexShrink: 0,
+          }}
+        >
+          <Box sx={{ minWidth: 0, flex: 1 }}>
+            <Typography
+              sx={{
+                fontSize: 19,
+                fontWeight: 800,
+                letterSpacing: -0.5,
+                color: BLACK,
+                fontFamily: '"Instrument Sans", system-ui, sans-serif',
+                lineHeight: 1.2,
+              }}
+            >
+              {editMatch?.played ? 'Editar resultado' : 'Registrar resultado'}
+            </Typography>
+            {editRound && (
+              <Typography sx={{ fontSize: 11.5, color: 'rgba(17,17,17,0.45)', mt: 0.25, fontWeight: 500 }}>
+                {editRound.name || `Jornada ${editRound.number}`}
+              </Typography>
+            )}
+          </Box>
+          <IconButton
+            onClick={() => setEditMatch(null)}
+            size="small"
+            sx={{
+              width: 32, height: 32, flexShrink: 0,
+              color: 'rgba(17,17,17,0.5)',
+              bgcolor: 'rgba(17,17,17,0.04)',
+              '&:hover': { bgcolor: 'rgba(17,17,17,0.08)', color: BLACK },
+              '&:active': { transform: 'scale(0.94)' },
+            }}
+          >
+            <CloseIcon sx={{ fontSize: 18 }} />
           </IconButton>
         </Box>
 
+        {/* ── CONTENIDO SCROLLABLE ── */}
         {editMatch && (
-          <>
+          <Box sx={{ px: { xs: 2.5, md: 3 }, py: 3, overflowY: 'auto', flex: 1, minHeight: 0 }}>
+            {/* Badges de equipos */}
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, mb: 3 }}>
               <Stack alignItems="center" spacing={1} sx={{ flex: 1, minWidth: 0 }}>
                 {getTeam(editMatch.homeTeamId).logo ? (
@@ -1938,6 +1984,7 @@ export default function TournamentDetail() {
               </Stack>
             </Box>
 
+            {/* Selects local/visitante (solo si no está jugado) */}
             {!editMatch.played && (
               <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.5, mb: 2.5 }}>
                 <Box>
@@ -1969,6 +2016,7 @@ export default function TournamentDetail() {
               </Box>
             )}
 
+            {/* Marcador */}
             <Box sx={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 1.5, alignItems: 'center', mb: 2.5 }}>
               <Box>
                 <Typography sx={{ ...labelSx, textAlign: 'center' }}>Local</Typography>
@@ -1995,6 +2043,7 @@ export default function TournamentDetail() {
               </Box>
             </Box>
 
+            {/* Fecha / Hora / Ubicación */}
             <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', md: '1fr 1fr 2fr' }, gap: 1.5, mb: 2.5 }}>
               <Box>
                 <Typography sx={labelSx}>Fecha</Typography>
@@ -2030,6 +2079,7 @@ export default function TournamentDetail() {
               </Box>
             </Box>
 
+            {/* Eventos */}
             <Box sx={{ pt: 2, borderTop: '1px solid rgba(17,17,17,0.08)' }}>
               <Typography sx={{ fontSize: 13, fontWeight: 800, color: BLACK, mb: 1.5 }}>
                 Eventos del partido
@@ -2169,6 +2219,7 @@ export default function TournamentDetail() {
               </Box>
             </Box>
 
+            {/* Apuestas pendientes */}
             {editMatch.played && betsStatus[editMatch.id]?.hasPending && (
               <Box
                 sx={{
@@ -2225,53 +2276,54 @@ export default function TournamentDetail() {
                 </Typography>
               </Box>
             )}
+          </Box>
+        )}
 
-            <Box sx={{ display: 'flex', gap: 1, mt: 3 }}>
-              <Button
-                onClick={() => setEditMatch(null)}
-                disabled={savingMatch}
-                sx={{
-                  flex: 1, height: 48, borderRadius: '999px',
-                  fontWeight: 700, fontSize: 14,
-                  color: BLACK, bgcolor: 'white',
-                  border: '1.5px solid rgba(17,17,17,0.1)',
-                  '&:hover': { borderColor: 'rgba(17,17,17,0.3)', bgcolor: 'white' },
-                  '&:disabled': { opacity: 0.5 },
-                }}
-              >
-                Cancelar
-              </Button>
-              <Button
-                onClick={saveMatch}
-                disabled={savingMatch}
-                startIcon={savingMatch ? <CircularProgress size={14} sx={{ color: 'white' }} /> : <SaveOutlinedIcon sx={{ fontSize: 16 }} />}
-                sx={{
-                  flex: 1, height: 48, borderRadius: '999px',
-                  fontWeight: 700, fontSize: 14,
-                  bgcolor: BLACK, color: 'white',
-                  gap: 0.75,
-                  '&:hover': { bgcolor: '#1a1a1a' },
-                  '&:disabled': { bgcolor: BLACK, color: 'white', opacity: 0.85 },
-                }}
-              >
-                {savingMatch ? 'Guardando…' : 'Guardar'}
-              </Button>
-            </Box>
-          </>
+        {/* ── FOOTER FIJO ── */}
+        {editMatch && (
+          <Box
+            sx={{
+              display: 'flex',
+              gap: 1,
+              px: { xs: 2.5, md: 3 },
+              py: 2,
+              borderTop: '1px solid rgba(17,17,17,0.06)',
+              bgcolor: 'white',
+              flexShrink: 0,
+            }}
+          >
+            <Button
+              onClick={() => setEditMatch(null)}
+              disabled={savingMatch}
+              sx={{
+                flex: 1, height: 48, borderRadius: '999px',
+                fontWeight: 700, fontSize: 14,
+                color: BLACK, bgcolor: 'white',
+                border: '1.5px solid rgba(17,17,17,0.1)',
+                '&:hover': { borderColor: 'rgba(17,17,17,0.3)', bgcolor: 'white' },
+                '&:disabled': { opacity: 0.5 },
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={saveMatch}
+              disabled={savingMatch}
+              startIcon={savingMatch ? <CircularProgress size={14} sx={{ color: 'white' }} /> : <SaveOutlinedIcon sx={{ fontSize: 16 }} />}
+              sx={{
+                flex: 1, height: 48, borderRadius: '999px',
+                fontWeight: 700, fontSize: 14,
+                bgcolor: BLACK, color: 'white',
+                gap: 0.75,
+                '&:hover': { bgcolor: '#1a1a1a' },
+                '&:disabled': { bgcolor: BLACK, color: 'white', opacity: 0.85 },
+              }}
+            >
+              {savingMatch ? 'Guardando…' : 'Guardar'}
+            </Button>
+          </Box>
         )}
       </Dialog>
-
-      {/* ═══════════ MODAL AÑADIR PARTIDO ═══════════ */}
-      <Dialog
-        open={Boolean(addMatchDialog)}
-        onClose={() => setAddMatchDialog(null)}
-        maxWidth="xs"
-        fullWidth
-        slotProps={{
-          backdrop: { sx: { bgcolor: 'rgba(10,10,10,0.5)', backdropFilter: 'blur(6px)' } },
-          paper: { sx: { borderRadius: '24px', bgcolor: '#FAFAF8', p: 3, backgroundImage: 'none' } },
-        }}
-      >
         <Typography sx={{ fontSize: 20, fontWeight: 800, letterSpacing: -0.5, color: BLACK, mb: 3, fontFamily: '"Instrument Sans", system-ui, sans-serif' }}>
           Añadir partido
         </Typography>
