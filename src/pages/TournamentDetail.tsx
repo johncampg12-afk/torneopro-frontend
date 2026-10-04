@@ -563,8 +563,9 @@ export default function TournamentDetail() {
   };
 
   const TeamBadge = ({ team, size = 'md', reverse = false }: { team: any; size?: 'sm' | 'md' | 'lg'; reverse?: boolean }) => {
-    const dim = size === 'sm' ? 20 : size === 'md' ? 32 : 48;
-    const fs = size === 'sm' ? 9 : size === 'md' ? 13 : 20;
+    // ✅ Reducido: sm 20→16, md 32→28, lg 48→44
+    const dim = size === 'sm' ? 16 : size === 'md' ? 28 : 44;
+    const fs = size === 'sm' ? 8 : size === 'md' ? 12 : 18;
 
     const crest = team.logo ? (
       <Box
@@ -625,7 +626,8 @@ export default function TournamentDetail() {
         key={match.id}
         sx={{
           position: 'relative',
-          p: { xs: 1.5, sm: 2 },
+          // ✅ Reducido: p xs 1.5→1, sm 2→1.25
+          p: { xs: 1, sm: 1.25 },
           borderRadius: '14px',
           bgcolor: match.played ? 'rgba(17,17,17,0.02)' : '#FAFAF8',
           border: '1px solid',
@@ -646,8 +648,9 @@ export default function TournamentDetail() {
 
           <Box
             sx={{
-              px: 2,
-              py: 0.75,
+              // ✅ Reducido: px 2→1.5, py 0.75→0.5
+              px: 1.5,
+              py: 0.5,
               borderRadius: '10px',
               bgcolor: match.played ? BLACK : 'transparent',
               display: 'flex',
@@ -658,18 +661,21 @@ export default function TournamentDetail() {
           >
             {match.played ? (
               <>
-                <Typography sx={{ fontSize: 22, fontWeight: 900, color: 'white', fontFamily: '"Instrument Sans", system-ui, sans-serif', lineHeight: 1 }}>
+                {/* ✅ Reducido: 22→18 */}
+                <Typography sx={{ fontSize: 18, fontWeight: 900, color: 'white', fontFamily: '"Instrument Sans", system-ui, sans-serif', lineHeight: 1 }}>
                   {match.homeScore}
                 </Typography>
-                <Typography sx={{ fontSize: 16, fontWeight: 700, color: 'rgba(255,255,255,0.4)' }}>
+                {/* ✅ Reducido: 16→13 */}
+                <Typography sx={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.4)' }}>
                   –
                 </Typography>
-                <Typography sx={{ fontSize: 22, fontWeight: 900, color: 'white', fontFamily: '"Instrument Sans", system-ui, sans-serif', lineHeight: 1 }}>
+                <Typography sx={{ fontSize: 18, fontWeight: 900, color: 'white', fontFamily: '"Instrument Sans", system-ui, sans-serif', lineHeight: 1 }}>
                   {match.awayScore}
                 </Typography>
               </>
             ) : (
-              <Typography sx={{ fontSize: 12, fontWeight: 700, color: 'rgba(17,17,17,0.4)', letterSpacing: 0.5 }}>
+              // ✅ Reducido: 12→11
+              <Typography sx={{ fontSize: 11, fontWeight: 700, color: 'rgba(17,17,17,0.4)', letterSpacing: 0.5 }}>
                 VS
               </Typography>
             )}
@@ -699,7 +705,8 @@ export default function TournamentDetail() {
         </Box>
 
         {pendingBets?.hasPending && (
-          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1.25 }}>
+          // ✅ Reducido: mt 1.25→0.75
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 0.75 }}>
             <Box
               sx={{
                 display: 'inline-flex',
@@ -722,7 +729,8 @@ export default function TournamentDetail() {
         )}
 
         {(match.date || match.time || match.location) && (
-          <Box sx={{ display: 'flex', gap: 2, mt: 1.25, justifyContent: 'center', flexWrap: 'wrap' }}>
+          // ✅ Reducido: gap 2→1.25, mt 1.25→0.75
+          <Box sx={{ display: 'flex', gap: 1.25, mt: 0.75, justifyContent: 'center', flexWrap: 'wrap' }}>
             {match.date && (
               <Typography sx={{ fontSize: 11, color: 'rgba(17,17,17,0.45)' }}>
                 {new Date(match.date).toLocaleDateString('es-ES')}
@@ -759,7 +767,9 @@ export default function TournamentDetail() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            p: { xs: 2, md: 2.5 },
+            // ✅ Reducido: p 2/2.5 → py 1.25/1.5, px 1.75/2.25
+            py: { xs: 1.25, md: 1.5 },
+            px: { xs: 1.75, md: 2.25 },
             cursor: 'pointer',
             transition: `background-color 0.2s ${SMOOTH}`,
             '&:hover': { bgcolor: 'rgba(17,17,17,0.015)' },
@@ -768,7 +778,8 @@ export default function TournamentDetail() {
           <Box sx={{ minWidth: 0, flex: 1 }}>
             <Typography
               sx={{
-                fontSize: 15.5,
+                // ✅ Reducido: 15.5→14
+                fontSize: 14,
                 fontWeight: 800,
                 color: BLACK,
                 letterSpacing: -0.3,
@@ -779,7 +790,8 @@ export default function TournamentDetail() {
                 ? round.name
                 : `Jornada ${round.number}`)}
             </Typography>
-            <Typography sx={{ fontSize: 12, color: 'rgba(17,17,17,0.5)', mt: 0.25 }}>
+            {/* ✅ Reducido: 12→11.5, mt 0.25→0.15 */}
+            <Typography sx={{ fontSize: 11.5, color: 'rgba(17,17,17,0.5)', mt: 0.15 }}>
               {round.matches.filter((m: any) => m.played).length}/{round.matches.length} jugados
             </Typography>
           </Box>
@@ -789,11 +801,12 @@ export default function TournamentDetail() {
               onClick={(e) => { e.stopPropagation(); setAddMatchDialog(round.id); }}
               startIcon={<AddIcon sx={{ fontSize: 16 }} />}
               sx={{
-                height: 34,
+                // ✅ Reducido: height 34→30, px 1.75→1.5, fontSize 12.5→12
+                height: 30,
                 borderRadius: '999px',
-                px: 1.75,
+                px: 1.5,
                 fontWeight: 600,
-                fontSize: 12.5,
+                fontSize: 12,
                 color: BLACK,
                 border: '1px solid rgba(17,17,17,0.1)',
                 '&:hover': { borderColor: 'rgba(17,17,17,0.3)', bgcolor: 'transparent' },
@@ -803,7 +816,8 @@ export default function TournamentDetail() {
             </Button>
             <ExpandMoreIcon
               sx={{
-                fontSize: 22,
+                // ✅ Reducido: 22→20
+                fontSize: 20,
                 color: 'rgba(17,17,17,0.4)',
                 transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
                 transition: `transform 0.25s ${SMOOTH}`,
@@ -813,7 +827,8 @@ export default function TournamentDetail() {
         </Box>
 
         <Collapse in={isOpen} timeout={250}>
-          <Box sx={{ px: { xs: 2, md: 2.5 }, pb: { xs: 2, md: 2.5 }, display: 'flex', flexDirection: 'column', gap: 1 }}>
+          {/* ✅ Reducido: px 2/2.5 → 1.5/2, pb 2/2.5 → 1.5/2, gap 1→0.75 */}
+          <Box sx={{ px: { xs: 1.5, md: 2 }, pb: { xs: 1.5, md: 2 }, display: 'flex', flexDirection: 'column', gap: 0.75 }}>
             {round.matches.map((m: any) => renderMatchCard(m, round))}
           </Box>
         </Collapse>
@@ -835,7 +850,9 @@ export default function TournamentDetail() {
         <Box
           onClick={() => toggleSection(sectionKey)}
           sx={{
-            p: { xs: 2, md: 2.5 },
+            // ✅ Reducido: p 2/2.5 → py 1.5/1.75, px 1.75/2.25
+            py: { xs: 1.5, md: 1.75 },
+            px: { xs: 1.75, md: 2.25 },
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
@@ -847,7 +864,8 @@ export default function TournamentDetail() {
           <Box>
             <Typography
               sx={{
-                fontSize: 17,
+                // ✅ Reducido: 17→15.5
+                fontSize: 15.5,
                 fontWeight: 800,
                 color: BLACK,
                 letterSpacing: -0.4,
@@ -856,13 +874,15 @@ export default function TournamentDetail() {
             >
               {title}
             </Typography>
-            <Typography sx={{ fontSize: 12, color: 'rgba(17,17,17,0.5)', mt: 0.25 }}>
+            {/* ✅ Reducido: 12→11.5, mt 0.25→0.15 */}
+            <Typography sx={{ fontSize: 11.5, color: 'rgba(17,17,17,0.5)', mt: 0.15 }}>
               {subtitle}
             </Typography>
           </Box>
           <ExpandMoreIcon
             sx={{
-              fontSize: 22,
+              // ✅ Reducido: 22→20
+              fontSize: 20,
               color: 'rgba(17,17,17,0.4)',
               transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
               transition: `transform 0.25s ${SMOOTH}`,
@@ -871,7 +891,8 @@ export default function TournamentDetail() {
         </Box>
 
         <Collapse in={isOpen} timeout={250}>
-          <Box sx={{ px: { xs: 2, md: 2.5 }, pb: { xs: 2, md: 2.5 }, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+          {/* ✅ Reducido: px 2/2.5 → 1.75/2.25, pb 2/2.5 → 1.75/2.25, gap 1.5→1 */}
+          <Box sx={{ px: { xs: 1.75, md: 2.25 }, pb: { xs: 1.75, md: 2.25 }, display: 'flex', flexDirection: 'column', gap: 1 }}>
             {content}
           </Box>
         </Collapse>
@@ -892,7 +913,8 @@ export default function TournamentDetail() {
       }}
     >
       {title && (
-        <Box sx={{ px: { xs: 2, md: 2.5 }, pt: 2.5, pb: 1 }}>
+        // ✅ Reducido: pt 2.5→2, pb 1→0.75
+        <Box sx={{ px: { xs: 2, md: 2.5 }, pt: 2, pb: 0.75 }}>
           <Typography
             sx={{
               fontSize: 15,
@@ -916,7 +938,8 @@ export default function TournamentDetail() {
                   key={h}
                   sx={{
                     px: { xs: 1, md: 2 },
-                    py: 1.75,
+                    // ✅ Reducido: py 1.75→1.25
+                    py: 1.25,
                     fontSize: 11,
                     fontWeight: 700,
                     letterSpacing: 0.6,
@@ -944,7 +967,8 @@ export default function TournamentDetail() {
                   '&:hover': { bgcolor: 'rgba(17,17,17,0.02)' },
                 }}
               >
-                <Box component="td" sx={{ px: { xs: 1, md: 2 }, py: 1.5, textAlign: 'center' }}>
+                {/* ✅ Reducido: py 1.5→0.9 */}
+                <Box component="td" sx={{ px: { xs: 1, md: 2 }, py: 0.9, textAlign: 'center' }}>
                   <Box
                     sx={{
                       width: 26, height: 26,
@@ -964,7 +988,7 @@ export default function TournamentDetail() {
                     {idx + 1}
                   </Box>
                 </Box>
-                <Box component="td" sx={{ px: { xs: 1, md: 2 }, py: 1.5 }}>
+                <Box component="td" sx={{ px: { xs: 1, md: 2 }, py: 0.9 }}>
                   <TeamBadge team={team} size="sm" />
                 </Box>
                 {['played', 'wins', 'draws', 'losses', 'gf', 'ga', 'gd'].map((field) => (
@@ -973,7 +997,7 @@ export default function TournamentDetail() {
                     key={field}
                     sx={{
                       px: { xs: 1, md: 2 },
-                      py: 1.5,
+                      py: 0.9,
                       textAlign: 'center',
                       fontSize: 13.5,
                       fontWeight: field === 'wins' ? 700 : 500,
@@ -987,7 +1011,7 @@ export default function TournamentDetail() {
                     {field === 'gd' ? (team.gd > 0 ? '+' : '') + team.gd : team[field]}
                   </Box>
                 ))}
-                <Box component="td" sx={{ px: { xs: 1, md: 2 }, py: 1.5, textAlign: 'center' }}>
+                <Box component="td" sx={{ px: { xs: 1, md: 2 }, py: 0.9, textAlign: 'center' }}>
                   <Typography
                     sx={{
                       fontSize: 16,
@@ -1197,7 +1221,8 @@ export default function TournamentDetail() {
 
         {/* ═══════════ FIXTURE ═══════════ */}
         {tab === 'fixture' && (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, animation: `${fadeInUp} 0.4s ${SMOOTH} both` }}>
+          // ✅ Reducido: gap 2.5→1.75
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.75, animation: `${fadeInUp} 0.4s ${SMOOTH} both` }}>
 
             {/* Toggle Lista / Árbol */}
             {hasEliminationView && (
@@ -1284,7 +1309,8 @@ export default function TournamentDetail() {
                         sx={{
                           display: 'grid',
                           gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
-                          gap: 2.5,
+                          // ✅ Reducido: gap 2.5→1.75
+                          gap: 1.75,
                           alignItems: 'flex-start',
                         }}
                       >
@@ -1465,7 +1491,8 @@ export default function TournamentDetail() {
               sx={{
                 display: 'grid',
                 gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
-                gap: 2.5,
+                // ✅ Reducido: gap 2.5→1.75
+                gap: 1.75,
                 alignItems: 'flex-start',
                 animation: `${fadeInUp} 0.4s ${SMOOTH} both`,
               }}
