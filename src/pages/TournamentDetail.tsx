@@ -2324,6 +2324,18 @@ export default function TournamentDetail() {
           </Box>
         )}
       </Dialog>
+
+      {/* ═══════════ MODAL AÑADIR PARTIDO ═══════════ */}
+      <Dialog
+        open={Boolean(addMatchDialog)}
+        onClose={() => setAddMatchDialog(null)}
+        maxWidth="xs"
+        fullWidth
+        slotProps={{
+          backdrop: { sx: { bgcolor: 'rgba(10,10,10,0.5)', backdropFilter: 'blur(6px)' } },
+          paper: { sx: { borderRadius: '24px', bgcolor: '#FAFAF8', p: 3, backgroundImage: 'none' } },
+        }}
+      >
         <Typography sx={{ fontSize: 20, fontWeight: 800, letterSpacing: -0.5, color: BLACK, mb: 3, fontFamily: '"Instrument Sans", system-ui, sans-serif' }}>
           Añadir partido
         </Typography>
