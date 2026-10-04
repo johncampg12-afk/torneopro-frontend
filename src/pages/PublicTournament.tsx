@@ -33,8 +33,9 @@ const formatName = (f: string) =>
   }[f] || f);
 
 const TeamBadge = ({ team, size = 'md', reverse = false }: { team: any; size?: 'sm' | 'md' | 'lg'; reverse?: boolean }) => {
-  const dim = size === 'sm' ? 20 : size === 'md' ? 32 : 48;
-  const fs = size === 'sm' ? 9 : size === 'md' ? 13 : 20;
+  // ⬇️ COMPACTO: dimensiones reducidas
+  const dim = size === 'sm' ? 16 : size === 'md' ? 28 : 44;
+  const fs = size === 'sm' ? 8 : size === 'md' ? 12 : 18;
 
   const crest = team.logo ? (
     <Box
@@ -62,7 +63,8 @@ const TeamBadge = ({ team, size = 'md', reverse = false }: { team: any; size?: '
   const name = (
     <Typography
       sx={{
-        fontSize: size === 'sm' ? 13 : size === 'md' ? 14.5 : 16,
+        // ⬇️ COMPACTO
+        fontSize: size === 'sm' ? 12 : size === 'md' ? 13.5 : 15,
         fontWeight: 600,
         color: BLACK,
         overflow: 'hidden',
@@ -301,7 +303,8 @@ export default function PublicTournament() {
       }}
     >
       {title && (
-        <Box sx={{ px: { xs: 2, md: 2.5 }, pt: 2.5, pb: 1 }}>
+        // ⬇️ COMPACTO: pt 2.5 → 2, pb 1 → 0.75
+        <Box sx={{ px: { xs: 2, md: 2.5 }, pt: 2, pb: 0.75 }}>
           <Typography
             sx={{
               fontSize: 15,
@@ -325,7 +328,8 @@ export default function PublicTournament() {
                   key={h}
                   sx={{
                     px: { xs: 1, md: 1.5 },
-                    py: 1.5,
+                    // ⬇️ COMPACTO: 1.5 → 1.1
+                    py: 1.1,
                     fontSize: 10.5,
                     fontWeight: 700,
                     letterSpacing: 0.6,
@@ -350,7 +354,8 @@ export default function PublicTournament() {
                   bgcolor: idx < 2 ? 'rgba(34,197,94,0.04)' : 'transparent',
                 }}
               >
-                <Box component="td" sx={{ px: { xs: 1, md: 1.5 }, py: 1.5, textAlign: 'center' }}>
+                {/* ⬇️ COMPACTO: py 1.5 → 0.8 */}
+                <Box component="td" sx={{ px: { xs: 1, md: 1.5 }, py: 0.8, textAlign: 'center' }}>
                   <Box
                     sx={{
                       width: 22, height: 22,
@@ -370,7 +375,8 @@ export default function PublicTournament() {
                     {idx + 1}
                   </Box>
                 </Box>
-                <Box component="td" sx={{ px: { xs: 1, md: 1.5 }, py: 1.5 }}>
+                {/* ⬇️ COMPACTO: py 1.5 → 0.8 */}
+                <Box component="td" sx={{ px: { xs: 1, md: 1.5 }, py: 0.8 }}>
                   <TeamBadge team={team} size="sm" />
                 </Box>
                 {['played', 'wins', 'draws', 'losses'].map(field => (
@@ -379,7 +385,8 @@ export default function PublicTournament() {
                     key={field}
                     sx={{
                       px: { xs: 1, md: 1.5 },
-                      py: 1.5,
+                      // ⬇️ COMPACTO: 1.5 → 0.8
+                      py: 0.8,
                       textAlign: 'center',
                       fontSize: 13,
                       fontWeight: field === 'wins' ? 700 : 500,
@@ -392,11 +399,12 @@ export default function PublicTournament() {
                     {team[field]}
                   </Box>
                 ))}
+                {/* ⬇️ COMPACTO: py 1.5 → 0.8 */}
                 <Box
                   component="td"
                   sx={{
                     px: { xs: 1, md: 1.5 },
-                    py: 1.5,
+                    py: 0.8,
                     textAlign: 'center',
                     fontSize: 13,
                     fontWeight: 600,
@@ -405,7 +413,8 @@ export default function PublicTournament() {
                 >
                   {team.gd > 0 ? '+' : ''}{team.gd}
                 </Box>
-                <Box component="td" sx={{ px: { xs: 1, md: 1.5 }, py: 1.5, textAlign: 'center' }}>
+                {/* ⬇️ COMPACTO: py 1.5 → 0.8 */}
+                <Box component="td" sx={{ px: { xs: 1, md: 1.5 }, py: 0.8, textAlign: 'center' }}>
                   <Typography
                     sx={{
                       fontSize: 15,
@@ -437,7 +446,8 @@ export default function PublicTournament() {
       <Box
         key={match.id}
         sx={{
-          p: { xs: 1.5, sm: 2 },
+          // ⬇️ COMPACTO: p 1.5/2 → 1/1.25
+          p: { xs: 1, sm: 1.25 },
           borderRadius: '14px',
           bgcolor: match.played ? 'rgba(17,17,17,0.02)' : '#FAFAF8',
           border: '1px solid',
@@ -451,8 +461,9 @@ export default function PublicTournament() {
 
           <Box
             sx={{
-              px: 2,
-              py: 0.75,
+              // ⬇️ COMPACTO: px 2 → 1.5, py 0.75 → 0.5
+              px: 1.5,
+              py: 0.5,
               borderRadius: '10px',
               bgcolor: match.played ? BLACK : 'transparent',
               display: 'flex',
@@ -463,16 +474,20 @@ export default function PublicTournament() {
           >
             {match.played ? (
               <>
-                <Typography sx={{ fontSize: 22, fontWeight: 900, color: 'white', fontFamily: '"Instrument Sans", system-ui, sans-serif', lineHeight: 1 }}>
+                {/* ⬇️ COMPACTO: 22 → 18 */}
+                <Typography sx={{ fontSize: 18, fontWeight: 900, color: 'white', fontFamily: '"Instrument Sans", system-ui, sans-serif', lineHeight: 1 }}>
                   {match.homeScore}
                 </Typography>
-                <Typography sx={{ fontSize: 16, fontWeight: 700, color: 'rgba(255,255,255,0.4)' }}>–</Typography>
-                <Typography sx={{ fontSize: 22, fontWeight: 900, color: 'white', fontFamily: '"Instrument Sans", system-ui, sans-serif', lineHeight: 1 }}>
+                {/* ⬇️ COMPACTO: 16 → 13 */}
+                <Typography sx={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.4)' }}>–</Typography>
+                {/* ⬇️ COMPACTO: 22 → 18 */}
+                <Typography sx={{ fontSize: 18, fontWeight: 900, color: 'white', fontFamily: '"Instrument Sans", system-ui, sans-serif', lineHeight: 1 }}>
                   {match.awayScore}
                 </Typography>
               </>
             ) : (
-              <Typography sx={{ fontSize: 12, fontWeight: 700, color: 'rgba(17,17,17,0.4)', letterSpacing: 0.5 }}>
+              // ⬇️ COMPACTO: 12 → 11
+              <Typography sx={{ fontSize: 11, fontWeight: 700, color: 'rgba(17,17,17,0.4)', letterSpacing: 0.5 }}>
                 VS
               </Typography>
             )}
@@ -485,12 +500,13 @@ export default function PublicTournament() {
 
         {/* Barra de distribución de apuestas */}
         {canBet && stats && stats.total > 0 && (
-          <Box sx={{ mt: 1.5 }}>
-            <Box sx={{ display: 'flex', height: 6, borderRadius: 3, overflow: 'hidden', bgcolor: 'rgba(17,17,17,0.06)' }}>
+          // ⬇️ COMPACTO: mt 1.5 → 1
+          <Box sx={{ mt: 1 }}>
+            <Box sx={{ display: 'flex', height: 5, borderRadius: 3, overflow: 'hidden', bgcolor: 'rgba(17,17,17,0.06)' }}>
               <Box sx={{ width: `${stats.homePct}%`, bgcolor: BLACK }} />
               <Box sx={{ width: `${stats.awayPct}%`, bgcolor: 'rgba(17,17,17,0.35)' }} />
             </Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.5 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.4 }}>
               <Typography sx={{ fontSize: 10, color: 'rgba(17,17,17,0.5)', fontWeight: 600 }}>
                 {stats.homePct}%
               </Typography>
@@ -503,14 +519,16 @@ export default function PublicTournament() {
 
         {/* Botón de apuesta o chip de mi apuesta */}
         {!match.played && user && (
-          <Box sx={{ mt: 1.5, display: 'flex', justifyContent: 'center' }}>
+          // ⬇️ COMPACTO: mt 1.5 → 1
+          <Box sx={{ mt: 1, display: 'flex', justifyContent: 'center' }}>
             {myBet && !myBet.resolved ? (
               <Chip
                 label={`🪙 Apostaste ${myBet.amount} a ${myBet.prediction === 'home' ? home.name : away.name}`}
                 size="small"
                 sx={{
-                  height: 26,
-                  fontSize: 11,
+                  // ⬇️ COMPACTO: height 26 → 22, fontSize 11 → 10.5
+                  height: 22,
+                  fontSize: 10.5,
                   fontWeight: 700,
                   bgcolor: 'rgba(251,191,36,0.15)',
                   color: '#92400E',
@@ -521,11 +539,12 @@ export default function PublicTournament() {
               <Button
                 onClick={(e) => { e.stopPropagation(); setBetMatch(match); }}
                 sx={{
-                  height: 32,
+                  // ⬇️ COMPACTO: height 32 → 28, px 2 → 1.75, fontSize 12 → 11.5
+                  height: 28,
                   borderRadius: '999px',
-                  px: 2,
+                  px: 1.75,
                   fontWeight: 700,
-                  fontSize: 12,
+                  fontSize: 11.5,
                   color: BLACK,
                   bgcolor: 'rgba(17,17,17,0.04)',
                   '&:hover': { bgcolor: 'rgba(17,17,17,0.08)' },
@@ -538,7 +557,8 @@ export default function PublicTournament() {
         )}
 
         {(match.date || match.time || match.location) && (
-          <Box sx={{ display: 'flex', gap: 2, mt: 1.25, justifyContent: 'center', flexWrap: 'wrap' }}>
+          // ⬇️ COMPACTO: gap 2 → 1.25, mt 1.25 → 0.75
+          <Box sx={{ display: 'flex', gap: 1.25, mt: 0.75, justifyContent: 'center', flexWrap: 'wrap' }}>
             {match.date && (
               <Typography sx={{ fontSize: 11, color: 'rgba(17,17,17,0.45)' }}>
                 {new Date(match.date).toLocaleDateString('es-ES')}
@@ -576,7 +596,9 @@ export default function PublicTournament() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            p: { xs: 2, md: 2.5 },
+            // ⬇️ COMPACTO: p 2/2.5 → py 1.25/1.5 + px 1.75/2.25
+            py: { xs: 1.25, md: 1.5 },
+            px: { xs: 1.75, md: 2.25 },
             cursor: 'pointer',
             transition: `background-color 0.2s ${SMOOTH}`,
             '&:hover': { bgcolor: 'rgba(17,17,17,0.015)' },
@@ -585,7 +607,8 @@ export default function PublicTournament() {
           <Box sx={{ minWidth: 0, flex: 1 }}>
             <Typography
               sx={{
-                fontSize: 15.5,
+                // ⬇️ COMPACTO: 15.5 → 14
+                fontSize: 14,
                 fontWeight: 800,
                 color: BLACK,
                 letterSpacing: -0.3,
@@ -596,13 +619,15 @@ export default function PublicTournament() {
                 ? round.name
                 : `Jornada ${round.number}`)}
             </Typography>
-            <Typography sx={{ fontSize: 12, color: 'rgba(17,17,17,0.5)', mt: 0.25 }}>
+            {/* ⬇️ COMPACTO: fontSize 12 → 11.5, mt 0.25 → 0.15 */}
+            <Typography sx={{ fontSize: 11.5, color: 'rgba(17,17,17,0.5)', mt: 0.15 }}>
               {round.matches.filter((m: any) => m.played).length}/{round.matches.length} jugados
             </Typography>
           </Box>
           <ExpandMoreIcon
             sx={{
-              fontSize: 22,
+              // ⬇️ COMPACTO: 22 → 20
+              fontSize: 20,
               color: 'rgba(17,17,17,0.4)',
               transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
               transition: `transform 0.25s ${SMOOTH}`,
@@ -611,7 +636,8 @@ export default function PublicTournament() {
         </Box>
 
         <Collapse in={isOpen} timeout={250}>
-          <Box sx={{ px: { xs: 2, md: 2.5 }, pb: { xs: 2, md: 2.5 }, display: 'flex', flexDirection: 'column', gap: 1 }}>
+          {/* ⬇️ COMPACTO: px 2/2.5 → 1.5/2, pb 2/2.5 → 1.5/2, gap 1 → 0.75 */}
+          <Box sx={{ px: { xs: 1.5, md: 2 }, pb: { xs: 1.5, md: 2 }, display: 'flex', flexDirection: 'column', gap: 0.75 }}>
             {round.matches.map((m: any) => renderMatch(m))}
           </Box>
         </Collapse>
@@ -634,7 +660,9 @@ export default function PublicTournament() {
         <Box
           onClick={() => toggleSection(sectionKey)}
           sx={{
-            p: { xs: 2, md: 2.5 },
+            // ⬇️ COMPACTO: p 2/2.5 → py 1.5/1.75 + px 1.75/2.25
+            py: { xs: 1.5, md: 1.75 },
+            px: { xs: 1.75, md: 2.25 },
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
@@ -645,7 +673,8 @@ export default function PublicTournament() {
           <Box>
             <Typography
               sx={{
-                fontSize: 17,
+                // ⬇️ COMPACTO: 17 → 15.5
+                fontSize: 15.5,
                 fontWeight: 800,
                 color: BLACK,
                 letterSpacing: -0.4,
@@ -654,13 +683,15 @@ export default function PublicTournament() {
             >
               {title}
             </Typography>
-            <Typography sx={{ fontSize: 12, color: 'rgba(17,17,17,0.5)', mt: 0.25 }}>
+            {/* ⬇️ COMPACTO: fontSize 12 → 11.5, mt 0.25 → 0.15 */}
+            <Typography sx={{ fontSize: 11.5, color: 'rgba(17,17,17,0.5)', mt: 0.15 }}>
               {subtitle}
             </Typography>
           </Box>
           <ExpandMoreIcon
             sx={{
-              fontSize: 22,
+              // ⬇️ COMPACTO: 22 → 20
+              fontSize: 20,
               color: 'rgba(17,17,17,0.4)',
               transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
               transition: `transform 0.25s ${SMOOTH}`,
@@ -669,7 +700,8 @@ export default function PublicTournament() {
         </Box>
 
         <Collapse in={isOpen} timeout={250}>
-          <Box sx={{ px: { xs: 2, md: 2.5 }, pb: { xs: 2, md: 2.5 }, pt: 0.5, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+          {/* ⬇️ COMPACTO: px 2/2.5 → 1.75/2.25, pb 2/2.5 → 1.75/2.25, gap 1.5 → 1 */}
+          <Box sx={{ px: { xs: 1.75, md: 2.25 }, pb: { xs: 1.75, md: 2.25 }, pt: 0.5, display: 'flex', flexDirection: 'column', gap: 1 }}>
             {content}
           </Box>
         </Collapse>
@@ -907,7 +939,8 @@ export default function PublicTournament() {
 
         {/* ═══════ FIXTURE ═══════ */}
         {tab === 'fixture' && (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, animation: `${fadeInUp} 0.4s ${SMOOTH} both` }}>
+          // ⬇️ COMPACTO: gap 2 → 1.5
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, animation: `${fadeInUp} 0.4s ${SMOOTH} both` }}>
 
             {/* Toggle Lista / Árbol */}
             {hasEliminationView && (
@@ -992,7 +1025,8 @@ export default function PublicTournament() {
                         sx={{
                           display: 'grid',
                           gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
-                          gap: 2,
+                          // ⬇️ COMPACTO: gap 2 → 1.5
+                          gap: 1.5,
                           alignItems: 'flex-start',
                         }}
                       >
@@ -1078,7 +1112,8 @@ export default function PublicTournament() {
               sx={{
                 display: 'grid',
                 gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
-                gap: 2,
+                // ⬇️ COMPACTO: gap 2 → 1.5
+                gap: 1.5,
                 animation: `${fadeInUp} 0.4s ${SMOOTH} both`,
               }}
             >
