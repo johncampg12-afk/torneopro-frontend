@@ -11,6 +11,7 @@ import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ViewListIcon from '@mui/icons-material/ViewList';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
+import BedtimeOutlinedIcon from '@mui/icons-material/BedtimeOutlined'; // ⬅️ NUEVO
 import { api } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
 import { BracketView } from '../components/BracketView';
@@ -639,6 +640,36 @@ export default function PublicTournament() {
           {/* ⬇️ COMPACTO: px 2/2.5 → 1.5/2, pb 2/2.5 → 1.5/2, gap 1 → 0.75 */}
           <Box sx={{ px: { xs: 1.5, md: 2 }, pb: { xs: 1.5, md: 2 }, display: 'flex', flexDirection: 'column', gap: 0.75 }}>
             {round.matches.map((m: any) => renderMatch(m))}
+
+            {/* ⬅️ NUEVO: Equipo que descansa en esta jornada */}
+            {round.byeTeam && (
+              <Box
+                sx={{
+                  p: { xs: 1, sm: 1.25 },
+                  borderRadius: '14px',
+                  bgcolor: 'rgba(17,17,17,0.015)',
+                  border: '1px dashed rgba(17,17,17,0.12)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 1.25,
+                }}
+              >
+                <BedtimeOutlinedIcon sx={{ fontSize: 14, color: 'rgba(17,17,17,0.35)' }} />
+                <Typography
+                  sx={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    letterSpacing: 0.5,
+                    textTransform: 'uppercase',
+                    color: 'rgba(17,17,17,0.4)',
+                  }}
+                >
+                  Descansa
+                </Typography>
+                <TeamBadge team={round.byeTeam} size="sm" />
+              </Box>
+            )}
           </Box>
         </Collapse>
       </Box>
