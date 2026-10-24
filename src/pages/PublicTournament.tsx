@@ -11,7 +11,7 @@ import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ViewListIcon from '@mui/icons-material/ViewList';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
-import BedtimeOutlinedIcon from '@mui/icons-material/BedtimeOutlined'; // ⬅️ NUEVO
+import BedtimeOutlinedIcon from '@mui/icons-material/BedtimeOutlined';
 import { api } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
 import { BracketView } from '../components/BracketView';
@@ -32,6 +32,18 @@ const formatName = (f: string) =>
     grupos: 'Grupos + Eliminatoria',
     'dos-ligas': '2 Ligas + Eliminatoria',
   }[f] || f);
+
+// ⬅️ NUEVO: cuántos equipos clasifican por tabla según formato
+const getQualifyCount = (teamCount: number, format: string, isPerLeague = false) => {
+  if (format === 'dos-ligas') return isPerLeague ? 4 : 0;
+  if (format === 'grupos') {
+    if (teamCount >= 8) return 8;
+    if (teamCount >= 5) return 4;
+    if (teamCount >= 3) return 2;
+    return 0;
+  }
+  return 0; // liga / eliminatoria → no clasifica nadie
+};
 
 const TeamBadge = ({ team, size = 'md', reverse = false }: { team: any; size?: 'sm' | 'md' | 'lg'; reverse?: boolean }) => {
   // ⬇️ COMPACTO: dimensiones reducidas
@@ -292,7 +304,8 @@ export default function PublicTournament() {
     setOpenSections(prev => ({ ...prev, [key]: prev[key] === false ? true : false }));
 
   // ── Render tabla de posiciones ──
-  const renderStandingsTable = (data: any[], title?: string) => (
+  // ⬅️ NUEVO: acepta qualifyCount
+  const renderStandingsTable = (data: any[], title?: string, qualifyCount = 0) => (
     <Box
       sx={{
         borderRadius: '20px',
@@ -346,89 +359,95 @@ export default function PublicTournament() {
             </Box>
           </Box>
           <Box component="tbody">
-            {data.map((team: any, idx: number) => (
-              <Box
-                component="tr"
-                key={team.id}
-                sx={{
-                  borderBottom: '1px solid rgba(17,17,17,0.04)',
-                  bgcolor: idx < 2 ? 'rgba(34,197,94,0.04)' : 'transparent',
-                }}
-              >
-                {/* ⬇️ COMPACTO: py 1.5 → 0.8 */}
-                <Box component="td" sx={{ px: { xs: 1, md: 1.5 }, py: 0.8, textAlign: 'center' }}>
-                  <Box
-                    sx={{
-                      width: 22, height: 22,
-                      borderRadius: '6px',
-                      display: 'inline-grid',
-                      placeItems: 'center',
-                      fontWeight: 800,
-                      fontSize: 11,
-                      bgcolor: idx === 0 ? 'rgba(251,191,36,0.15)'
-                        : idx === 1 ? 'rgba(148,163,184,0.15)'
-                        : 'transparent',
-                      color: idx === 0 ? '#D97706'
-                        : idx === 1 ? '#64748B'
-                        : 'rgba(17,17,17,0.5)',
-                    }}
-                  >
-                    {idx + 1}
+            {data.map((team: any, idx: number) => {
+              const isQualified = idx < qualifyCount; // ⬅️ NUEVO
+              return (
+                <Box
+                  component="tr"
+                  key={team.id}
+                  sx={{
+                    borderBottom: '1px solid rgba(17,17,17,0.04)',
+                    // ⬅️ NUEVO: fondo verde para clasificados
+                    bgcolor: isQualified ? 'rgba(34,197,94,0.06)' : 'transparent',
+                    // ⬅️ NUEVO: barra verde a la izquierda
+                    boxShadow: isQualified ? 'inset 3px 0 0 #16A34A' : 'none',
+                  }}
+                >
+                  {/* ⬇️ COMPACTO: py 1.5 → 0.8 */}
+                  <Box component="td" sx={{ px: { xs: 1, md: 1.5 }, py: 0.8, textAlign: 'center' }}>
+                    <Box
+                      sx={{
+                        width: 22, height: 22,
+                        borderRadius: '6px',
+                        display: 'inline-grid',
+                        placeItems: 'center',
+                        fontWeight: 800,
+                        fontSize: 11,
+                        bgcolor: idx === 0 ? 'rgba(251,191,36,0.15)'
+                          : idx === 1 ? 'rgba(148,163,184,0.15)'
+                          : 'transparent',
+                        color: idx === 0 ? '#D97706'
+                          : idx === 1 ? '#64748B'
+                          : 'rgba(17,17,17,0.5)',
+                      }}
+                    >
+                      {idx + 1}
+                    </Box>
                   </Box>
-                </Box>
-                {/* ⬇️ COMPACTO: py 1.5 → 0.8 */}
-                <Box component="td" sx={{ px: { xs: 1, md: 1.5 }, py: 0.8 }}>
-                  <TeamBadge team={team} size="sm" />
-                </Box>
-                {['played', 'wins', 'draws', 'losses'].map(field => (
+                  {/* ⬇️ COMPACTO: py 1.5 → 0.8 */}
+                  <Box component="td" sx={{ px: { xs: 1, md: 1.5 }, py: 0.8 }}>
+                    <TeamBadge team={team} size="sm" />
+                  </Box>
+                  {['played', 'wins', 'draws', 'losses'].map(field => (
+                    <Box
+                      component="td"
+                      key={field}
+                      sx={{
+                        px: { xs: 1, md: 1.5 },
+                        // ⬇️ COMPACTO: 1.5 → 0.8
+                        py: 0.8,
+                        textAlign: 'center',
+                        fontSize: 13,
+                        fontWeight: field === 'wins' ? 700 : 500,
+                        color: field === 'wins' ? '#16A34A'
+                          : field === 'draws' ? '#D97706'
+                          : field === 'losses' ? '#DC2626'
+                          : BLACK,
+                      }}
+                    >
+                      {team[field]}
+                    </Box>
+                  ))}
+                  {/* ⬇️ COMPACTO: py 1.5 → 0.8 */}
                   <Box
                     component="td"
-                    key={field}
                     sx={{
                       px: { xs: 1, md: 1.5 },
-                      // ⬇️ COMPACTO: 1.5 → 0.8
                       py: 0.8,
                       textAlign: 'center',
                       fontSize: 13,
-                      fontWeight: field === 'wins' ? 700 : 500,
-                      color: field === 'wins' ? '#16A34A'
-                        : field === 'draws' ? '#D97706'
-                        : field === 'losses' ? '#DC2626'
-                        : BLACK,
-                    }}
-                  >
-                    {team[field]}
-                  </Box>
-                ))}
-                {/* ⬇️ COMPACTO: py 1.5 → 0.8 */}
-                <Box
-                  component="td"
-                  sx={{
-                    px: { xs: 1, md: 1.5 },
-                    py: 0.8,
-                    textAlign: 'center',
-                    fontSize: 13,
-                    fontWeight: 600,
-                    color: BLACK,
-                  }}
-                >
-                  {team.gd > 0 ? '+' : ''}{team.gd}
-                </Box>
-                {/* ⬇️ COMPACTO: py 1.5 → 0.8 */}
-                <Box component="td" sx={{ px: { xs: 1, md: 1.5 }, py: 0.8, textAlign: 'center' }}>
-                  <Typography
-                    sx={{
-                      fontSize: 15,
-                      fontWeight: 900,
+                      fontWeight: 600,
                       color: BLACK,
-                      fontFamily: '"Instrument Sans", system-ui, sans-serif',
                     }}
                   >
-                    {team.points}
-                  </Typography>
+                    {team.gd > 0 ? '+' : ''}{team.gd}
+                  </Box>
+                  {/* ⬇️ COMPACTO: py 1.5 → 0.8 */}
+                  <Box component="td" sx={{ px: { xs: 1, md: 1.5 }, py: 0.8, textAlign: 'center' }}>
+                    <Typography
+                      sx={{
+                        fontSize: 15,
+                        fontWeight: 900,
+                        color: BLACK,
+                        fontFamily: '"Instrument Sans", system-ui, sans-serif',
+                      }}
+                    >
+                      {team.points}
+                    </Typography>
+                  </Box>
                 </Box>
-              </Box>
-            ))}
+              );
+            })}
           </Box>
         </Box>
       </Box>
@@ -1148,13 +1167,19 @@ export default function PublicTournament() {
                 animation: `${fadeInUp} 0.4s ${SMOOTH} both`,
               }}
             >
-              {renderStandingsTable(standingsA, 'Liga A')}
-              {renderStandingsTable(standingsB, 'Liga B')}
+              {/* ⬅️ NUEVO: qualifyCount = 4 en dos-ligas */}
+              {renderStandingsTable(standingsA, 'Liga A', 4)}
+              {renderStandingsTable(standingsB, 'Liga B', 4)}
             </Box>
           ) : (
             /* ═══════ TABLA ÚNICA ═══════ */
             <Box sx={{ animation: `${fadeInUp} 0.4s ${SMOOTH} both` }}>
-              {renderStandingsTable(standings)}
+              {/* ⬅️ NUEVO: qualifyCount según formato */}
+              {renderStandingsTable(
+                standings,
+                undefined,
+                getQualifyCount(tournament.teams.length, tournament.format)
+              )}
             </Box>
           )
         )}
