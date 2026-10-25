@@ -246,8 +246,8 @@ function MiniAdTile({
           left: 0,
           right: 0,
           bottom: 0,
-          height: '65%',
-          background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)',
+          height: '40%',
+          background: 'linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 100%)',
           pointerEvents: 'none',
         }}
       />
@@ -1112,7 +1112,7 @@ export default function Home() {
                     link="#"
                   />
                   <MiniAdTile
-                    image="/sponsors/image.png"
+                    image="/sponsors/icon-K cuadrada.png"
                     title="Kewway"
                     cta="Úneme →"
                     link="https://kewway.com/"
