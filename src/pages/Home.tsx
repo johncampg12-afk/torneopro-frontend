@@ -1222,7 +1222,7 @@ export default function Home() {
                 mt: 0.25,
               }}
             >
-              Gánate un billete extra vendiendo lo que ya no usas
+              Vende lo que no usas y gana un billete extra
             </Typography>
           </Box>
 
