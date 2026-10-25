@@ -246,8 +246,8 @@ function MiniAdTile({
           left: 0,
           right: 0,
           bottom: 0,
-          height: '40%',
-          background: 'linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 100%)',
+          height: '20%',
+          background: 'linear-gradient(to top, rgba(0,0,0,0.45) 0%, transparent 100%)',
           pointerEvents: 'none',
         }}
       />
