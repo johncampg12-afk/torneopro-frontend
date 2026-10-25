@@ -38,7 +38,6 @@ const sponsors = [
   {
     id: 2,
     name: 'Trend Sport',
-    tier: 'Oficial',
     image: '/sponsors/trend-sport-logo.jpeg',
     cta: 'Ver colección',
     link: '#',
@@ -48,14 +47,13 @@ const sponsors = [
   },
   {
     id: 3,
-    name: 'Emprende Conmigo',
-    tier: 'Colaborador',
-    image: '/sponsors/EMPRENDE-CONMIGO-TREND-SPORT.png',
-    cta: 'Apuntarme',
-    link: '#',
-    title: 'Emprende Conmigo',
-    shortTitle: 'Emprende',
-    description: 'Descubre nuevas oportunidades de negocio.',
+    name: 'Kewway',
+    image: '/sponsors/bannerkewway.png',
+    cta: 'Únete',
+    link: 'https://kewway.com/',
+    title: 'Compra y Vende lo que ya no usas en Kewway',
+    shortTitle: 'Únete ',
+    description: 'Gánate un billete extra',
   },
 ];
 
