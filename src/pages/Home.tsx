@@ -992,29 +992,6 @@ export default function Home() {
                     }}
                   >
                     <Box sx={{ minWidth: 0, flex: 1 }}>
-                      <Box sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 1,
-                        mb: 0.5,
-                        minWidth: 0,
-                      }}>
-                        <Typography
-                          sx={{
-                            minWidth: 0,
-                            flex: '1 1 auto',
-                            fontSize: { xs: 17, md: 19 },
-                            fontWeight: 800,
-                            letterSpacing: -0.4,
-                            color: BLACK,
-                            fontFamily: '"Instrument Sans", system-ui, sans-serif',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                          }}
-                        >
-                          {t.name}
-                        </Typography>
                         <Box
                           sx={{
                             px: 1,
