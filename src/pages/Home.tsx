@@ -1118,10 +1118,10 @@ export default function Home() {
                     link="https://kewway.com/"
                   />
                   <MiniAdTile
-                    image="/sponsors/placeholder.png"
-                    title="Tu marca"
+                    image="/sponsors/anentLogo.jpeg"
+                    title="Anent Lab"
                     cta="Contactar →"
-                    link="#"
+                    link="https://www.anentlab.com/"
                   />
                 </Box>
               </Box>
