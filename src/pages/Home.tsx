@@ -1188,8 +1188,8 @@ export default function Home() {
           >
             <Box
               component="img"
-              src="/sponsors/dental-fresh-plus-hrz.jpeg"
-              alt="Dental Fresh Plus"
+              src="/sponsors/image.png"
+              alt="Kewway"
               sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
             />
           </Box>
@@ -1210,7 +1210,7 @@ export default function Home() {
                 whiteSpace: 'nowrap',
               }}
             >
-              Dental Fresh Plus
+              Kewway
             </Typography>
             <Typography
               sx={{
@@ -1222,7 +1222,7 @@ export default function Home() {
                 mt: 0.25,
               }}
             >
-              Información al 0939280932
+              Gánate un billete extra vendiendo lo que ya no usas
             </Typography>
           </Box>
 
@@ -1240,7 +1240,7 @@ export default function Home() {
                 placeItems: 'center',
               }}
             >
-              Ver
+              Únete
             </Box>
             <IconButton
               onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowBottomAd(false); }}
