@@ -1090,7 +1090,7 @@ export default function Home() {
                     mb: 1.5,
                   }}
                 >
-                  Spotlight del mes
+                  Sponsors oficiales
                 </Typography>
                 <Box
                   sx={{
@@ -1100,7 +1100,7 @@ export default function Home() {
                   }}
                 >
                   <MiniAdTile
-                    image="/sponsors/dental-fresh-plus-hrz.jpeg"
+                    image="/sponsors/dentalfresh.jpej"
                     title="Dental Fresh"
                     cta="Pedir cita →"
                     link="#"
@@ -1112,9 +1112,9 @@ export default function Home() {
                     link="#"
                   />
                   <MiniAdTile
-                    image="/sponsors/bannerkewway.png"
-                    title="Emprende"
-                    cta="Apuntarme →"
+                    image="/sponsors/image.png"
+                    title="Kewway"
+                    cta="Úneme →"
                     link="https://kewway.com/"
                   />
                   <MiniAdTile
