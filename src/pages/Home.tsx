@@ -33,7 +33,6 @@ const formatName = (f: string) =>
 
 // ═══════════════════════════════════════════════════════════════════════════
 // COMPONENTE: AdTile (tarjeta publicitaria 2:1 con hover)
-// Se usa en la sección "TRIPACK DE IMÁGENES". Recibe props independientes.
 // ═══════════════════════════════════════════════════════════════════════════
 function AdTile({
   image, title, description, cta, tier, link,
@@ -196,7 +195,6 @@ function AdTile({
 
 // ═══════════════════════════════════════════════════════════════════════════
 // COMPONENTE: MiniAdTile (miniatura cuadrada 1:1 para el Spotlight)
-// Recibe props independientes.
 // ═══════════════════════════════════════════════════════════════════════════
 function MiniAdTile({
   image, title, cta, link,
@@ -320,7 +318,6 @@ function MiniAdTile({
 
 // ═══════════════════════════════════════════════════════════════════════════
 // COMPONENTE: BottomBanner (banner horizontal grande, SOLO DESKTOP)
-// Recibe props independientes.
 // ═══════════════════════════════════════════════════════════════════════════
 function BottomBanner({
   image, title, description, cta, tier, link,
@@ -541,8 +538,6 @@ export default function Home() {
         >
           {/* ═══════════════════════════════════════════════════════════════
               SECCIÓN 1: HERO AD
-              ➜ Patrocinador principal (Dental Fresh Plus)
-              ➜ Cambia aquí: imagen, tier, título, descripción, CTA y link
               ═══════════════════════════════════════════════════════════════ */}
           <Box
             sx={{
@@ -557,7 +552,6 @@ export default function Home() {
               animation: `${fadeInUp} 0.5s ${SMOOTH} both`,
             }}
           >
-            {/* Imagen del hero */}
             <Box
               sx={{
                 flex: 1.2,
@@ -571,8 +565,8 @@ export default function Home() {
             >
               <Box
                 component="img"
-                src="/sponsors/dental-fresh-plus-hrz.jpeg"      // ← IMAGEN HERO
-                alt="Dental Fresh Plus"                          // ← ALT HERO
+                src="/sponsors/dental-fresh-plus-hrz.jpeg"
+                alt="Dental Fresh Plus"
                 sx={{
                   position: 'absolute',
                   inset: 0,
@@ -583,7 +577,6 @@ export default function Home() {
               />
             </Box>
 
-            {/* Texto + CTA del hero */}
             <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 1.5 }}>
               <Typography
                 sx={{
@@ -594,7 +587,7 @@ export default function Home() {
                   color: 'rgba(17,17,17,0.4)',
                 }}
               >
-                Patrocinador principal                            {/* ← TIER HERO */}
+                Patrocinador principal
               </Typography>
               <Typography
                 sx={{
@@ -607,12 +600,12 @@ export default function Home() {
                   color: BLACK,
                 }}
               >
-                Tu sonrisa,                                       {/* ← TÍTULO HERO */}
+                Tu sonrisa,
                 <br />
                 nuestra victoria.
               </Typography>
               <Typography sx={{ fontSize: 13.5, color: 'rgba(17,17,17,0.5)', lineHeight: 1.5 }}>
-                Información al 0939280932                        {/* ← DESCRIPCIÓN HERO */}
+                Información al 0939280932
               </Typography>
               <Button
                 endIcon={<ArrowForwardIcon sx={{ fontSize: 18 }} />}
@@ -636,15 +629,13 @@ export default function Home() {
                   '&:active': { transform: 'scale(0.98)' },
                 }}
               >
-                Reservar cita                                     {/* ← CTA HERO */}
+                Reservar cita
               </Button>
             </Box>
           </Box>
 
           {/* ═══════════════════════════════════════════════════════════════
               SECCIÓN 2: MARQUEE DE EQUIPOS
-              ➜ Carrusel infinito con logos/nombres de equipos reales
-              ➜ No depende de sponsors, solo de la API de torneos
               ═══════════════════════════════════════════════════════════════ */}
           {allTeams.length > 0 && (
             <Box sx={{ animation: `${fadeInUp} 0.5s ${SMOOTH} both 0.05s` }}>
@@ -719,11 +710,7 @@ export default function Home() {
           )}
 
           {/* ═══════════════════════════════════════════════════════════════
-              SECCIÓN 3: TRIPACK DE IMÁGENES (3 tarjetas AdTile independientes)
-              ➜ Tarjeta 1: Trend Sport
-              ➜ Tarjeta 2: Kewway
-              ➜ Tarjeta 3: Próximamente (Disponible)
-              ➜ Cada tarjeta tiene sus props inline: imagen, title, description, cta, tier, link
+              SECCIÓN 3: TRIPACK DE IMÁGENES
               ═══════════════════════════════════════════════════════════════ */}
           <Box
             sx={{
@@ -735,38 +722,37 @@ export default function Home() {
           >
             {/* ─── Tarjeta 1: Trend Sport ─── */}
             <AdTile
-              image="/sponsors/trend-sport-logo.jpeg"                 // ← IMAGEN TARJETA 1
-              title="Trend Sport"                                     // ← TÍTULO TARJETA 1
-              description="Atrévete a vestir diferente. Nueva colección deportiva disponible."  // ← DESCRIPCIÓN TARJETA 1
-              cta="Ver colección"                                     // ← CTA TARJETA 1
-              tier="Patrocinador"                                     // ← TIER TARJETA 1
-              link="#"                                                // ← LINK TARJETA 1
+              image="/sponsors/trend-sport-logo.jpeg"
+              title="Trend Sport"
+              description="Atrévete a vestir diferente. Nueva colección deportiva disponible."
+              cta="Ver colección"
+              tier="Patrocinador"
+              link="#"
             />
 
             {/* ─── Tarjeta 2: Kewway ─── */}
             <AdTile
-              image="/sponsors/bannerkewway.png"                      // ← IMAGEN TARJETA 2
-              title="Únete "                                          // ← TÍTULO TARJETA 2
-              description="Gánate un billete extra vendiendo lo que ya no usas en Kewway"  // ← DESCRIPCIÓN TARJETA 2
-              cta="Únete"                                             // ← CTA TARJETA 2
-              tier="Colaborador"                                      // ← TIER TARJETA 2
-              link="https://kewway.com/"                              // ← LINK TARJETA 2
+              image="/sponsors/bannerkewway.png"
+              title="Únete "
+              description="Gánate un billete extra vendiendo lo que ya no usas en Kewway"
+              cta="Únete"
+              tier="Colaborador"
+              link="https://kewway.com/"
             />
 
             {/* ─── Tarjeta 3: Próximamente / Disponible ─── */}
             <AdTile
-              image="/sponsors/placeholder.png"                       // ← IMAGEN TARJETA 3
-              title="Próximamente"                                    // ← TÍTULO TARJETA 3
-              description="Este espacio puede ser tuyo. Contacta para patrocinar el torneo."  // ← DESCRIPCIÓN TARJETA 3
-              cta="Contactar"                                         // ← CTA TARJETA 3
-              tier="Disponible"                                       // ← TIER TARJETA 3
-              link="#"                                                // ← LINK TARJETA 3
+              image="/sponsors/placeholder.png"
+              title="Próximamente"
+              description="Este espacio puede ser tuyo. Contacta para patrocinar el torneo."
+              cta="Contactar"
+              tier="Disponible"
+              link="#"
             />
           </Box>
 
           {/* ═══════════════════════════════════════════════════════════════
-              SECCIÓN 4: BANNER DE PREMIOS
-              ➜ Solo visible para usuarios logueados NO organizadores
+              SECCIÓN 4: BANNER DE PREMIOS (solo usuarios logueados)
               ═══════════════════════════════════════════════════════════════ */}
           {user && !isOrganizer && (
             <Box
@@ -992,22 +978,51 @@ export default function Home() {
                     }}
                   >
                     <Box sx={{ minWidth: 0, flex: 1 }}>
-                        <Box
+                      {/* ─── Fila título + chip estado ─── */}
+                      <Box sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1,
+                        mb: 0.5,
+                        minWidth: 0,
+                      }}>
+                        <Typography
                           sx={{
-                            px: 1,
-                            py: 0.15,
-                            borderRadius: '6px',
-                            bgcolor: t.status === 'active' ? 'rgba(34,197,94,0.12)' : 'rgba(17,17,17,0.06)',
-                            color: t.status === 'active' ? '#16A34A' : 'rgba(17,17,17,0.6)',
-                            fontSize: 10,
-                            fontWeight: 700,
-                            letterSpacing: 0.3,
-                            flexShrink: 0,
+                            minWidth: 0,
+                            flex: '1 1 auto',
+                            fontSize: { xs: 17, md: 19 },
+                            fontWeight: 800,
+                            letterSpacing: -0.4,
+                            color: BLACK,
+                            fontFamily: '"Instrument Sans", system-ui, sans-serif',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
                           }}
                         >
-                          {t.status === 'active' ? 'EN CURSO' : 'FINALIZADO'}
-                        </Box>
+                          {t.name}
+                        </Typography>
+                        {/* ⬇️ CAMBIO: el chip "EN CURSO" ya no se muestra.
+                            Solo se renderiza "FINALIZADO" para los torneos terminados. */}
+                        {t.status !== 'active' && (
+                          <Box
+                            sx={{
+                              px: 1,
+                              py: 0.15,
+                              borderRadius: '6px',
+                              bgcolor: 'rgba(17,17,17,0.06)',
+                              color: 'rgba(17,17,17,0.6)',
+                              fontSize: 10,
+                              fontWeight: 700,
+                              letterSpacing: 0.3,
+                              flexShrink: 0,
+                            }}
+                          >
+                            FINALIZADO
+                          </Box>
+                        )}
                       </Box>
+                      {/* ─── Fila equipos + formato ─── */}
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
                         <Typography sx={{ fontSize: 12.5, color: 'rgba(17,17,17,0.5)', display: 'flex', alignItems: 'center', gap: 0.5 }}>
                           <GroupsIcon sx={{ fontSize: 15 }} />
@@ -1044,8 +1059,7 @@ export default function Home() {
             </Box>
 
             {/* ─────────────────────────────────────────────────────────
-                SIDEBAR DERECHO: Spotlight del mes (4 MiniAdTile independientes)
-                ➜ Cada MiniAdTile tiene sus props inline: image, title, cta, link
+                SIDEBAR DERECHO: Spotlight del mes
                 ───────────────────────────────────────────────────────── */}
             <Box
               sx={{
@@ -1085,36 +1099,29 @@ export default function Home() {
                     gap: 1,
                   }}
                 >
-                  {/* ─── Mini tile 1 (arriba izq.) ─── */}
                   <MiniAdTile
-                    image="/sponsors/dental-fresh-plus-hrz.jpeg"     // ← IMAGEN MINI 1
-                    title="Dental Fresh"                             // ← TÍTULO MINI 1
-                    cta="Pedir cita →"                               // ← CTA MINI 1
-                    link="#"                                         // ← LINK MINI 1
+                    image="/sponsors/dental-fresh-plus-hrz.jpeg"
+                    title="Dental Fresh"
+                    cta="Pedir cita →"
+                    link="#"
                   />
-
-                  {/* ─── Mini tile 2 (arriba der.) ─── */}
                   <MiniAdTile
-                    image="/sponsors/trend-sport-logo.jpeg"          // ← IMAGEN MINI 2
-                    title="Trend Sport"                              // ← TÍTULO MINI 2
-                    cta="Ver colección →"                            // ← CTA MINI 2
-                    link="#"                                         // ← LINK MINI 2
+                    image="/sponsors/trend-sport-logo.jpeg"
+                    title="Trend Sport"
+                    cta="Ver colección →"
+                    link="#"
                   />
-
-                  {/* ─── Mini tile 3 (abajo izq.) ─── */}
                   <MiniAdTile
-                    image="/sponsors/bannerkewway.png"               // ← IMAGEN MINI 3
-                    title="Emprende"                                 // ← TÍTULO MINI 3
-                    cta="Apuntarme →"                                // ← CTA MINI 3
-                    link="https://kewway.com/"                       // ← LINK MINI 3
+                    image="/sponsors/bannerkewway.png"
+                    title="Emprende"
+                    cta="Apuntarme →"
+                    link="https://kewway.com/"
                   />
-
-                  {/* ─── Mini tile 4 (abajo der.) ─── */}
                   <MiniAdTile
-                    image="/sponsors/placeholder.png"                // ← IMAGEN MINI 4
-                    title="Tu marca"                                 // ← TÍTULO MINI 4
-                    cta="Contactar →"                                // ← CTA MINI 4
-                    link="#"                                         // ← LINK MINI 4
+                    image="/sponsors/placeholder.png"
+                    title="Tu marca"
+                    cta="Contactar →"
+                    link="#"
                   />
                 </Box>
               </Box>
@@ -1122,33 +1129,28 @@ export default function Home() {
           </Box>
 
           {/* ═══════════════════════════════════════════════════════════════
-              SECCIÓN 6: BOTTOM BANNER (banner grande inferior)
-              ➜ SOLO DESKTOP (md+). En móvil se usa el sticky de abajo.
-              ➜ Cambia aquí: imagen, title, description, cta, tier y link
+              SECCIÓN 6: BOTTOM BANNER (solo desktop)
               ═══════════════════════════════════════════════════════════════ */}
           <Box sx={{ animation: `${fadeInUp} 0.5s ${SMOOTH} both 0.25s`, display: { xs: 'none', md: 'block' } }}>
             <BottomBanner
-              image="/sponsors/dental-fresh-plus-hrz.jpeg"                                                // ← IMAGEN BOTTOM
-              title="Dental Fresh Plus"                                                                   // ← TÍTULO BOTTOM
-              description="Clínica dental oficial del torneo. Revisión gratuita para todos los jugadores registrados este mes."  // ← DESCRIPCIÓN BOTTOM
-              cta="Reservar cita"                                                                         // ← CTA BOTTOM
-              tier="Patrocinador principal"                                                               // ← TIER BOTTOM
-              link="#"                                                                                    // ← LINK BOTTOM
+              image="/sponsors/dental-fresh-plus-hrz.jpeg"
+              title="Dental Fresh Plus"
+              description="Clínica dental oficial del torneo. Revisión gratuita para todos los jugadores registrados este mes."
+              cta="Reservar cita"
+              tier="Patrocinador principal"
+              link="#"
             />
           </Box>
         </Box>
       </Box>
 
       {/* ═══════════════════════════════════════════════════════════════════
-          SECCIÓN 7: STICKY MÓVIL (aparece abajo en pantallas pequeñas)
-          ➜ Totalmente independiente del resto.
-          ➜ Cambia aquí: imagen, name (alt), shortTitle, description, link y el texto del botón "Ver".
-          ➜ Fuera del contenedor con overflowX: 'clip' para que no se corte.
+          SECCIÓN 7: STICKY MÓVIL
           ═══════════════════════════════════════════════════════════════════ */}
       {showBottomAd && (
         <Box
           component="a"
-          href="#"                                                                            // ← LINK STICKY MÓVIL
+          href="#"
           target="_blank"
           rel="noopener noreferrer"
           sx={{
@@ -1173,7 +1175,6 @@ export default function Home() {
             boxShadow: '0 -8px 24px rgba(0,0,0,0.06)',
           }}
         >
-          {/* Thumb imagen sticky */}
           <Box
             sx={{
               width: 42,
@@ -1187,13 +1188,12 @@ export default function Home() {
           >
             <Box
               component="img"
-              src="/sponsors/dental-fresh-plus-hrz.jpeg"                                    // ← IMAGEN STICKY MÓVIL
-              alt="Dental Fresh Plus"                                                        // ← ALT STICKY MÓVIL
+              src="/sponsors/dental-fresh-plus-hrz.jpeg"
+              alt="Dental Fresh Plus"
               sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
             />
           </Box>
 
-          {/* Texto sticky */}
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography
               sx={{
@@ -1210,7 +1210,7 @@ export default function Home() {
                 whiteSpace: 'nowrap',
               }}
             >
-              Dental Fresh Plus                                                              {/* ← TÍTULO STICKY MÓVIL */}
+              Dental Fresh Plus
             </Typography>
             <Typography
               sx={{
@@ -1222,11 +1222,10 @@ export default function Home() {
                 mt: 0.25,
               }}
             >
-              Información al 0939280932                                                      {/* ← DESCRIPCIÓN STICKY MÓVIL */}
+              Información al 0939280932
             </Typography>
           </Box>
 
-          {/* Botón "Ver" + cerrar */}
           <Box sx={{ display: 'flex', gap: 0.5, flexShrink: 0 }}>
             <Box
               sx={{
@@ -1241,7 +1240,7 @@ export default function Home() {
                 placeItems: 'center',
               }}
             >
-              Ver                                                                            {/* ← TEXTO BOTÓN STICKY MÓVIL */}
+              Ver
             </Box>
             <IconButton
               onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowBottomAd(false); }}
