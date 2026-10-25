@@ -1222,7 +1222,7 @@ export default function Home() {
                 mt: 0.25,
               }}
             >
-              Ganate un billete extra, vende tus articulos
+              Gánate un billete extra, vende tus articulos
             </Typography>
           </Box>
 
@@ -1242,18 +1242,6 @@ export default function Home() {
             >
               Únete
             </Box>
-            <IconButton
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowBottomAd(false); }}
-              size="small"
-              sx={{
-                width: 32,
-                height: 32,
-                color: 'rgba(17,17,17,0.5)',
-                '&:hover': { bgcolor: 'rgba(17,17,17,0.04)', color: BLACK },
-              }}
-            >
-              <CloseIcon sx={{ fontSize: 16 }} />
-            </IconButton>
           </Box>
         </Box>
       )}
