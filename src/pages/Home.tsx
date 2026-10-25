@@ -1100,7 +1100,7 @@ export default function Home() {
                   }}
                 >
                   <MiniAdTile
-                    image="/sponsors/dentalfresh.jpej"
+                    image="/sponsors/dentalfresh.jpeg"
                     title="Dental Fresh"
                     cta="Pedir cita →"
                     link="#"
