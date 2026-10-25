@@ -1150,7 +1150,7 @@ export default function Home() {
       {showBottomAd && (
         <Box
           component="a"
-          href="#"
+          href="https://kewway.com/"
           target="_blank"
           rel="noopener noreferrer"
           sx={{
@@ -1222,7 +1222,7 @@ export default function Home() {
                 mt: 0.25,
               }}
             >
-              Vende lo que no usas y gana un billete extra
+              Ganate un billete extra, vende tus articulos
             </Typography>
           </Box>
 
