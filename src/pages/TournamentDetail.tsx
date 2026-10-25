@@ -61,7 +61,7 @@ const formatName = (f: string) =>
     'dos-ligas': '2 Ligas + Eliminatoria',
   }[f] || f);
 
-// ⬅️ NUEVO: cuántos equipos clasifican por tabla según formato
+// ⬅️ Cuántos equipos clasifican por tabla según formato
 const getQualifyCount = (teamCount: number, format: string, isPerLeague = false) => {
   if (format === 'dos-ligas') return isPerLeague ? 4 : 0;
   if (format === 'grupos') {
@@ -70,7 +70,7 @@ const getQualifyCount = (teamCount: number, format: string, isPerLeague = false)
     if (teamCount >= 3) return 2;
     return 0;
   }
-  return 0; // liga / eliminatoria → no clasifica nadie
+  return 0;
 };
 
 // ═══════════ Cálculo de clasificación (reutilizable) ═══════════
@@ -150,7 +150,6 @@ export default function TournamentDetail() {
 
   const [deleteConfirm, setDeleteConfirm] = useState<{ type: 'match' | 'team' | 'player'; id: string; teamId?: string; name?: string } | null>(null);
 
-  // Estado de desplegables
   const [openRounds, setOpenRounds] = useState<Record<string, boolean>>({});
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     liga: true,
@@ -159,17 +158,14 @@ export default function TournamentDetail() {
     eliminatorias: true,
   });
 
-  // Estado de apuestas
   const [betsStatus, setBetsStatus] = useState<Record<string, { hasPending: boolean; count: number }>>({});
   const [resolvingBets, setResolvingBets] = useState(false);
 
-  // ── Standings general (todos los equipos) ──
   const standings = useMemo(() => {
     if (!tournament) return [];
     return computeStandings(tournament.teams, tournament.rounds);
   }, [tournament]);
 
-  // ── Standings Liga A ──
   const standingsA = useMemo(() => {
     if (!tournament || tournament.format !== 'dos-ligas') return [];
     const roundsA = tournament.rounds.filter((r: any) => r.groupName === 'Liga A');
@@ -182,7 +178,6 @@ export default function TournamentDetail() {
     return computeStandings(teams, roundsA);
   }, [tournament]);
 
-  // ── Standings Liga B ──
   const standingsB = useMemo(() => {
     if (!tournament || tournament.format !== 'dos-ligas') return [];
     const roundsB = tournament.rounds.filter((r: any) => r.groupName === 'Liga B');
@@ -195,7 +190,6 @@ export default function TournamentDetail() {
     return computeStandings(teams, roundsB);
   }, [tournament]);
 
-  // ── Carga inicial ──
   useEffect(() => {
     if (!user) { navigate('/welcome'); return; }
     api.get(`/tournaments/${id}`)
@@ -243,7 +237,6 @@ export default function TournamentDetail() {
     }
   }, [tournament]);
 
-  // ── Cargar estado de apuestas del torneo ──
   useEffect(() => {
     if (!tournament) return;
     const loadBetsStatus = async () => {
@@ -286,8 +279,6 @@ export default function TournamentDetail() {
     ? tournament.rounds
     : tournament.rounds.filter((r: any) => r.phase === 'elimination');
   const hasEliminationView = eliminationRounds.length > 0;
-
-  // ── Handlers ──
 
   const toggleRound = (key: string) =>
     setOpenRounds(prev => ({ ...prev, [key]: prev[key] === false ? true : false }));
@@ -415,7 +406,6 @@ export default function TournamentDetail() {
     }
   };
 
-  // ── Jugadores ──
   const handleAddPlayer = async () => {
     if (!addPlayerForTeam || !newPlayerName.trim()) return;
     try {
@@ -444,7 +434,6 @@ export default function TournamentDetail() {
     } catch {}
   };
 
-  // ── Equipos ──
   const saveEditTeam = async () => {
     if (!editingTeamId || !editingTeamName.trim()) return;
     try {
@@ -486,7 +475,6 @@ export default function TournamentDetail() {
     }
   };
 
-  // ── Eventos ──
   const handleAddEvent = async () => {
     if (!editMatch || !newEvent.playerId) return;
     try {
@@ -522,7 +510,6 @@ export default function TournamentDetail() {
     } catch {}
   };
 
-  // ── Añadir equipos ──
   const handleAddTeams = async () => {
     const valid = newTeams.filter(t => t.name.trim()).map(t => ({
       name: t.name.trim(), color: t.color, logo: t.logo || null,
@@ -538,7 +525,6 @@ export default function TournamentDetail() {
     }
   };
 
-  // ── Añadir partido ──
   const handleAddMatch = async () => {
     if (!addMatchDialog) return;
     try {
@@ -551,7 +537,6 @@ export default function TournamentDetail() {
     }
   };
 
-  // ── Estilos comunes ──
   const inputSx = {
     '& .MuiOutlinedInput-root': {
       borderRadius: '14px',
@@ -576,7 +561,6 @@ export default function TournamentDetail() {
   };
 
   const TeamBadge = ({ team, size = 'md', reverse = false }: { team: any; size?: 'sm' | 'md' | 'lg'; reverse?: boolean }) => {
-    // ⬇️ COMPACTO: dimensiones reducidas
     const dim = size === 'sm' ? 16 : size === 'md' ? 28 : 44;
     const fs = size === 'sm' ? 8 : size === 'md' ? 12 : 18;
 
@@ -608,7 +592,6 @@ export default function TournamentDetail() {
     const name = (
       <Typography
         sx={{
-          // ⬇️ COMPACTO
           fontSize: size === 'sm' ? 12 : size === 'md' ? 13.5 : 15,
           fontWeight: 600,
           color: BLACK,
@@ -629,7 +612,6 @@ export default function TournamentDetail() {
     );
   };
 
-  // ── Render helpers para el fixture ──
   const renderMatchCard = (match: any, round: any) => {
     const home = getTeam(match.homeTeamId);
     const away = getTeam(match.awayTeamId);
@@ -640,7 +622,6 @@ export default function TournamentDetail() {
         key={match.id}
         sx={{
           position: 'relative',
-          // ⬇️ COMPACTO
           p: { xs: 1, sm: 1.25 },
           borderRadius: '14px',
           bgcolor: match.played ? 'rgba(17,17,17,0.02)' : '#FAFAF8',
@@ -662,7 +643,6 @@ export default function TournamentDetail() {
 
           <Box
             sx={{
-              // ⬇️ COMPACTO
               px: 1.5,
               py: 0.5,
               borderRadius: '10px',
@@ -675,21 +655,17 @@ export default function TournamentDetail() {
           >
             {match.played ? (
               <>
-                {/* ⬇️ COMPACTO: 22 → 18 */}
                 <Typography sx={{ fontSize: 18, fontWeight: 900, color: 'white', fontFamily: '"Instrument Sans", system-ui, sans-serif', lineHeight: 1 }}>
                   {match.homeScore}
                 </Typography>
-                {/* ⬇️ COMPACTO: 16 → 13 */}
                 <Typography sx={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.4)' }}>
                   –
                 </Typography>
-                {/* ⬇️ COMPACTO: 22 → 18 */}
                 <Typography sx={{ fontSize: 18, fontWeight: 900, color: 'white', fontFamily: '"Instrument Sans", system-ui, sans-serif', lineHeight: 1 }}>
                   {match.awayScore}
                 </Typography>
               </>
             ) : (
-              // ⬇️ COMPACTO: 12 → 11
               <Typography sx={{ fontSize: 11, fontWeight: 700, color: 'rgba(17,17,17,0.4)', letterSpacing: 0.5 }}>
                 VS
               </Typography>
@@ -720,7 +696,6 @@ export default function TournamentDetail() {
         </Box>
 
         {pendingBets?.hasPending && (
-          // ⬇️ COMPACTO: mt 1.25 → 0.75
           <Box sx={{ display: 'flex', justifyContent: 'center', mt: 0.75 }}>
             <Box
               sx={{
@@ -744,7 +719,6 @@ export default function TournamentDetail() {
         )}
 
         {(match.date || match.time || match.location) && (
-          // ⬇️ COMPACTO: gap 2 → 1.25, mt 1.25 → 0.75
           <Box sx={{ display: 'flex', gap: 1.25, mt: 0.75, justifyContent: 'center', flexWrap: 'wrap' }}>
             {match.date && (
               <Typography sx={{ fontSize: 11, color: 'rgba(17,17,17,0.45)' }}>
@@ -782,7 +756,6 @@ export default function TournamentDetail() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            // ⬇️ COMPACTO: p 2/2.5 → py 1.25/1.5 + px 1.75/2.25
             py: { xs: 1.25, md: 1.5 },
             px: { xs: 1.75, md: 2.25 },
             cursor: 'pointer',
@@ -793,7 +766,6 @@ export default function TournamentDetail() {
           <Box sx={{ minWidth: 0, flex: 1 }}>
             <Typography
               sx={{
-                // ⬇️ COMPACTO: 15.5 → 14
                 fontSize: 14,
                 fontWeight: 800,
                 color: BLACK,
@@ -805,7 +777,6 @@ export default function TournamentDetail() {
                 ? round.name
                 : `Jornada ${round.number}`)}
             </Typography>
-            {/* ⬇️ COMPACTO: fontSize 12 → 11.5, mt 0.25 → 0.15 */}
             <Typography sx={{ fontSize: 11.5, color: 'rgba(17,17,17,0.5)', mt: 0.15 }}>
               {round.matches.filter((m: any) => m.played).length}/{round.matches.length} jugados
             </Typography>
@@ -816,7 +787,6 @@ export default function TournamentDetail() {
               onClick={(e) => { e.stopPropagation(); setAddMatchDialog(round.id); }}
               startIcon={<AddIcon sx={{ fontSize: 16 }} />}
               sx={{
-                // ⬇️ COMPACTO: height 34 → 30, px 1.75 → 1.5, fontSize 12.5 → 12
                 height: 30,
                 borderRadius: '999px',
                 px: 1.5,
@@ -831,7 +801,6 @@ export default function TournamentDetail() {
             </Button>
             <ExpandMoreIcon
               sx={{
-                // ⬇️ COMPACTO: 22 → 20
                 fontSize: 20,
                 color: 'rgba(17,17,17,0.4)',
                 transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
@@ -842,11 +811,9 @@ export default function TournamentDetail() {
         </Box>
 
         <Collapse in={isOpen} timeout={250}>
-          {/* ⬇️ COMPACTO: px 2/2.5 → 1.5/2, pb 2/2.5 → 1.5/2, gap 1 → 0.75 */}
           <Box sx={{ px: { xs: 1.5, md: 2 }, pb: { xs: 1.5, md: 2 }, display: 'flex', flexDirection: 'column', gap: 0.75 }}>
             {round.matches.map((m: any) => renderMatchCard(m, round))}
 
-            {/* ⬅️ NUEVO: Equipo que descansa en esta jornada */}
             {round.byeTeam && (
               <Box
                 sx={{
@@ -895,7 +862,6 @@ export default function TournamentDetail() {
         <Box
           onClick={() => toggleSection(sectionKey)}
           sx={{
-            // ⬇️ COMPACTO: p 2/2.5 → py 1.5/1.75 + px 1.75/2.25
             py: { xs: 1.5, md: 1.75 },
             px: { xs: 1.75, md: 2.25 },
             cursor: 'pointer',
@@ -909,7 +875,6 @@ export default function TournamentDetail() {
           <Box>
             <Typography
               sx={{
-                // ⬇️ COMPACTO: 17 → 15.5
                 fontSize: 15.5,
                 fontWeight: 800,
                 color: BLACK,
@@ -919,14 +884,12 @@ export default function TournamentDetail() {
             >
               {title}
             </Typography>
-            {/* ⬇️ COMPACTO: fontSize 12 → 11.5, mt 0.25 → 0.15 */}
             <Typography sx={{ fontSize: 11.5, color: 'rgba(17,17,17,0.5)', mt: 0.15 }}>
               {subtitle}
             </Typography>
           </Box>
           <ExpandMoreIcon
             sx={{
-              // ⬇️ COMPACTO: 22 → 20
               fontSize: 20,
               color: 'rgba(17,17,17,0.4)',
               transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
@@ -936,7 +899,6 @@ export default function TournamentDetail() {
         </Box>
 
         <Collapse in={isOpen} timeout={250}>
-          {/* ⬇️ COMPACTO: px 2/2.5 → 1.75/2.25, pb 2/2.5 → 1.75/2.25, gap 1.5 → 1 */}
           <Box sx={{ px: { xs: 1.75, md: 2.25 }, pb: { xs: 1.75, md: 2.25 }, display: 'flex', flexDirection: 'column', gap: 1 }}>
             {content}
           </Box>
@@ -945,8 +907,6 @@ export default function TournamentDetail() {
     );
   };
 
-  // ── Tabla de posiciones reutilizable (para 1 o 2 tablas) ──
-  // ⬅️ NUEVO: acepta qualifyCount
   const renderStandingsTable = (data: any[], title?: string, qualifyCount = 0) => (
     <Box
       sx={{
@@ -959,7 +919,6 @@ export default function TournamentDetail() {
       }}
     >
       {title && (
-        // ⬇️ COMPACTO: pt 2.5 → 2, pb 1 → 0.75
         <Box sx={{ px: { xs: 2, md: 2.5 }, pt: 2, pb: 0.75 }}>
           <Typography
             sx={{
@@ -984,7 +943,6 @@ export default function TournamentDetail() {
                   key={h}
                   sx={{
                     px: { xs: 1, md: 2 },
-                    // ⬇️ COMPACTO: 1.75 → 1.25
                     py: 1.25,
                     fontSize: 11,
                     fontWeight: 700,
@@ -1003,22 +961,19 @@ export default function TournamentDetail() {
           </Box>
           <Box component="tbody">
             {data.map((team: any, idx: number) => {
-              const isQualified = idx < qualifyCount; // ⬅️ NUEVO
+              const isQualified = idx < qualifyCount;
               return (
                 <Box
                   component="tr"
                   key={team.id}
                   sx={{
                     borderBottom: '1px solid rgba(17,17,17,0.04)',
-                    // ⬅️ NUEVO: fondo verde para clasificados
                     bgcolor: isQualified ? 'rgba(34,197,94,0.06)' : 'transparent',
-                    // ⬅️ NUEVO: barra verde a la izquierda
                     boxShadow: isQualified ? 'inset 3px 0 0 #16A34A' : 'none',
                     transition: `background-color 0.2s ${SMOOTH}`,
                     '&:hover': { bgcolor: 'rgba(17,17,17,0.02)' },
                   }}
                 >
-                  {/* ⬇️ COMPACTO: py 1.5 → 0.9 */}
                   <Box component="td" sx={{ px: { xs: 1, md: 2 }, py: 0.9, textAlign: 'center' }}>
                     <Box
                       sx={{
@@ -1039,7 +994,6 @@ export default function TournamentDetail() {
                       {idx + 1}
                     </Box>
                   </Box>
-                  {/* ⬇️ COMPACTO: py 1.5 → 0.9 */}
                   <Box component="td" sx={{ px: { xs: 1, md: 2 }, py: 0.9 }}>
                     <TeamBadge team={team} size="sm" />
                   </Box>
@@ -1049,7 +1003,6 @@ export default function TournamentDetail() {
                       key={field}
                       sx={{
                         px: { xs: 1, md: 2 },
-                        // ⬇️ COMPACTO: py 1.5 → 0.9
                         py: 0.9,
                         textAlign: 'center',
                         fontSize: 13.5,
@@ -1064,7 +1017,6 @@ export default function TournamentDetail() {
                       {field === 'gd' ? (team.gd > 0 ? '+' : '') + team.gd : team[field]}
                     </Box>
                   ))}
-                  {/* ⬇️ COMPACTO: py 1.5 → 0.9 */}
                   <Box component="td" sx={{ px: { xs: 1, md: 2 }, py: 0.9, textAlign: 'center' }}>
                     <Typography
                       sx={{
@@ -1276,10 +1228,8 @@ export default function TournamentDetail() {
 
         {/* ═══════════ FIXTURE ═══════════ */}
         {tab === 'fixture' && (
-          // ⬇️ COMPACTO: gap 2.5 → 1.75
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.75, animation: `${fadeInUp} 0.4s ${SMOOTH} both` }}>
 
-            {/* Toggle Lista / Árbol */}
             {hasEliminationView && (
               <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
                 <Box
@@ -1343,7 +1293,6 @@ export default function TournamentDetail() {
                 <BracketView rounds={eliminationRounds} getTeam={getTeam} />
               </Box>
             ) : tournament.format === 'dos-ligas' ? (
-              /* ═══ 2 LIGAS + ELIMINATORIA ═══ */
               <>
                 {(() => {
                   const ligaARounds = tournament.rounds.filter((r: any) => r.groupName === 'Liga A');
@@ -1359,12 +1308,10 @@ export default function TournamentDetail() {
 
                   return (
                     <>
-                      {/* Liga A y Liga B en paralelo */}
                       <Box
                         sx={{
                           display: 'grid',
                           gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
-                          // ⬇️ COMPACTO: gap 2.5 → 1.75
                           gap: 1.75,
                           alignItems: 'flex-start',
                         }}
@@ -1391,7 +1338,6 @@ export default function TournamentDetail() {
                         )}
                       </Box>
 
-                      {/* Eliminatorias a ancho completo */}
                       {elimRounds.length > 0 &&
                         renderSection(
                           'eliminatorias',
@@ -1404,7 +1350,6 @@ export default function TournamentDetail() {
                 })()}
               </>
             ) : tournament.format === 'grupos' ? (
-              /* ═══ GRUPOS (una sola liga) ═══ */
               <>
                 {(() => {
                   const leagueRounds = tournament.rounds.filter((r: any) => r.phase === 'league');
@@ -1436,13 +1381,11 @@ export default function TournamentDetail() {
                 })()}
               </>
             ) : (
-              /* ═══ LIGA PURA O ELIMINATORIA PURA ═══ */
               <>
                 {tournament.rounds.map((round: any) => renderCollapsibleRound(round))}
               </>
             )}
 
-            {/* ── Campeón ── */}
             {showChampion && championTeam && (
               <Box
                 sx={{
@@ -1541,25 +1484,20 @@ export default function TournamentDetail() {
         {/* ═══════════ STANDINGS ═══════════ */}
         {tab === 'standings' && (
           tournament.format === 'dos-ligas' ? (
-            /* ═══ 2 TABLAS EN PARALELO ═══ */
             <Box
               sx={{
                 display: 'grid',
                 gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
-                // ⬇️ COMPACTO: gap 2.5 → 1.75
                 gap: 1.75,
                 alignItems: 'flex-start',
                 animation: `${fadeInUp} 0.4s ${SMOOTH} both`,
               }}
             >
-              {/* ⬅️ NUEVO: qualifyCount = 4 en dos-ligas */}
               {renderStandingsTable(standingsA, 'Liga A', 4)}
               {renderStandingsTable(standingsB, 'Liga B', 4)}
             </Box>
           ) : (
-            /* ═══ TABLA ÚNICA ═══ */
             <Box sx={{ animation: `${fadeInUp} 0.4s ${SMOOTH} both` }}>
-              {/* ⬅️ NUEVO: qualifyCount según formato */}
               {renderStandingsTable(
                 standings,
                 undefined,
@@ -1944,7 +1882,6 @@ export default function TournamentDetail() {
           backdrop: { sx: { bgcolor: 'rgba(10,10,10,0.6)', backdropFilter: 'blur(8px)' } },
           paper: {
             sx: {
-              // Popup flotante con márgenes en TODAS las pantallas
               m: 2,
               width: 'calc(100% - 32px)',
               maxWidth: 560,
@@ -1961,7 +1898,6 @@ export default function TournamentDetail() {
           },
         }}
       >
-        {/* ── HEADER FIJO ── */}
         <Box
           sx={{
             display: 'flex',
@@ -2010,7 +1946,6 @@ export default function TournamentDetail() {
           </IconButton>
         </Box>
 
-        {/* ── CONTENIDO SCROLLABLE ── */}
         {editMatch && (
           <Box sx={{ px: { xs: 2.5, md: 3 }, py: 3, overflowY: 'auto', flex: 1, minHeight: 0 }}>
             {/* Badges de equipos */}
@@ -2050,7 +1985,7 @@ export default function TournamentDetail() {
                     fullWidth
                     value={editMatch.homeTeamId || ''}
                     onChange={e => setEditMatch({ ...editMatch, homeTeamId: e.target.value || null })}
-                    SelectProps={{ native: true }}
+                    slotProps={{ select: { native: true } }}
                     sx={{ ...inputSx, '& .MuiOutlinedInput-root': { ...inputSx['& .MuiOutlinedInput-root'], minHeight: 44 } }}
                   >
                     {tournament.teams.map((t: any) => <option key={t.id} value={t.id}>{t.name}</option>)}
@@ -2063,7 +1998,7 @@ export default function TournamentDetail() {
                     fullWidth
                     value={editMatch.awayTeamId || ''}
                     onChange={e => setEditMatch({ ...editMatch, awayTeamId: e.target.value || null })}
-                    SelectProps={{ native: true }}
+                    slotProps={{ select: { native: true } }}
                     sx={{ ...inputSx, '& .MuiOutlinedInput-root': { ...inputSx['& .MuiOutlinedInput-root'], minHeight: 44 } }}
                   >
                     {tournament.teams.map((t: any) => <option key={t.id} value={t.id}>{t.name}</option>)}
@@ -2081,7 +2016,7 @@ export default function TournamentDetail() {
                   type="number"
                   defaultValue={editMatch.homeScore ?? ''}
                   fullWidth
-                  inputProps={{ min: 0, style: { textAlign: 'center', fontSize: 28, fontWeight: 900, fontFamily: '"Instrument Sans", system-ui, sans-serif', padding: '12px 0' } }}
+                  slotProps={{ htmlInput: { min: 0, style: { textAlign: 'center', fontSize: 28, fontWeight: 900, fontFamily: '"Instrument Sans", system-ui, sans-serif', padding: '12px 0' } } }}
                   sx={inputSx}
                 />
               </Box>
@@ -2093,7 +2028,7 @@ export default function TournamentDetail() {
                   type="number"
                   defaultValue={editMatch.awayScore ?? ''}
                   fullWidth
-                  inputProps={{ min: 0, style: { textAlign: 'center', fontSize: 28, fontWeight: 900, fontFamily: '"Instrument Sans", system-ui, sans-serif', padding: '12px 0' } }}
+                  slotProps={{ htmlInput: { min: 0, style: { textAlign: 'center', fontSize: 28, fontWeight: 900, fontFamily: '"Instrument Sans", system-ui, sans-serif', padding: '12px 0' } } }}
                   sx={inputSx}
                 />
               </Box>
@@ -2108,7 +2043,7 @@ export default function TournamentDetail() {
                   type="date"
                   defaultValue={editMatch.date ? editMatch.date.split('T')[0] : ''}
                   fullWidth
-                  InputLabelProps={{ shrink: true }}
+                  slotProps={{ inputLabel: { shrink: true } }}
                   sx={{ ...inputSx, '& .MuiOutlinedInput-root': { ...inputSx['& .MuiOutlinedInput-root'], minHeight: 44 } }}
                 />
               </Box>
@@ -2119,7 +2054,7 @@ export default function TournamentDetail() {
                   type="time"
                   defaultValue={editMatch.time || ''}
                   fullWidth
-                  InputLabelProps={{ shrink: true }}
+                  slotProps={{ inputLabel: { shrink: true } }}
                   sx={{ ...inputSx, '& .MuiOutlinedInput-root': { ...inputSx['& .MuiOutlinedInput-root'], minHeight: 44 } }}
                 />
               </Box>
@@ -2162,7 +2097,7 @@ export default function TournamentDetail() {
                           value={editEventType}
                           onChange={e => setEditEventType(e.target.value)}
                           fullWidth
-                          SelectProps={{ native: true }}
+                          slotProps={{ select: { native: true } }}
                           sx={{ '& .MuiOutlinedInput-root': { height: 32, borderRadius: '8px', bgcolor: 'white' }, '& select': { fontSize: 12, py: 0.5, px: 1 } }}
                         >
                           <option value="GOAL">⚽ Gol</option>
@@ -2226,7 +2161,7 @@ export default function TournamentDetail() {
                     value={newEvent.playerId}
                     onChange={e => setNewEvent({ ...newEvent, playerId: e.target.value })}
                     fullWidth
-                    SelectProps={{ native: true }}
+                    slotProps={{ select: { native: true } }}
                     sx={{ '& .MuiOutlinedInput-root': { height: 40, borderRadius: '10px', bgcolor: 'white' }, '& select': { fontSize: 13, py: 0.75, px: 1.5 } }}
                   >
                     <option value="">Seleccionar jugador…</option>
@@ -2242,7 +2177,7 @@ export default function TournamentDetail() {
                       select
                       value={newEvent.type}
                       onChange={e => setNewEvent({ ...newEvent, type: e.target.value })}
-                      SelectProps={{ native: true }}
+                      slotProps={{ select: { native: true } }}
                       sx={{ '& .MuiOutlinedInput-root': { height: 40, borderRadius: '10px', bgcolor: 'white' }, '& select': { fontSize: 13, py: 0.75, px: 1.5 } }}
                     >
                       <option value="GOAL">⚽ Gol</option>
@@ -2335,7 +2270,6 @@ export default function TournamentDetail() {
           </Box>
         )}
 
-        {/* ── FOOTER FIJO ── */}
         {editMatch && (
           <Box
             sx={{
@@ -2402,7 +2336,7 @@ export default function TournamentDetail() {
             <TextField
               select fullWidth value={newMatchData.homeTeamId}
               onChange={e => setNewMatchData({ ...newMatchData, homeTeamId: e.target.value })}
-              SelectProps={{ native: true }} sx={inputSx}
+              slotProps={{ select: { native: true } }} sx={inputSx}
             >
               <option value="">Seleccionar…</option>
               {tournament.teams.map((t: any) => <option key={t.id} value={t.id}>{t.name}</option>)}
@@ -2413,7 +2347,7 @@ export default function TournamentDetail() {
             <TextField
               select fullWidth value={newMatchData.awayTeamId}
               onChange={e => setNewMatchData({ ...newMatchData, awayTeamId: e.target.value })}
-              SelectProps={{ native: true }} sx={inputSx}
+              slotProps={{ select: { native: true } }} sx={inputSx}
             >
               <option value="">Seleccionar…</option>
               {tournament.teams.map((t: any) => <option key={t.id} value={t.id}>{t.name}</option>)}
@@ -2425,7 +2359,7 @@ export default function TournamentDetail() {
               <TextField
                 type="date" fullWidth value={newMatchData.date}
                 onChange={e => setNewMatchData({ ...newMatchData, date: e.target.value })}
-                InputLabelProps={{ shrink: true }} sx={inputSx}
+                slotProps={{ inputLabel: { shrink: true } }} sx={inputSx}
               />
             </Box>
             <Box>
@@ -2433,7 +2367,7 @@ export default function TournamentDetail() {
               <TextField
                 type="time" fullWidth value={newMatchData.time}
                 onChange={e => setNewMatchData({ ...newMatchData, time: e.target.value })}
-                InputLabelProps={{ shrink: true }} sx={inputSx}
+                slotProps={{ inputLabel: { shrink: true } }} sx={inputSx}
               />
             </Box>
           </Box>
