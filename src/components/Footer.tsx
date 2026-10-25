@@ -96,7 +96,7 @@ export default function Footer() {
             fontFamily: '"Fragment Mono", monospace',
           }}
         >
-          © {new Date().getFullYear()} Torneos TrendSport · Hecho en Valencia
+          © {new Date().getFullYear()} Torneos TrendSport
         </Typography>
       </Box>
     </Box>
