@@ -587,7 +587,7 @@ export default function Home() {
                   color: 'rgba(17,17,17,0.4)',
                 }}
               >
-                Patrocinador principal
+                Patrocinador Oficial
               </Typography>
               <Typography
                 sx={{
