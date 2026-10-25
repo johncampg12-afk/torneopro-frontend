@@ -926,7 +926,7 @@ export default function Home() {
               display: 'flex',
               flexDirection: { xs: 'column', lg: 'row' },
               gap: 3,
-              alignItems: 'flex-start',
+              alignItems: { xs: 'stretch', lg: 'flex-start' },
               animation: `${fadeInUp} 0.5s ${SMOOTH} both 0.2s`,
             }}
           >
