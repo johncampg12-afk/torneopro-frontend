@@ -60,12 +60,12 @@ export const REWARDS: Reward[] = [
   },
   {
     id: 'camiseta-tienda-u',
-    title: 'Camiseta deportiva',
-    description: 'Una camiseta oficial en Tienda U',
-    sponsor: 'Tienda U',
+    title: 'Sandalias Nike Benassi Estampado',
+    description: 'Dale un toque de estilo y comodidad a tus días con estas Nike Benassi',
+    sponsor: 'La Casa de las Zapatillas',
     cost: 15000,
     tier: 'silver',
-    image: '/rewards/camiseta.jpg',
+    image: '/rewards/sandalias1.png',
   },
 
   // ══════════ ORO ══════════
