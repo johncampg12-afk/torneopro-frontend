@@ -12,24 +12,6 @@ export interface Reward {
 export const REWARDS: Reward[] = [
   // ══════════ BRONCE ══════════
   {
-    id: 'cafe-solo-cafeteria-x',
-    title: 'Café solo',
-    description: 'Un café de especialidad en Cafetería X',
-    sponsor: 'Cafetería X',
-    cost: 500,
-    tier: 'bronze',
-    image: '/rewards/cafe-solo.jpg',
-  },
-  {
-    id: 'cerveza-tapa-bar-y',
-    title: 'Cerveza + tapa',
-    description: 'Una cerveza nacional con tapa en Bar Y',
-    sponsor: 'Bar Y',
-    cost: 1000,
-    tier: 'bronze',
-    image: '/rewards/cerveza-tapa.jpg',
-  },
-  {
     id: 'descuento-tienda-z',
     title: 'Aretes Plata 925',
     description: 'Realza cualquier look con estos elegantes pendientes de botón con piedra brillante.',
