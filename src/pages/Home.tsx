@@ -747,7 +747,9 @@ export default function Home() {
               description="Este espacio puede ser tuyo. Contacta para patrocinar el torneo."
               cta="Contactar"
               tier="Disponible"
-              link="#"
+              link={`https://wa.me/593999314954?text=${encodeURIComponent(
+                'Hola, me interesa el espacio publicitario disponible en la web de Torneos TrendSport. ¿Podrían darme más información sobre precios, formatos y opciones de patrocinio? Gracias.'
+              )}`}
             />
           </Box>
 
