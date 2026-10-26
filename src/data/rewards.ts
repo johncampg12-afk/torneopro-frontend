@@ -31,12 +31,12 @@ export const REWARDS: Reward[] = [
   },
   {
     id: 'descuento-tienda-z',
-    title: '10% de descuento',
-    description: 'En cualquier compra en Tienda Deportiva Z',
-    sponsor: 'Tienda Deportiva Z',
+    title: 'Aretes Plata 925',
+    description: 'Realza cualquier look con estos elegantes pendientes de botón con piedra brillante.',
+    sponsor: 'TrendSport',
     cost: 2000,
     tier: 'bronze',
-    image: '/rewards/descuento-10.jpg',
+    image: '/rewards/aretes.png',
   },
 
   // ══════════ PLATA ══════════
@@ -60,7 +60,7 @@ export const REWARDS: Reward[] = [
   },
   {
     id: 'camiseta-tienda-u',
-    title: 'Sandalias Nike Benassi Estampado',
+    title: 'Zapatillas Nike Benassi Estampado',
     description: 'Dale un toque de estilo y comodidad a tus días con estas Nike Benassi',
     sponsor: 'La Casa de las Zapatillas',
     cost: 5000,
