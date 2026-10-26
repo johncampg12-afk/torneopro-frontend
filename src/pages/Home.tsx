@@ -742,7 +742,7 @@ export default function Home() {
 
             {/* ─── Tarjeta 3: Próximamente / Disponible ─── */}
             <AdTile
-              image="/sponsors/placeholder.png"
+              image="/sponsors/placeholder.jpg"
               title="TU NEGOCIO VISIBLE AQUI!!!"
               description="Este espacio puede ser tuyo. Contacta para patrocinar el torneo."
               cta="Contactar"
