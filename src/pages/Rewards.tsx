@@ -270,50 +270,42 @@ export default function Rewards() {
                         backgroundPosition: 'center',
                       }}
                     >
-                    {/* ⬇️ Chip mejorado: icono bien centrado */}
-                    <Chip
-                      icon={<TierIcon slug={tierKey} size={11} />}
-                      label={tier.label}
-                      size="small"
-                      sx={{
-                        position: 'absolute',
-                        top: 12,
-                        left: 12,
-                        height: 26,
-                        fontSize: 10,
-                        fontWeight: 800,
-                        letterSpacing: 0.3,
-                        bgcolor: 'rgba(255,255,255,0.92)',
-                        color: tier.color,
-                        backdropFilter: 'blur(8px)',
-                        borderRadius: '999px',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                        // ── ICONO ──
-                        '& .MuiChip-icon': {
-                          ml: 0.75,
-                          mr: 0.4,
-                          color: 'inherit',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          width: 11,
-                          height: 11,
-                          // Elimina el baseline-gap del SVG inline
-                          '& svg': {
-                            display: 'block',
-                            overflow: 'visible',
+                      {/* ⬇️ CAMBIO: chip con icono SVG en lugar de emoji */}
+                      <Chip
+                        icon={<TierIcon slug={tierKey} size={13} />}
+                        label={tier.label}
+                        size="small"
+                        sx={{
+                          position: 'absolute',
+                          top: 12,
+                          left: 12,
+                          height: 26,
+                          fontSize: 10.5,
+                          fontWeight: 800,
+                          letterSpacing: 0.2,
+                          bgcolor: 'rgba(255,255,255,0.94)',
+                          color: tier.color,
+                          backdropFilter: 'blur(10px)',
+                          WebkitBackdropFilter: 'blur(10px)',
+                          borderRadius: '999px',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+                          '& .MuiChip-icon': {
+                            ml: 1.25,          // ← 10px de espacio a la izquierda (antes 8px)
+                            mr: 0.5,           // ← 4px entre icono y texto (antes -2px, negativo)
+                            color: 'inherit',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0,
                           },
-                        },
-                        // ── LABEL ──
-                        '& .MuiChip-label': {
-                          pl: 0,
-                          pr: 1,
-                          lineHeight: 1,
-                          display: 'flex',
-                          alignItems: 'center',
-                        },
-                      }}
-                    />
+                          '& .MuiChip-label': {
+                            pl: 0,             // ← el gap ya lo da el mr del icono
+                            pr: 1.5,           // ← 12px de aire a la derecha
+                            fontSize: 10.5,
+                            fontWeight: 800,
+                          },
+                        }}
+                      />
                     </Box>
 
                     {/* Info */}
