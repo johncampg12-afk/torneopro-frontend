@@ -7,6 +7,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CloseIcon from '@mui/icons-material/Close';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { REWARDS, TIER_INFO, ORGANIZER_WHATSAPP, Reward } from '../data/rewards';
+import { TierIcon } from '../components/TierIcon'; // ⬅️ NUEVO
 import { api } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
 import { BLACK, SMOOTH, SPRING } from '../theme';
@@ -198,7 +199,10 @@ export default function Rewards() {
         return (
           <Box key={tierKey} sx={{ mb: 6, animation: `${fadeInUp} 0.5s ${SMOOTH} both` }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2.5 }}>
-              <Typography sx={{ fontSize: 24 }}>{tier.emoji}</Typography>
+              {/* ⬇️ CAMBIO: emoji → SVG, con color del tier */}
+              <Box sx={{ color: tier.color, display: 'flex', alignItems: 'center' }}>
+                <TierIcon slug={tierKey} size={26} />
+              </Box>
               <Typography
                 sx={{
                   fontSize: { xs: 18, md: 22 },
@@ -266,19 +270,32 @@ export default function Rewards() {
                         backgroundPosition: 'center',
                       }}
                     >
+                      {/* ⬇️ CAMBIO: chip con icono SVG en lugar de emoji */}
                       <Chip
-                        label={tier.emoji + ' ' + tier.label}
+                        icon={<TierIcon slug={tierKey} size={12} />}
+                        label={tier.label}
                         size="small"
                         sx={{
                           position: 'absolute',
                           top: 12,
                           left: 12,
-                          height: 22,
+                          height: 24,
                           fontSize: 10,
                           fontWeight: 800,
                           bgcolor: 'rgba(255,255,255,0.9)',
                           color: tier.color,
                           backdropFilter: 'blur(8px)',
+                          '& .MuiChip-icon': {
+                            ml: 1,
+                            mr: -0.25,
+                            color: 'inherit',
+                            display: 'flex',
+                            alignItems: 'center',
+                          },
+                          '& .MuiChip-label': {
+                            pl: 0.75,
+                            pr: 1.25,
+                          },
                         }}
                       />
                     </Box>
