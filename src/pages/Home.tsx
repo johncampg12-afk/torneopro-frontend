@@ -743,7 +743,7 @@ export default function Home() {
             {/* ─── Tarjeta 3: Próximamente / Disponible ─── */}
             <AdTile
               image="/sponsors/placeholder.png"
-              title="Próximamente"
+              title="TU NEGOCIO VISIBLE AQUI!!!"
               description="Este espacio puede ser tuyo. Contacta para patrocinar el torneo."
               cta="Contactar"
               tier="Disponible"
