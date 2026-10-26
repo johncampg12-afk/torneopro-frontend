@@ -23,24 +23,6 @@ export const REWARDS: Reward[] = [
 
   // ══════════ PLATA ══════════
   {
-    id: 'menu-dia-restaurante-w',
-    title: 'Menú del día',
-    description: 'Menú completo en Restaurante W',
-    sponsor: 'Restaurante W',
-    cost: 3000,
-    tier: 'silver',
-    image: '/rewards/menu-dia.jpg',
-  },
-  {
-    id: 'sesion-fisio-clinica-v',
-    title: 'Sesión de fisio',
-    description: 'Sesión de fisioterapia en Clínica V',
-    sponsor: 'Clínica V',
-    cost: 4000,
-    tier: 'silver',
-    image: '/rewards/fisio.jpg',
-  },
-  {
     id: 'camiseta-tienda-u',
     title: 'Zapatillas Nike Benassi Estampado',
     description: 'Dale un toque de estilo y comodidad a tus días con estas Nike Benassi',
@@ -51,53 +33,8 @@ export const REWARDS: Reward[] = [
   },
 
   // ══════════ ORO ══════════
-  {
-    id: 'cena-2-restaurante-t',
-    title: 'Cena para 2',
-    description: 'Cena completa para dos personas en Restaurante T',
-    sponsor: 'Restaurante T',
-    cost: 30000,
-    tier: 'gold',
-    image: '/rewards/cena-2.jpg',
-  },
-  {
-    id: 'bono-30-tienda-s',
-    title: 'Bono de $30',
-    description: 'Bono de compra en Tienda Deportiva S',
-    sponsor: 'Tienda Deportiva S',
-    cost: 50000,
-    tier: 'gold',
-    image: '/rewards/bono-30.jpg',
-  },
 
   // ══════════ DIAMANTE ══════════
-  {
-    id: 'descuento-50-tienda',
-    title: '50% de descuento',
-    description: 'En una compra grande en cualquier tienda asociada',
-    sponsor: 'Varios',
-    cost: 200000,
-    tier: 'diamond',
-    image: '/rewards/descuento-50.jpg',
-  },
-  {
-    id: 'smartwatch-top',
-    title: 'Smartwatch',
-    description: 'Smartwatch o auriculares de gama alta',
-    sponsor: 'TrendSport',
-    cost: 300000,
-    tier: 'diamond',
-    image: '/rewards/smartwatch.jpg',
-  },
-  {
-    id: 'iphone',
-    title: 'iPhone',
-    description: 'iPhone o dispositivo equivalente de última generación',
-    sponsor: 'TrendSport',
-    cost: 500000,
-    tier: 'diamond',
-    image: '/rewards/iphone.jpg',
-  },
 ];
 
 export const TIER_INFO = {
